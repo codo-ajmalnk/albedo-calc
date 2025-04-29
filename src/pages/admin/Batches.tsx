@@ -5,7 +5,7 @@ import { Batch } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "lucide-react";
+import { Calendar, Eye, Edit, Plus } from "lucide-react";
 
 // Mock batch data (would come from API in real app)
 const batchesMockData: Batch[] = [
@@ -57,25 +57,42 @@ const AdminBatches = () => {
     const elapsed = now - start;
     return Math.round((elapsed / totalDuration) * 100);
   };
+
+  const handleViewStudents = (batchId: string) => {
+    // In a real app, this would navigate to a batch students page
+    console.log("Viewing students for batch:", batchId);
+  };
+
+  const handleEditBatch = (batchId: string) => {
+    // In a real app, this would navigate to a batch edit page
+    console.log("Editing batch:", batchId);
+  };
   
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Batches Management</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-2xl font-bold">Batches Management</h1>
+          
+          <Button className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Batch
+          </Button>
+        </div>
         
         <Card>
           <CardHeader>
             <CardTitle>Search Batches</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <Input
                 placeholder="Search by batch name..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="max-w-sm"
+                className="w-full sm:max-w-sm"
               />
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <Calendar className="mr-2 h-4 w-4" />
                 Search
               </Button>
@@ -91,7 +108,7 @@ const AdminBatches = () => {
             return (
               <Card key={batch.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <CardTitle>{batch.name}</CardTitle>
                     <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
                       {batch.studentCount} Students
@@ -137,9 +154,24 @@ const AdminBatches = () => {
                         <span>Total Sessions:</span>
                         <span>{batch.studentCount * 75}</span>
                       </div>
-                      <div className="mt-4 flex justify-end space-x-2">
-                        <Button variant="outline" size="sm">View Students</Button>
-                        <Button size="sm">Edit Batch</Button>
+                      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => handleViewStudents(batch.id)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Students
+                        </Button>
+                        <Button 
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => handleEditBatch(batch.id)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Batch
+                        </Button>
                       </div>
                     </div>
                   </div>

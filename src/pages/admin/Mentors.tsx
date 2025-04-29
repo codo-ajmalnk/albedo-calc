@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User } from "@/lib/types";
-import { User as UserIcon } from "lucide-react";
+import { User as UserIcon, Eye, Edit, Plus } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 
 const AdminMentors = () => {
@@ -34,11 +34,28 @@ const AdminMentors = () => {
     // This would be calculated from actual student data in a real application
     return Math.floor(Math.random() * 100);
   };
+
+  const handleViewStudents = (mentorId: string) => {
+    // In a real app, this would navigate to a mentor's students page
+    console.log("Viewing students for mentor:", mentorId);
+  };
+
+  const handleEditProfile = (mentorId: string) => {
+    // In a real app, this would navigate to a mentor edit page
+    console.log("Editing mentor profile:", mentorId);
+  };
   
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Mentors Management</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-2xl font-bold">Mentors Management</h1>
+          
+          <Button className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Mentor
+          </Button>
+        </div>
         
         <Card>
           <CardHeader>
@@ -93,7 +110,7 @@ const AdminMentors = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span>Email:</span>
-                      <span>{mentor.email}</span>
+                      <span className="truncate max-w-[200px]">{mentor.email}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Coordinator:</span>
@@ -116,9 +133,24 @@ const AdminMentors = () => {
                       <ProgressBar progress={progress} />
                       <div className="flex justify-end text-sm mt-1">{progress}%</div>
                     </div>
-                    <div className="mt-4 flex justify-end space-x-2">
-                      <Button variant="outline" size="sm">View Students</Button>
-                      <Button size="sm">Edit Profile</Button>
+                    <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        onClick={() => handleViewStudents(mentor.id)}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Students
+                      </Button>
+                      <Button 
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        onClick={() => handleEditProfile(mentor.id)}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit Profile
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

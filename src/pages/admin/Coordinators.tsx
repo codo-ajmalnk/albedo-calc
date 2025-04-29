@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/lib/types";
-import { UserSearch } from "lucide-react";
+import { UserSearch, Eye, Edit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminCoordinators = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [coordinators, setCoordinators] = useState(
     users.filter((user) => user.role === "coordinator")
@@ -24,25 +26,43 @@ const AdminCoordinators = () => {
       (user) => user.role === "mentor" && user.supervisorId === coordinatorId
     ).length;
   };
+
+  const handleViewDetails = (coordinatorId: string) => {
+    // In a real app, this would navigate to a coordinator detail page
+    console.log("Viewing coordinator details:", coordinatorId);
+    // navigate(`/admin/coordinators/${coordinatorId}`);
+  };
+
+  const handleEditProfile = (coordinatorId: string) => {
+    // In a real app, this would navigate to a coordinator edit page
+    console.log("Editing coordinator profile:", coordinatorId);
+    // navigate(`/admin/coordinators/edit/${coordinatorId}`);
+  };
   
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Coordinators Management</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-2xl font-bold">Coordinators Management</h1>
+          
+          <Button className="w-full sm:w-auto">
+            Add New Coordinator
+          </Button>
+        </div>
         
         <Card>
           <CardHeader>
             <CardTitle>Search Coordinators</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <Input
                 placeholder="Search by name..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="max-w-sm"
+                className="w-full sm:max-w-sm"
               />
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <UserSearch className="mr-2 h-4 w-4" />
                 Search
               </Button>
@@ -60,7 +80,7 @@ const AdminCoordinators = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span>Email:</span>
-                    <span>{coordinator.email}</span>
+                    <span className="truncate max-w-[200px]">{coordinator.email}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Mentors Supervised:</span>
@@ -74,9 +94,24 @@ const AdminCoordinators = () => {
                     <span>Total Sessions:</span>
                     <span>1350 sessions</span>
                   </div>
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <Button variant="outline" size="sm">View Details</Button>
-                    <Button size="sm">Edit Profile</Button>
+                  <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full sm:w-auto"
+                      onClick={() => handleViewDetails(coordinator.id)}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Details
+                    </Button>
+                    <Button 
+                      size="sm"
+                      className="w-full sm:w-auto"
+                      onClick={() => handleEditProfile(coordinator.id)}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit Profile
+                    </Button>
                   </div>
                 </div>
               </CardContent>
