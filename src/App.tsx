@@ -13,6 +13,9 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminStudents from "./pages/admin/Students";
+import AdminCoordinators from "./pages/admin/Coordinators";
+import AdminMentors from "./pages/admin/Mentors";
+import AdminBatches from "./pages/admin/Batches";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorMentors from "./pages/coordinator/Mentors";
 import CoordinatorStudents from "./pages/coordinator/Students";
@@ -46,6 +49,30 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminStudents />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/coordinators" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminCoordinators />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/mentors" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminMentors />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/batches" 
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminBatches />
                 </ProtectedRoute>
               } 
             />

@@ -5,8 +5,20 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+    
+    --primary-color: #00b764;
+    --secondary-color: #00203f;
+    --accent-color: #ff6f61;
+    --text-color: #2d3436;
+    --bg-color: #f0f3ff;
+    --sidebar-bg-color: white;
+    --border-color: #ddd;
+    --highlight-color: #f0fff4;
+    --transition-speed: 0.3s;
+    --border-radius: 15px;
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -14,16 +26,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 142 100% 35%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 183 100% 26%;
+    --secondary: 211 100% 12%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 24 94% 53%;
+    --accent: 359 100% 69%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,18 +43,18 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 142 100% 35%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 221.2 83.2% 53.3%;
+    --sidebar-background: 211 100% 12%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 221.2 83.2% 53.3%;
-    --sidebar-accent: 183 100% 26%;
+    --sidebar-primary-foreground: 211 100% 12%;
+    --sidebar-accent: 142 100% 35%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 221.2 83.2% 53.3%;
-    --sidebar-ring: 221.2 83.2% 53.3%;
+    --sidebar-border: 211 100% 12%;
+    --sidebar-ring: 211 100% 12%;
   }
 
   .dark {
@@ -55,16 +67,16 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 142 70% 50%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 182.1 59.8% 36.6%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 24 94% 53%;
+    --accent: 359 85% 75%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
@@ -72,16 +84,82 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 217.2 91.2% 59.8%;
+    --ring: 142 70% 50%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
   }
+}
+
+/* Progress Bar Custom Colors */
+.bg-progress-low {
+  background-color: #dc2626;
+}
+
+.bg-progress-medium {
+  background-color: #f97316;
+}
+
+.bg-progress-high {
+  background-color: #16a34a;
+}
+
+.bg-progress-complete {
+  background-color: #2563eb;
+}
+
+/* Custom Card Styles */
+.card {
+  background-color: var(--sidebar-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+/* Custom Button Styles */
+button {
+  padding: 12px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Form Input Styles */
+input[type="url"], input[type="text"], input[type="email"], input[type="password"] {
+  padding: 12px 15px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: border-color var(--transition-speed);
+}
+
+input[type="url"]:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
 }
