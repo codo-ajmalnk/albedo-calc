@@ -88,81 +88,32 @@ export const batches: Batch[] = [
 
 // Generate mock students
 export const generateMockStudents = (): Student[] => {
-  const students: Student[] = [];
-  const studentNames = [
-    "Student A", "Student B", "Student C", "Student D", "Student E", "Student F",
-    "Student G", "Student H", "Student I", "Student J", "Student K", "Student L",
-    "Student M", "Student N", "Student O", "Student P", "Student Q", "Student R",
-    "Student S", "Student T", "Student U", "Student V", "Student W", "Student X",
-    "Student Y", "Student Z", "Student AA", "Student BB", "Student CC", "Student DD",
-    "Student EE", "Student FF", "Student GG", "Student HH", "Student II", "Student JJ"
-  ];
-  
-  // Batch 1 students (A to L)
-  for (let i = 0; i < 12; i++) {
-    const studentName = studentNames[i];
-    const mentorIndex = Math.floor(i / 2); // Each mentor has 2 students from batch 1
-    const mentorId = `mentor${mentorIndex + 1}`;
-    const sessionsCompleted = Math.floor(Math.random() * 450);
-    const totalSessions = 450;
-    
-    students.push({
-      id: `student-${i+1}`,
-      name: studentName,
-      totalHours: 600,
-      sessionDuration: 1.33, // ~1 hour 20 minutes
-      totalSessions: totalSessions,
-      startDate: "2024-01-29",
-      endDate: "2024-05-29",
-      sessionsCompleted: sessionsCompleted,
-      sessionsRemaining: totalSessions - sessionsCompleted,
-      progressPercentage: Math.floor((sessionsCompleted / totalSessions) * 100),
-      mentorId: mentorId,
-      batchId: "batch1",
-      activeSessions: Math.floor(Math.random() * 5),
-      completedHours: Math.floor(Math.random() * 600),
-      pendingHours: Math.floor(Math.random() * 200),
-      totalPayments: 12000,
-      pendingPayments: Math.floor(Math.random() * 5000),
-      completedPayments: Math.floor(Math.random() * 7000),
-      activeHours: Math.floor(Math.random() * 100),
-      status: Math.random() > 0.2 ? 'active' : 'inactive' // 80% chance of being active
-    });
-  }
-  
-  // Batch 2 students (M to BB)
-  for (let i = 12; i < 36; i++) {
-    const studentName = studentNames[i];
-    const mentorIndex = Math.floor((i - 12) / 4); // Each mentor has 4 students from batch 2
-    const mentorId = `mentor${mentorIndex + 1}`;
-    const sessionsCompleted = Math.floor(Math.random() * 450);
-    const totalSessions = 450;
-    
-    students.push({
-      id: `student-${i+1}`,
-      name: studentName,
-      totalHours: 600,
-      sessionDuration: 1.33, // ~1 hour 20 minutes
-      totalSessions: totalSessions,
-      startDate: "2024-01-30",
-      endDate: "2024-05-30",
-      sessionsCompleted: sessionsCompleted,
-      sessionsRemaining: totalSessions - sessionsCompleted,
-      progressPercentage: Math.floor((sessionsCompleted / totalSessions) * 100),
-      mentorId: mentorId,
-      batchId: "batch2",
-      activeSessions: Math.floor(Math.random() * 5),
-      completedHours: Math.floor(Math.random() * 600),
-      pendingHours: Math.floor(Math.random() * 200),
-      totalPayments: 12000,
-      pendingPayments: Math.floor(Math.random() * 5000),
-      completedPayments: Math.floor(Math.random() * 7000),
-      activeHours: Math.floor(Math.random() * 100),
-      status: Math.random() > 0.2 ? 'active' : 'inactive' // 80% chance of being active
-    });
-  }
-  
-  return students;
+  return Array.from({ length: 5 }, (_, i) => {
+    const totalSessions = 12;
+    const sessionsCompleted = Math.floor(Math.random() * 13);
+    const sessionsRemaining = totalSessions - sessionsCompleted;
+    const progressPercentage = Math.round((sessionsCompleted / totalSessions) * 100);
+
+    return {
+      id: `student${i + 1}`,
+      name: `Student ${i + 1}`,
+      email: `student${i + 1}@example.com`,
+      phone: `+91 98765${43210 + i}`,
+      mentorId: `mentor${i % 3 + 1}`,
+      status: "active" as const,
+      totalSessions,
+      sessionsCompleted,
+      totalHours: 24,
+      totalPayment: 12000,
+      paidAmount: Math.floor(Math.random() * 12001),
+      batchId: `batch${Math.floor(i / 2) + 1}`,
+      sessionDuration: 1.33,
+      startDate: "January 1, 2024",
+      endDate: "June 30, 2024",
+      sessionsRemaining,
+      progressPercentage
+    };
+  });
 };
 
 export const students = generateMockStudents();
@@ -185,37 +136,52 @@ export const generateDashboardStats = (
     0
   );
   const completedHours = filteredStudents.reduce(
-    (sum, student) => sum + student.completedHours,
+    (sum, student) => sum + student.sessionsCompleted * student.sessionDuration,
     0
   );
-  const pendingHours = filteredStudents.reduce(
-    (sum, student) => sum + student.pendingHours,
-    0
-  );
+  const pendingHours = totalHours - completedHours;
+  
+  // Active hours are hours from sessions that are currently in progress
   const activeHours = filteredStudents.reduce(
-    (sum, student) => sum + student.activeHours,
+    (sum, student) => {
+      if (student.status === "active" && student.sessionsCompleted < student.totalSessions) {
+        return sum + (student.totalHours / student.totalSessions); // Hours per active session
+      }
+      return sum;
+    },
     0
   );
+
   const totalPayments = filteredStudents.reduce(
-    (sum, student) => sum + student.totalPayments,
+    (sum, student) => sum + student.totalPayment,
     0
   );
   const completedPayments = filteredStudents.reduce(
-    (sum, student) => sum + student.completedPayments,
+    (sum, student) => sum + student.paidAmount,
     0
   );
-  const pendingPayments = filteredStudents.reduce(
-    (sum, student) => sum + student.pendingPayments,
+  const pendingPayments = totalPayments - completedPayments;
+  
+  // Active sessions are sessions that are currently in progress (not completed)
+  const activeSessions = filteredStudents.reduce(
+    (sum, student) => {
+      if (student.status === "active" && student.sessionsCompleted < student.totalSessions) {
+        return sum + 1; // Count one active session per active student
+      }
+      return sum;
+    },
     0
   );
+
+  const pendingSessions = totalSessions - completedSessions;
   
   return {
     totalStudents,
-    activeSessions: filteredStudents.reduce((sum, student) => sum + student.activeSessions, 0),
+    activeSessions,
     completedSessions,
     totalSessions,
-    pendingSessions: totalSessions - completedSessions,
-    overallProgress: Math.floor((completedSessions / totalSessions) * 100),
+    pendingSessions,
+    overallProgress: totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0,
     totalHours,
     completedHours,
     pendingHours,

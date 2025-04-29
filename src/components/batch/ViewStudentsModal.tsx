@@ -1,13 +1,14 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { generateMockStudents } from "@/lib/mock-data";
 import { Batch } from "@/lib/types";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, UserPlus } from "lucide-react";
+import { Eye, UserPlus, Search, Mail, Phone, IndianRupee } from "lucide-react";
 import AddStudentsToBatchModal from "./AddStudentsToBatchModal";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface ViewStudentsModalProps {
   isOpen: boolean;
@@ -17,16 +18,39 @@ interface ViewStudentsModalProps {
 
 const ViewStudentsModal = ({ isOpen, onClose, batch }: ViewStudentsModalProps) => {
   const [isAddStudentsModalOpen, setIsAddStudentsModalOpen] = useState(false);
-  const students = generateMockStudents().filter(
+  const [search, setSearch] = useState("");
+  const allStudents = generateMockStudents().filter(
     (student) => batch && student.batchId === batch.id
+  );
+
+  const students = allStudents.filter(student =>
+    student.name.toLowerCase().includes(search.toLowerCase()) ||
+    student.id.toLowerCase().includes(search.toLowerCase()) ||
+    student.email.toLowerCase().includes(search.toLowerCase())
   );
 
   // Function to determine progress bar color class
   const getProgressColorClass = (progressPercentage: number) => {
-    if (progressPercentage < 30) return "bg-progress-low";
-    if (progressPercentage < 70) return "bg-progress-medium";
-    if (progressPercentage < 100) return "bg-progress-high";
-    return "bg-progress-complete";
+    if (progressPercentage < 30) return "bg-red-500";
+    if (progressPercentage < 70) return "bg-yellow-500";
+    if (progressPercentage < 100) return "bg-green-500";
+    return "bg-blue-500";
+  };
+
+  // Function to get student status
+  const getStudentStatus = (progressPercentage: number) => {
+    if (progressPercentage === 0) return { label: "Not Started", class: "bg-gray-500/10 text-gray-500" };
+    if (progressPercentage === 100) return { label: "Completed", class: "bg-green-500/10 text-green-500" };
+    return { label: "In Progress", class: "bg-yellow-500/10 text-yellow-500" };
+  };
+
+  // Function to format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   if (!batch) return null;
@@ -34,97 +58,142 @@ const ViewStudentsModal = ({ isOpen, onClose, batch }: ViewStudentsModalProps) =
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex justify-between items-center">
-              <span>Students in {batch.name}</span>
-              <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full">
-                {students.length} Students
-              </span>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">
+              Students in {batch.name}
             </DialogTitle>
+            <DialogDescription>
+              View and manage students enrolled in this batch. Total students: {allStudents.length}
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-sm text-muted-foreground">
-              Manage students in this batch
-            </div>
-            <Button 
-              onClick={() => setIsAddStudentsModalOpen(true)}
-              className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add New Students
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            {students.length > 0 ? (
-              students.map((student) => (
-                <Card key={student.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="font-semibold">{student.name}</span>
-                          <span className="text-muted-foreground text-sm">
-                            ID: {student.id}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Total Hours:</span>
-                          <span>{student.totalHours}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Start Date:</span>
-                          <span>{student.startDate}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>End Date:</span>
-                          <span>{student.endDate}</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>Sessions Completed:</span>
-                          <span>
-                            {student.sessionsCompleted} / {student.totalSessions}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span>Progress:</span>
-                            <span>{student.progressPercentage}%</span>
-                          </div>
-                          <Progress
-                            value={student.progressPercentage}
-                            className="h-2"
-                            indicatorClassName={getProgressColorClass(student.progressPercentage)}
-                          />
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Remaining Sessions:</span>
-                          <span>{student.sessionsRemaining}</span>
-                        </div>
-                        <div className="mt-2">
-                          <Button size="sm" variant="outline" className="w-full">
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center p-8">
-                <p className="text-muted-foreground">No students found in this batch.</p>
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, ID, or email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 w-full"
+                />
               </div>
-            )}
-          </div>
-          
-          <div className="mt-4 flex justify-end">
-            <Button onClick={onClose}>Close</Button>
+              <Button 
+                onClick={() => setIsAddStudentsModalOpen(true)}
+                size="sm"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Students
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              {students.length > 0 ? (
+                students.map((student) => {
+                  const status = getStudentStatus(student.progressPercentage);
+                  const paymentProgress = (student.paidAmount / student.totalPayment) * 100;
+                  return (
+                    <Card key={student.id} className="border-border/40 hover:border-border/80 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                              <div className="space-y-1">
+                                <h3 className="font-semibold">{student.name}</h3>
+                                <p className="text-sm text-muted-foreground">ID: {student.id}</p>
+                              </div>
+                              <Badge variant="secondary" className={status.class}>
+                                {status.label}
+                              </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-[20px_1fr] gap-2 text-sm items-center">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                              <span>{student.email}</span>
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <span>{student.phone}</span>
+                              <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                              <span>{formatCurrency(student.paidAmount)} / {formatCurrency(student.totalPayment)}</span>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm text-muted-foreground">Payment Progress</span>
+                                <span className="text-sm font-medium">{Math.round(paymentProgress)}%</span>
+                              </div>
+                              <Progress
+                                value={paymentProgress}
+                                className="h-2"
+                                indicatorClassName={getProgressColorClass(paymentProgress)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div>
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm text-muted-foreground">Session Progress</span>
+                                <span className="text-sm font-medium">{student.progressPercentage}%</span>
+                              </div>
+                              <Progress
+                                value={student.progressPercentage}
+                                className="h-2"
+                                indicatorClassName={getProgressColorClass(student.progressPercentage)}
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="space-y-2">
+                                <div className="text-muted-foreground">Sessions Completed</div>
+                                <div className="text-muted-foreground">Remaining Sessions</div>
+                                <div className="text-muted-foreground">Total Hours</div>
+                                <div className="text-muted-foreground">Session Duration</div>
+                              </div>
+                              <div className="space-y-2 font-medium">
+                                <div>{student.sessionsCompleted} / {student.totalSessions}</div>
+                                <div>{student.sessionsRemaining}</div>
+                                <div>{student.totalHours} hours</div>
+                                <div>{student.sessionDuration}h per session</div>
+                              </div>
+                            </div>
+
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <Card className="py-8 border-dashed">
+                  <div className="text-center">
+                    <p className="text-muted-foreground">
+                      {allStudents.length === 0 
+                        ? "No students found in this batch."
+                        : "No students found matching your search criteria."
+                      }
+                    </p>
+                    {search && (
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={() => setSearch("")}
+                      >
+                        Clear Search
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>

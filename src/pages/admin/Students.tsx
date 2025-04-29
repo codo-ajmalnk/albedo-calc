@@ -60,7 +60,13 @@ const AdminStudents = () => {
     sessionsCompleted: 0,
     totalHours: 24,
     totalPayment: 12000,
-    paidAmount: 0
+    paidAmount: 0,
+    batchId: "",
+    sessionsRemaining: 12,
+    progressPercentage: 0,
+    startDate: "",
+    endDate: "",
+    sessionDuration: 1.33
   });
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   
@@ -692,7 +698,13 @@ const AdminStudents = () => {
                   sessionsCompleted: 0,
                   totalHours: 24,
                   totalPayment: 12000,
-                  paidAmount: 0
+                  paidAmount: 0,
+                  batchId: "",
+                  sessionsRemaining: 12,
+                  progressPercentage: 0,
+                  startDate: "",
+                  endDate: "",
+                  sessionDuration: 1.33
                 });
               }}
               className="w-full sm:w-auto"

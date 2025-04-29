@@ -17,11 +17,17 @@ export interface Student {
   phone: string;
   mentorId: string;
   status: "active" | "inactive";
+  batchId: string;
+  totalHours: number;
   totalSessions: number;
   sessionsCompleted: number;
-  totalHours: number;
   totalPayment: number;
   paidAmount: number;
+  sessionsRemaining: number;
+  progressPercentage: number;
+  startDate: string;
+  endDate: string;
+  sessionDuration: number;
 }
 
 export interface Batch {

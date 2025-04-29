@@ -1,15 +1,15 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Batch } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, CalendarPlus, Eye, Edit, Plus } from "lucide-react";
+import { Calendar, CalendarPlus, Eye, Edit, Plus, Search } from "lucide-react";
 import AddBatchModal from "@/components/batch/AddBatchModal";
 import EditBatchModal from "@/components/batch/EditBatchModal";
 import ViewStudentsModal from "@/components/batch/ViewStudentsModal";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 // Mock batch data (would come from API in real app)
 const batchesMockData: Batch[] = [
@@ -92,99 +92,131 @@ const AdminBatches = () => {
   
   // Function to determine progress bar color class
   const getProgressColorClass = (progress: number) => {
-    if (progress < 30) return "bg-progress-low";
-    if (progress < 70) return "bg-progress-medium";
-    if (progress < 100) return "bg-progress-high";
-    return "bg-progress-complete";
+    if (progress < 30) return "bg-red-500";
+    if (progress < 70) return "bg-yellow-500";
+    if (progress < 100) return "bg-green-500";
+    return "bg-blue-500";
+  };
+
+  // Function to get batch status
+  const getBatchStatus = (startDate: string, endDate: string) => {
+    const now = new Date().getTime();
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+
+    if (now < start) return { label: "Upcoming", class: "bg-blue-500/10 text-blue-500" };
+    if (now > end) return { label: "Completed", class: "bg-green-500/10 text-green-500" };
+    return { label: "Active", class: "bg-yellow-500/10 text-yellow-500" };
   };
   
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h1 className="text-2xl font-bold">Batches Management</h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Batches Management</h1>
+            <p className="text-muted-foreground mt-1">Manage and monitor all training batches</p>
+          </div>
           
-          <Button className="w-full sm:w-auto" onClick={() => setIsAddModalOpen(true)}>
+          <Button 
+            className="w-full sm:w-auto" 
+            onClick={() => setIsAddModalOpen(true)}
+            size="sm"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add New Batch
           </Button>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Search Batches</CardTitle>
+        <Card className="border-border/40">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium">Search Batches</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row items-center gap-4">
-              <Input
-                placeholder="Search by batch name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full sm:max-w-sm"
-              />
-              <Button variant="outline" className="w-full sm:w-auto">
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by batch name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 w-full"
+                />
+              </div>
+              <Button variant="outline" className="w-full sm:w-auto" size="sm">
                 <Calendar className="mr-2 h-4 w-4" />
-                Search
+                Filter by Date
               </Button>
             </div>
           </CardContent>
         </Card>
         
-        <div className="space-y-6">
+        <div className="grid gap-4">
           {filteredBatches.map((batch) => {
             const progress = getBatchProgress(batch.sessionStart, batch.sessionEnd);
             const daysRemaining = getDaysRemaining(batch.sessionEnd);
             const progressColorClass = getProgressColorClass(progress);
+            const status = getBatchStatus(batch.sessionStart, batch.sessionEnd);
             
             return (
-              <Card key={batch.id}>
-                <CardHeader>
+              <Card key={batch.id} className="border-border/40 hover:border-border/80 transition-colors">
+                <CardHeader className="pb-3">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <CardTitle>{batch.name}</CardTitle>
-                    <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-                      {batch.studentCount} Students
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg font-semibold">{batch.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">ID: {batch.id}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className={status.class}>
+                        {status.label}
+                      </Badge>
+                      <Badge variant="outline" className="font-medium">
+                        {batch.studentCount} Students
+                      </Badge>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span>Added On:</span>
-                        <span>{batch.addedOn}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Session Start:</span>
-                        <span>{batch.sessionStart}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Session End:</span>
-                        <span>{batch.sessionEnd}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Days Remaining:</span>
-                        <span>{daysRemaining} days</span>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="space-y-3">
+                          <div className="text-muted-foreground">Added On</div>
+                          <div className="text-muted-foreground">Session Start</div>
+                          <div className="text-muted-foreground">Session End</div>
+                          <div className="text-muted-foreground">Days Remaining</div>
+                        </div>
+                        <div className="space-y-3 font-medium">
+                          <div>{batch.addedOn}</div>
+                          <div>{batch.sessionStart}</div>
+                          <div>{batch.sessionEnd}</div>
+                          <div>{daysRemaining} days</div>
+                        </div>
                       </div>
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium block mb-1">Overall Progress:</label>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm text-muted-foreground">Overall Progress</label>
+                          <span className="text-sm font-medium">{progress}%</span>
+                        </div>
                         <Progress 
                           value={progress} 
-                          className="h-2.5"
+                          className="h-2"
                           indicatorClassName={progressColorClass}
                         />
-                        <div className="flex justify-end text-sm mt-1">{progress}%</div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Total Hours:</span>
-                        <span>{batch.studentCount * 100}</span>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="space-y-3">
+                          <div className="text-muted-foreground">Total Hours</div>
+                          <div className="text-muted-foreground">Total Sessions</div>
+                        </div>
+                        <div className="space-y-3 font-medium">
+                          <div>{batch.studentCount * 100}</div>
+                          <div>{batch.studentCount * 75}</div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Total Sessions:</span>
-                        <span>{batch.studentCount * 75}</span>
-                      </div>
-                      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:justify-end pt-2">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -211,11 +243,20 @@ const AdminBatches = () => {
           })}
           
           {filteredBatches.length === 0 && (
-            <div className="text-center p-8">
-              <p className="text-muted-foreground">
-                No batches found matching your search.
-              </p>
-            </div>
+            <Card className="py-8 border-dashed">
+              <div className="text-center">
+                <p className="text-muted-foreground">
+                  No batches found matching your search criteria.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => setSearch("")}
+                >
+                  Clear Search
+                </Button>
+              </div>
+            </Card>
           )}
         </div>
       </div>
