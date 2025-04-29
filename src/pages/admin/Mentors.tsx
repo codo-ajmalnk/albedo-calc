@@ -128,7 +128,7 @@ const AdminMentors = () => {
       paymentsProgress: stats.totalPayments > 0 ? Math.floor((stats.completedPayments / stats.totalPayments) * 100) : 0,
     };
   };
-
+  
   const filteredMentors = mentors.filter((mentor) => {
     const matchesSearch = mentor.name.toLowerCase().includes(search.toLowerCase());
     const matchesCoordinator = coordinatorFilter === "all" || mentor.supervisorId === coordinatorFilter;
@@ -139,7 +139,7 @@ const AdminMentors = () => {
     const coordinator = users.find((user) => user.id === coordinatorId);
     return coordinator ? coordinator.name : "Unassigned";
   };
-
+  
   const handleViewDetails = (mentor: User) => {
     const stats = getMentorStats(mentor.id);
     setSelectedMentor({ user: mentor, stats });
@@ -337,7 +337,7 @@ const AdminMentors = () => {
     setSelectedStudentsToAssign([]);
     setStudentSearchQuery("");
   };
-
+  
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
@@ -352,7 +352,7 @@ const AdminMentors = () => {
             Add New Mentor
           </Button>
         </div>
-
+        
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
             <CardTitle>Filter Mentors</CardTitle>
@@ -362,17 +362,17 @@ const AdminMentors = () => {
               <div className="space-y-2">
                 <Label>Search by Name</Label>
                 <div className="flex items-center gap-3">
-                  <Input
-                    placeholder="Search mentors..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                <Input
+                  placeholder="Search mentors..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                     className="w-full text-sm"
-                  />
+                />
                   <Button variant="outline" className="shrink-0 text-sm">
                     <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                     Search
                   </Button>
-                </div>
+              </div>
               </div>
               <div className="space-y-2">
                 <Label>Filter by Coordinator</Label>
@@ -396,7 +396,7 @@ const AdminMentors = () => {
             </div>
           </CardContent>
         </Card>
-
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredMentors.map((mentor) => {
             const stats = getMentorStats(mentor.id);
@@ -434,12 +434,12 @@ const AdminMentors = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                  <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Sessions Progress</span>
                           <span className="font-medium">{stats.sessionProgress}%</span>
-                        </div>
+                    </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
@@ -452,18 +452,18 @@ const AdminMentors = () => {
                               }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
-                        </div>
+                    </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>{stats.completedSessions} completed</span>
                           <span>{stats.totalSessions} total</span>
-                        </div>
-                      </div>
+                    </div>
+                    </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Hours Progress</span>
                           <span className="font-medium">{stats.hoursProgress}%</span>
-                        </div>
+                    </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
@@ -476,7 +476,7 @@ const AdminMentors = () => {
                               }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
-                        </div>
+                    </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>{stats.completedHours} completed</span>
                           <span>{stats.totalHours} total</span>
@@ -540,8 +540,8 @@ const AdminMentors = () => {
                     </div>
 
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
-                      <Button
-                        variant="outline"
+                      <Button 
+                        variant="outline" 
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => handleViewDetails(mentor)}
@@ -549,7 +549,7 @@ const AdminMentors = () => {
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
                       </Button>
-                      <Button
+                      <Button 
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -582,7 +582,7 @@ const AdminMentors = () => {
               </Card>
             );
           })}
-
+          
           {filteredMentors.length === 0 && (
             <div className="col-span-full text-center p-8">
               <p className="text-muted-foreground">

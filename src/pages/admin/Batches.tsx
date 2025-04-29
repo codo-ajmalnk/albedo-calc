@@ -4,12 +4,14 @@ import { Batch } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, CalendarPlus, Eye, Edit, Plus, Search } from "lucide-react";
+import { Calendar, CalendarPlus, Eye, Edit, Plus, Search, Users, Trash2 } from "lucide-react";
 import AddBatchModal from "@/components/batch/AddBatchModal";
 import EditBatchModal from "@/components/batch/EditBatchModal";
 import ViewStudentsModal from "@/components/batch/ViewStudentsModal";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 // Mock batch data (would come from API in real app)
 const batchesMockData: Batch[] = [
@@ -39,6 +41,8 @@ const AdminBatches = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewStudentsModalOpen, setIsViewStudentsModalOpen] = useState(false);
+  const [isViewDetailsModalOpen, setIsViewDetailsModalOpen] = useState(false);
+  const [isDeletingBatch, setIsDeletingBatch] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
   
   const filteredBatches = batches.filter((batch) =>
@@ -89,6 +93,23 @@ const AdminBatches = () => {
     setSelectedBatch(batch);
     setIsViewStudentsModalOpen(true);
   };
+
+  const handleViewDetails = (batch: Batch) => {
+    setSelectedBatch(batch);
+    setIsViewDetailsModalOpen(true);
+  };
+
+  const handleDeleteBatch = (batch: Batch) => {
+    setSelectedBatch(batch);
+    setIsDeletingBatch(true);
+  };
+
+  const confirmDeleteBatch = () => {
+    if (!selectedBatch) return;
+    setBatches(batches.filter(b => b.id !== selectedBatch.id));
+    setIsDeletingBatch(false);
+    setSelectedBatch(null);
+  };
   
   // Function to determine progress bar color class
   const getProgressColorClass = (progress: number) => {
@@ -136,12 +157,12 @@ const AdminBatches = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="relative w-full sm:max-w-sm">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by batch name..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+              <Input
+                placeholder="Search by batch name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 w-full"
-                />
+              />
               </div>
               <Button variant="outline" className="w-full sm:w-auto" size="sm">
                 <Calendar className="mr-2 h-4 w-4" />
@@ -171,7 +192,7 @@ const AdminBatches = () => {
                         {status.label}
                       </Badge>
                       <Badge variant="outline" className="font-medium">
-                        {batch.studentCount} Students
+                      {batch.studentCount} Students
                       </Badge>
                     </div>
                   </div>
@@ -185,13 +206,13 @@ const AdminBatches = () => {
                           <div className="text-muted-foreground">Session Start</div>
                           <div className="text-muted-foreground">Session End</div>
                           <div className="text-muted-foreground">Days Remaining</div>
-                        </div>
+                      </div>
                         <div className="space-y-3 font-medium">
                           <div>{batch.addedOn}</div>
                           <div>{batch.sessionStart}</div>
                           <div>{batch.sessionEnd}</div>
                           <div>{daysRemaining} days</div>
-                        </div>
+                      </div>
                       </div>
                     </div>
                     <div className="space-y-4">
@@ -214,25 +235,44 @@ const AdminBatches = () => {
                         <div className="space-y-3 font-medium">
                           <div>{batch.studentCount * 100}</div>
                           <div>{batch.studentCount * 75}</div>
-                        </div>
+                      </div>
                       </div>
                       <div className="flex flex-col sm:flex-row gap-2 sm:justify-end pt-2">
                         <Button 
                           variant="outline" 
                           size="sm"
                           className="w-full sm:w-auto"
-                          onClick={() => handleViewStudents(batch)}
+                          onClick={() => handleViewDetails(batch)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
-                          View Students
+                          Details
                         </Button>
                         <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => handleViewStudents(batch)}
+                        >
+                          <Users className="mr-2 h-4 w-4" />
+                          Students
+                        </Button>
+                        <Button 
+                          variant="outline"
                           size="sm"
                           className="w-full sm:w-auto"
                           onClick={() => handleEditBatch(batch)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
-                          Edit Batch
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="destructive"
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => handleDeleteBatch(batch)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
                         </Button>
                       </div>
                     </div>
@@ -245,7 +285,7 @@ const AdminBatches = () => {
           {filteredBatches.length === 0 && (
             <Card className="py-8 border-dashed">
               <div className="text-center">
-                <p className="text-muted-foreground">
+              <p className="text-muted-foreground">
                   No batches found matching your search criteria.
                 </p>
                 <Button 
@@ -255,7 +295,7 @@ const AdminBatches = () => {
                 >
                   Clear Search
                 </Button>
-              </div>
+            </div>
             </Card>
           )}
         </div>
@@ -282,6 +322,123 @@ const AdminBatches = () => {
         onClose={() => setIsViewStudentsModalOpen(false)}
         batch={selectedBatch}
       />
+
+      {/* View Details Modal */}
+      <Dialog open={isViewDetailsModalOpen} onOpenChange={setIsViewDetailsModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {selectedBatch?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Batch ID: {selectedBatch?.id}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedBatch && (
+            <div className="space-y-6 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Students</p>
+                  <p className="text-2xl font-bold mt-1">{selectedBatch.studentCount}</p>
+                  <p className="text-sm text-muted-foreground">enrolled</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Total Hours</p>
+                  <p className="text-2xl font-bold mt-1">{selectedBatch.studentCount * 100}</p>
+                  <p className="text-sm text-muted-foreground">hours</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Total Sessions</p>
+                  <p className="text-2xl font-bold mt-1">{selectedBatch.studentCount * 75}</p>
+                  <p className="text-sm text-muted-foreground">sessions</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Days Remaining</p>
+                  <p className="text-2xl font-bold mt-1">{getDaysRemaining(selectedBatch.sessionEnd)}</p>
+                  <p className="text-sm text-muted-foreground">days</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-4">Batch Timeline</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Added On</span>
+                      <span className="font-medium">{selectedBatch.addedOn}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Session Start</span>
+                      <span className="font-medium">{selectedBatch.sessionStart}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Session End</span>
+                      <span className="font-medium">{selectedBatch.sessionEnd}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4">Progress Overview</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Overall Progress</span>
+                        <span>{getBatchProgress(selectedBatch.sessionStart, selectedBatch.sessionEnd)}%</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            getProgressColorClass(getBatchProgress(selectedBatch.sessionStart, selectedBatch.sessionEnd))
+                          }`}
+                          style={{ width: `${getBatchProgress(selectedBatch.sessionStart, selectedBatch.sessionEnd)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4">Batch Status</h3>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className={getBatchStatus(selectedBatch.sessionStart, selectedBatch.sessionEnd).class}>
+                      {getBatchStatus(selectedBatch.sessionStart, selectedBatch.sessionEnd).label}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeletingBatch} onOpenChange={setIsDeletingBatch}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {selectedBatch?.name} and remove all associated data.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setIsDeletingBatch(false);
+              setSelectedBatch(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteBatch}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };

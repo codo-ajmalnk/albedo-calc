@@ -308,10 +308,6 @@ const AdminDashboard = () => {
                   <span>Students:</span>
                   <span className="font-bold">{students.length}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Student-Mentor Ratio:</span>
-                  <span className="font-bold">6:1</span>
-                </div>
               </div>
             </CardContent>
           </Card>
