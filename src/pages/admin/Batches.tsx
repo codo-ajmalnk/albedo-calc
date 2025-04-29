@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { crudToasts } from "@/lib/toast";
 
 // Mock batch data (would come from API in real app)
 const batchesMockData: Batch[] = [
@@ -73,15 +74,25 @@ const AdminBatches = () => {
   };
 
   const handleAddBatch = (newBatch: Batch) => {
-    setBatches([...batches, newBatch]);
+    try {
+      setBatches([...batches, newBatch]);
+      crudToasts.create.success("Batch");
+    } catch (error) {
+      crudToasts.create.error("Batch");
+    }
   };
 
   const handleUpdateBatch = (updatedBatch: Batch) => {
-    setBatches(
-      batches.map((batch) => 
-        batch.id === updatedBatch.id ? updatedBatch : batch
-      )
-    );
+    try {
+      setBatches(
+        batches.map((batch) => 
+          batch.id === updatedBatch.id ? updatedBatch : batch
+        )
+      );
+      crudToasts.update.success("Batch");
+    } catch (error) {
+      crudToasts.update.error("Batch");
+    }
   };
 
   const handleEditBatch = (batch: Batch) => {
@@ -106,9 +117,14 @@ const AdminBatches = () => {
 
   const confirmDeleteBatch = () => {
     if (!selectedBatch) return;
-    setBatches(batches.filter(b => b.id !== selectedBatch.id));
-    setIsDeletingBatch(false);
-    setSelectedBatch(null);
+    try {
+      setBatches(batches.filter(b => b.id !== selectedBatch.id));
+      setIsDeletingBatch(false);
+      setSelectedBatch(null);
+      crudToasts.delete.success("Batch");
+    } catch (error) {
+      crudToasts.delete.error("Batch");
+    }
   };
   
   // Function to determine progress bar color class

@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { crudToasts } from "@/lib/toast";
 
 const AdminCoordinators = () => {
   const navigate = useNavigate();
@@ -161,44 +162,58 @@ const AdminCoordinators = () => {
   };
 
   const handleAddCoordinator = () => {
-    // Here you would typically make an API call to create the coordinator
-    const newUser: User = {
-      id: newCoordinator.id,
-      name: newCoordinator.name,
-      email: newCoordinator.email,
-      role: "coordinator",
-      phone: newCoordinator.phone,
-    };
+    try {
+      // Validate required fields
+      if (!newCoordinator.name || !newCoordinator.email || !newCoordinator.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
 
-    setCoordinators([...coordinators, newUser]);
-    setIsAddingCoordinator(false);
-    setNewCoordinator({
-      id: `coord${users.filter(u => u.role === "coordinator").length + 2}`,
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-    });
+      const newUser: User = {
+        id: newCoordinator.id,
+        name: newCoordinator.name,
+        email: newCoordinator.email,
+        role: "coordinator",
+        phone: newCoordinator.phone,
+      };
+
+      setCoordinators([...coordinators, newUser]);
+      setIsAddingCoordinator(false);
+      setNewCoordinator({
+        id: `coord${users.filter(u => u.role === "coordinator").length + 2}`,
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+      });
+      crudToasts.create.success("Coordinator");
+    } catch (error) {
+      crudToasts.create.error("Coordinator");
+    }
   };
 
   const handleUpdateCoordinator = () => {
     if (!editingCoordinator) return;
 
-    // Here you would typically make an API call to update the coordinator
-    const updatedCoordinators = coordinators.map((coord) =>
-      coord.id === editingCoordinator.id
-        ? {
-          ...coord,
-          name: editingCoordinator.name,
-          email: editingCoordinator.email,
-          phone: editingCoordinator.phone,
-        }
-        : coord
-    );
+    try {
+      const updatedCoordinators = coordinators.map((coord) =>
+        coord.id === editingCoordinator.id
+          ? {
+            ...coord,
+            name: editingCoordinator.name,
+            email: editingCoordinator.email,
+            phone: editingCoordinator.phone,
+          }
+          : coord
+      );
 
-    setCoordinators(updatedCoordinators);
-    setIsEditingCoordinator(false);
-    setEditingCoordinator(null);
+      setCoordinators(updatedCoordinators);
+      setIsEditingCoordinator(false);
+      setEditingCoordinator(null);
+      crudToasts.update.success("Coordinator");
+    } catch (error) {
+      crudToasts.update.error("Coordinator");
+    }
   };
 
   const handleViewMentors = (coordinator: User) => {
@@ -216,12 +231,17 @@ const AdminCoordinators = () => {
   const confirmDeleteCoordinator = () => {
     if (!selectedCoordinator) return;
 
-    const updatedCoordinators = coordinators.filter(
-      (c) => c.id !== selectedCoordinator.user.id
-    );
-    setCoordinators(updatedCoordinators);
-    setIsDeletingCoordinator(false);
-    setSelectedCoordinator(null);
+    try {
+      const updatedCoordinators = coordinators.filter(
+        (c) => c.id !== selectedCoordinator.user.id
+      );
+      setCoordinators(updatedCoordinators);
+      setIsDeletingCoordinator(false);
+      setSelectedCoordinator(null);
+      crudToasts.delete.success("Coordinator");
+    } catch (error) {
+      crudToasts.delete.error("Coordinator");
+    }
   };
 
   const getAssignedMentors = (coordinatorId: string) => {
@@ -312,18 +332,22 @@ const AdminCoordinators = () => {
   const handleAssignMentor = () => {
     if (!selectedCoordinator || !selectedMentorId) return;
 
-    // Here you would typically make an API call to assign the mentor
-    const updatedUsers = users.map(user => {
-      if (user.id === selectedMentorId) {
-        return { ...user, supervisorId: selectedCoordinator.user.id };
-      }
-      return user;
-    });
-    users.length = 0;
-    users.push(...updatedUsers);
+    try {
+      const updatedUsers = users.map(user => {
+        if (user.id === selectedMentorId) {
+          return { ...user, supervisorId: selectedCoordinator.user.id };
+        }
+        return user;
+      });
+      users.length = 0;
+      users.push(...updatedUsers);
 
-    setIsAssigningMentor(false);
-    setSelectedMentorId("");
+      setIsAssigningMentor(false);
+      setSelectedMentorId("");
+      crudToasts.assign.success("Mentor", "coordinator");
+    } catch (error) {
+      crudToasts.assign.error("Mentor", "coordinator");
+    }
   };
 
   const handleViewStudents = (coordinator: User) => {

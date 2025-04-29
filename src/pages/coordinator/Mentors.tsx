@@ -37,10 +37,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { User, Student } from "@/lib/types";
+import { crudToasts } from "@/lib/toast";
 
 const CoordinatorMentors = () => {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [mentors, setMentors] = useState(users.filter(u => u.role === "mentor" && u.supervisorId === user?.id));
   const [selectedMentor, setSelectedMentor] = useState<{
     user: User;
     stats: ReturnType<typeof getMentorStats>;
@@ -63,10 +65,10 @@ const CoordinatorMentors = () => {
   if (!user) return null;
   
   // Get mentors under this coordinator
-  const mentors = users.filter(
-    (u) => u.role === "mentor" && u.supervisorId === user.id
+  const filteredMentors = mentors.filter((mentor) =>
+    mentor.name.toLowerCase().includes(search.toLowerCase())
   );
-
+  
   const getMentorStats = (mentorId: string) => {
     const mentorStudents = allStudents.filter(
       (student) => student.mentorId === mentorId
@@ -108,10 +110,6 @@ const CoordinatorMentors = () => {
     };
   };
 
-  const filteredMentors = mentors.filter((mentor) =>
-    mentor.name.toLowerCase().includes(search.toLowerCase())
-  );
-
   const handleViewDetails = (mentor: User) => {
     const stats = getMentorStats(mentor.id);
     setSelectedMentor({ user: mentor, stats });
@@ -134,36 +132,71 @@ const CoordinatorMentors = () => {
 
   const handleUpdateMentor = () => {
     if (!editingMentor) return;
-    // Here you would typically update the mentor in your backend
-    setIsEditingMentor(false);
-    setEditingMentor(null);
+    
+    try {
+      setMentors(mentors.map(mentor =>
+        mentor.id === editingMentor.id ? editingMentor : mentor
+      ));
+      setIsEditingMentor(false);
+      setEditingMentor(null);
+      crudToasts.update.success("Mentor");
+    } catch (error) {
+      crudToasts.update.error("Mentor");
+    }
   };
 
   const confirmDeleteMentor = () => {
     if (!selectedMentor) return;
-    // Here you would typically delete the mentor in your backend
-    setIsDeletingMentor(false);
-    setSelectedMentor(null);
+    
+    try {
+      setMentors(mentors.filter(mentor => mentor.id !== selectedMentor.user.id));
+      setIsDeletingMentor(false);
+      setSelectedMentor(null);
+      crudToasts.delete.success("Mentor");
+    } catch (error) {
+      crudToasts.delete.error("Mentor");
+    }
   };
 
   const handleAddMentor = () => {
-    // Add the new mentor to the users array
-    const mentorToAdd = {
-      ...newMentor,
-      id: `mentor${users.length + 1}`,
-      supervisorId: user.id
-    };
-    users.push(mentorToAdd);
-    setIsAddingMentor(false);
-    setNewMentor({
-      id: `mentor${users.length + 2}`,
-      name: "",
-      email: "",
-      phone: "",
-      role: "mentor" as const,
-      supervisorId: user.id,
-      password: ""
-    });
+    try {
+      // Validate required fields
+      if (!newMentor.name || !newMentor.email || !newMentor.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
+
+      // Automatically assign the current coordinator as supervisor
+      const mentorWithSupervisor = {
+        ...newMentor,
+        id: `mentor${users.length + 2}`,
+        supervisorId: user.id,
+        status: "active",
+        totalStudents: 0,
+        activeStudents: 0,
+        totalSessions: 0,
+        completedSessions: 0,
+        totalHours: 0,
+        completedHours: 0,
+        totalPayment: 0,
+        collectedPayment: 0,
+      };
+
+      users.push(mentorWithSupervisor);
+      setIsAddingMentor(false);
+      setNewMentor({
+        id: "",
+        name: "",
+        email: "",
+        phone: "",
+        role: "mentor" as const,
+        supervisorId: user.id,
+        password: ""
+      });
+      crudToasts.create.success("Mentor");
+    } catch (error) {
+      crudToasts.create.error("Mentor");
+    }
   };
   
   return (
@@ -195,7 +228,7 @@ const CoordinatorMentors = () => {
                   className="w-full text-sm"
                 />
               </div>
-            </div>
+                      </div>
           </CardContent>
         </Card>
         
@@ -217,7 +250,7 @@ const CoordinatorMentors = () => {
                       </p>
                     </div>
                   </div>
-                </CardHeader>
+              </CardHeader>
                 <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
@@ -234,7 +267,7 @@ const CoordinatorMentors = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Sessions Progress</span>
@@ -635,7 +668,7 @@ const CoordinatorMentors = () => {
                                     : 'bg-gray-100 text-gray-800'
                                 }`}>
                                   {student.status}
-                                </span>
+                    </span>
                               </TableCell>
                               <TableCell>
                                 <div className="w-full">
@@ -756,7 +789,7 @@ const CoordinatorMentors = () => {
                     placeholder="mentor@example.com"
                     className="w-full"
                   />
-                </div>
+                  </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-phone">Phone Number *</Label>
                   <Input
@@ -867,8 +900,8 @@ const CoordinatorMentors = () => {
                 placeholder="Enter secure password"
                 className="w-full"
               />
-            </div>
-          </div>
+        </div>
+      </div>
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setIsAddingMentor(false)} className="w-full sm:w-auto">
               Cancel

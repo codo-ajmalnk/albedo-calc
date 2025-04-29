@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { crudToasts } from "@/lib/toast";
 
 const AdminStudents = () => {
   const [students, setStudents] = useState<Student[]>(allStudents);
@@ -97,6 +98,112 @@ const AdminStudents = () => {
       completedHours: Math.round((student.totalHours * student.sessionsCompleted) / student.totalSessions),
       pendingPayment: student.totalPayment - student.paidAmount
     };
+  };
+  
+  const handleUpdateStudent = () => {
+    if (!editingStudent) return;
+    
+    try {
+      setStudents(students.map(student =>
+        student.id === editingStudent.id ? editingStudent : student
+      ));
+      setIsEditingStudent(false);
+      setEditingStudent(null);
+      crudToasts.update.success("Student");
+    } catch (error) {
+      crudToasts.update.error("Student");
+    }
+  };
+
+  const confirmDeleteStudent = () => {
+    if (!selectedStudent) return;
+    
+    try {
+      setStudents(students.filter(student => student.id !== selectedStudent.id));
+      setIsDeletingStudent(false);
+      setSelectedStudent(null);
+      crudToasts.delete.success("Student");
+    } catch (error) {
+      crudToasts.delete.error("Student");
+    }
+  };
+
+  const handleAddStudent = () => {
+    try {
+      // Validate required fields
+      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
+
+      setStudents([...students, newStudent]);
+      setIsAddingStudent(false);
+      setNewStudent({
+        ...newStudent,
+        id: `student${students.length + 2}`,
+        name: "",
+        email: "",
+        phone: "",
+        totalSessions: 12,
+        sessionsCompleted: 0,
+        totalHours: 24,
+        totalPayment: 12000,
+        paidAmount: 0,
+        batchId: "",
+        sessionsRemaining: 12,
+        progressPercentage: 0,
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        sessionDuration: 1.33
+      });
+      crudToasts.create.success("Student");
+    } catch (error) {
+      crudToasts.create.error("Student");
+    }
+  };
+
+  const handleAssignMentor = (studentId: string, mentorId: string) => {
+    try {
+      setStudents(students.map(student =>
+        student.id === studentId ? { ...student, mentorId } : student
+      ));
+      crudToasts.assign.success("Student", "Mentor");
+    } catch (error) {
+      crudToasts.assign.error("Student", "Mentor");
+    }
+  };
+
+  const handleUnassignMentor = (studentId: string) => {
+    try {
+      setStudents(students.map(student =>
+        student.id === studentId ? { ...student, mentorId: "" } : student
+      ));
+      crudToasts.unassign.success("Student", "Mentor");
+    } catch (error) {
+      crudToasts.unassign.error("Student", "Mentor");
+    }
+  };
+
+  const handleAssignBatch = (studentId: string, batchId: string) => {
+    try {
+      setStudents(students.map(student =>
+        student.id === studentId ? { ...student, batchId } : student
+      ));
+      crudToasts.assign.success("Student", "Batch");
+    } catch (error) {
+      crudToasts.assign.error("Student", "Batch");
+    }
+  };
+
+  const handleUnassignBatch = (studentId: string) => {
+    try {
+      setStudents(students.map(student =>
+        student.id === studentId ? { ...student, batchId: "" } : student
+      ));
+      crudToasts.unassign.success("Student", "Batch");
+    } catch (error) {
+      crudToasts.unassign.error("Student", "Batch");
+    }
   };
   
   return (
@@ -684,29 +791,7 @@ const AdminStudents = () => {
               Cancel
             </Button>
             <Button 
-              onClick={() => {
-                setStudents([...students, newStudent]);
-                setIsAddingStudent(false);
-                setNewStudent({
-                  id: `student${students.length + 2}`,
-                  name: "",
-                  email: "",
-                  phone: "",
-                  mentorId: "",
-                  status: "active" as const,
-                  totalSessions: 12,
-                  sessionsCompleted: 0,
-                  totalHours: 24,
-                  totalPayment: 12000,
-                  paidAmount: 0,
-                  batchId: "",
-                  sessionsRemaining: 12,
-                  progressPercentage: 0,
-                  startDate: "",
-                  endDate: "",
-                  sessionDuration: 1.33
-                });
-              }}
+              onClick={handleAddStudent}
               className="w-full sm:w-auto"
             >
               Create Student
@@ -905,14 +990,7 @@ const AdminStudents = () => {
             }} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button onClick={() => {
-              if (!editingStudent) return;
-              setStudents(students.map(student =>
-                student.id === editingStudent.id ? editingStudent : student
-              ));
-              setIsEditingStudent(false);
-              setEditingStudent(null);
-            }} className="w-full sm:w-auto">
+            <Button onClick={handleUpdateStudent} className="w-full sm:w-auto">
               Save Changes
             </Button>
           </DialogFooter>
@@ -937,12 +1015,7 @@ const AdminStudents = () => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                if (!selectedStudent) return;
-                setStudents(students.filter(student => student.id !== selectedStudent.id));
-                setIsDeletingStudent(false);
-                setSelectedStudent(null);
-              }}
+              onClick={confirmDeleteStudent}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete

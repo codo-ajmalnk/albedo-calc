@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { toast } from "@/components/ui/sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { showSuccessToast, showErrorToast } from "@/lib/toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -26,9 +26,10 @@ const Login = () => {
       if (forgotMode) {
         await forgotPassword(email);
         setForgotMode(false);
-        toast.success("Reset instructions sent to your email");
+        showSuccessToast("Reset instructions sent", "Please check your email for further instructions.");
       } else {
         await login(email, password);
+        showSuccessToast("Login successful", "Welcome back!");
         
         // Based on roles redirect to different dashboards
         if (email.includes("admin")) {
@@ -40,7 +41,9 @@ const Login = () => {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
+      showErrorToast("Authentication failed", errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -168,7 +168,7 @@ const DashboardStatsCard = ({ stats, title }: DashboardStatsCardProps) => {
             </Card>
           </div>
         </div>
-
+        
         {/* Overview Section */}
         <div className="space-y-2 sm:space-y-3">
           <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ const DashboardStatsCard = ({ stats, title }: DashboardStatsCardProps) => {
             </Card>
             <Card className="p-2 sm:p-3 border-border/40">
               <div className="space-y-1.5 sm:space-y-2">
-                <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center">
                   <p className="text-xs sm:text-sm text-muted-foreground">Progress</p>
                   <p className="text-xs sm:text-sm font-medium">{stats.overallProgress}%</p>
                 </div>

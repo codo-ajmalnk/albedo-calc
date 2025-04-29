@@ -1,7 +1,7 @@
-
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { showErrorToast } from "@/lib/toast";
 
 const NotFound = () => {
   const location = useLocation();
@@ -10,6 +10,10 @@ const NotFound = () => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
+    );
+    showErrorToast(
+      "Page not found",
+      `The requested page "${location.pathname}" does not exist.`
     );
   }, [location.pathname]);
 

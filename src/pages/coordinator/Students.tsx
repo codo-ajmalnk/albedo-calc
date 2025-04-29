@@ -33,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { crudToasts } from "@/lib/toast";
 
 const CoordinatorStudents = () => {
   const { user } = useAuth();
@@ -117,18 +118,86 @@ const CoordinatorStudents = () => {
 
   const handleUpdateStudent = () => {
     if (!editingStudent) return;
-    setStudents(students.map(student =>
-      student.id === editingStudent.id ? editingStudent : student
-    ));
-    setIsEditingStudent(false);
-    setEditingStudent(null);
+    
+    try {
+      setStudents(students.map(student =>
+        student.id === editingStudent.id ? editingStudent : student
+      ));
+      setIsEditingStudent(false);
+      setEditingStudent(null);
+      crudToasts.update.success("Student");
+    } catch (error) {
+      crudToasts.update.error("Student");
+    }
   };
 
   const confirmDeleteStudent = () => {
     if (!selectedStudent) return;
-    setStudents(students.filter(student => student.id !== selectedStudent.id));
-    setIsDeletingStudent(false);
-    setSelectedStudent(null);
+    
+    try {
+      setStudents(students.filter(student => student.id !== selectedStudent.id));
+      setIsDeletingStudent(false);
+      setSelectedStudent(null);
+      crudToasts.delete.success("Student");
+    } catch (error) {
+      crudToasts.delete.error("Student");
+    }
+  };
+
+  const handleAddStudent = () => {
+    try {
+      // Validate required fields
+      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
+
+      setStudents([...students, newStudent]);
+      setIsAddingStudent(false);
+      setNewStudent({
+        ...newStudent,
+        id: `student${students.length + 2}`,
+        name: "",
+        email: "",
+        phone: "",
+        totalSessions: 12,
+        sessionsCompleted: 0,
+        totalHours: 24,
+        totalPayment: 12000,
+        paidAmount: 0,
+        batchId: "",
+        sessionsRemaining: 12,
+        progressPercentage: 0,
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        sessionDuration: 1.33
+      });
+      crudToasts.create.success("Student");
+    } catch (error) {
+      crudToasts.create.error("Student");
+    }
+  };
+
+  const handleAssignMentor = (studentId: string, mentorId: string) => {
+    try {
+      setStudents(students.map(student =>
+        student.id === studentId ? { ...student, mentorId } : student
+      ));
+      crudToasts.assign.success("Student", "Mentor");
+    } catch (error) {
+      crudToasts.assign.error("Student", "Mentor");
+    }
+  };
+
+  const handleUnassignMentor = (studentId: string) => {
+    try {
+      setStudents(students.map(student =>
+        student.id === studentId ? { ...student, mentorId: "" } : student
+      ));
+      crudToasts.unassign.success("Student", "Mentor");
+    } catch (error) {
+      crudToasts.unassign.error("Student", "Mentor");
+    }
   };
   
   return (
@@ -154,12 +223,12 @@ const CoordinatorStudents = () => {
               <div className="space-y-2">
                 <Label>Search by Name</Label>
                 <div className="flex items-center gap-3">
-                  <Input
-                    placeholder="Search students..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                <Input
+                  placeholder="Search students..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                     className="w-full text-sm"
-                  />
+                />
                   <Button variant="outline" className="shrink-0 text-sm">
                     <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                     Search
@@ -309,7 +378,7 @@ const CoordinatorStudents = () => {
                         <div className="flex justify-between text-sm mb-1">
                           <span>Overall Progress</span>
                           <span className="font-medium">{stats.overallProgress}%</span>
-                        </div>
+              </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${
@@ -322,8 +391,8 @@ const CoordinatorStudents = () => {
                                 : 'bg-progress-low'
                             }`}
                             style={{ width: `${stats.overallProgress}%` }}
-                          />
-                        </div>
+              />
+            </div>
                       </div>
                     </div>
 
@@ -707,29 +776,7 @@ const CoordinatorStudents = () => {
               Cancel
             </Button>
             <Button 
-              onClick={() => {
-                setStudents([...students, newStudent]);
-                setIsAddingStudent(false);
-                setNewStudent({
-                  id: `student${students.length + 2}`,
-                  name: "",
-                  email: "",
-                  phone: "",
-                  mentorId: "",
-                  status: "active" as const,
-                  totalSessions: 12,
-                  sessionsCompleted: 0,
-                  totalHours: 24,
-                  totalPayment: 12000,
-                  paidAmount: 0,
-                  batchId: "",
-                  sessionsRemaining: 12,
-                  progressPercentage: 0,
-                  startDate: "",
-                  endDate: "",
-                  sessionDuration: 1.33
-                });
-              }}
+              onClick={handleAddStudent}
               className="w-full sm:w-auto"
             >
               Create Student

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, UserSearch, Edit, Trash2, Plus } from "lucide-react";
+import { crudToasts } from "@/lib/toast";
 import {
   Dialog,
   DialogContent,
@@ -64,7 +65,7 @@ const MentorStudents = () => {
   const filteredStudents = myStudents.filter((student) =>
     student.name.toLowerCase().includes(search.toLowerCase())
   );
-
+  
   const getStudentStats = (student: Student) => {
     const sessionProgress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
     const hoursProgress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
@@ -88,11 +89,17 @@ const MentorStudents = () => {
 
   const handleUpdateStudent = () => {
     if (!editingStudent) return;
-    setStudents(students.map(student =>
-      student.id === editingStudent.id ? editingStudent : student
-    ));
-    setIsEditingStudent(false);
-    setEditingStudent(null);
+    
+    try {
+      setStudents(students.map(student =>
+        student.id === editingStudent.id ? editingStudent : student
+      ));
+      setIsEditingStudent(false);
+      setEditingStudent(null);
+      crudToasts.update.success("Student");
+    } catch (error) {
+      crudToasts.update.error("Student");
+    }
   };
 
   const handleDeleteStudent = (student: Student) => {
@@ -102,11 +109,51 @@ const MentorStudents = () => {
 
   const confirmDeleteStudent = () => {
     if (!selectedStudent) return;
-    setStudents(students.filter(student => student.id !== selectedStudent.id));
-    setIsDeletingStudent(false);
-    setSelectedStudent(null);
+    
+    try {
+      setStudents(students.filter(student => student.id !== selectedStudent.id));
+      setIsDeletingStudent(false);
+      setSelectedStudent(null);
+      crudToasts.delete.success("Student");
+    } catch (error) {
+      crudToasts.delete.error("Student");
+    }
   };
-  
+
+  const handleAddStudent = () => {
+    try {
+      // Validate required fields
+      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
+
+      setStudents([...students, newStudent]);
+      setIsAddingStudent(false);
+      setNewStudent({
+        ...newStudent,
+        id: `student${students.length + 2}`,
+        name: "",
+        email: "",
+        phone: "",
+        totalSessions: 12,
+        sessionsCompleted: 0,
+        totalHours: 24,
+        totalPayment: 12000,
+        paidAmount: 0,
+        batchId: "",
+        sessionsRemaining: 12,
+        progressPercentage: 0,
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        sessionDuration: 1.33
+      });
+      crudToasts.create.success("Student");
+    } catch (error) {
+      crudToasts.create.error("Student");
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6">
@@ -137,12 +184,12 @@ const MentorStudents = () => {
             <div className="space-y-3">
               <Label className="text-sm font-medium">Search by Name</Label>
               <div className="flex items-center gap-3">
-                <Input
+            <Input
                   placeholder="Search students..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
                   className="w-full text-sm"
-                />
+            />
               </div>
             </div>
           </CardContent>
@@ -166,7 +213,7 @@ const MentorStudents = () => {
                       </p>
                     </div>
                   </div>
-                </CardHeader>
+          </CardHeader>
                 <CardContent className="flex-1 p-4 sm:p-6 pt-0">
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
@@ -304,8 +351,8 @@ const MentorStudents = () => {
                       </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+          </CardContent>
+        </Card>
             );
           })}
           
@@ -769,28 +816,7 @@ const MentorStudents = () => {
               Cancel
             </Button>
             <Button 
-              onClick={() => {
-                setStudents([...students, newStudent]);
-                setIsAddingStudent(false);
-                setNewStudent({
-                  ...newStudent,
-                  id: `student${students.length + 2}`,
-                  name: "",
-                  email: "",
-                  phone: "",
-                  totalSessions: 12,
-                  sessionsCompleted: 0,
-                  totalHours: 24,
-                  totalPayment: 12000,
-                  paidAmount: 0,
-                  batchId: "",
-                  sessionsRemaining: 12,
-                  progressPercentage: 0,
-                  startDate: new Date().toISOString(),
-                  endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-                  sessionDuration: 1.33
-                });
-              }}
+              onClick={handleAddStudent} 
               className="w-full sm:w-auto"
             >
               Create Student

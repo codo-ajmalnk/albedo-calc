@@ -51,6 +51,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
+import { crudToasts } from "@/lib/toast";
 
 const AdminMentors = () => {
   const [search, setSearch] = useState("");
@@ -72,6 +73,7 @@ const AdminMentors = () => {
     phone: "",
     password: "",
     supervisorId: "",
+    role: "mentor" as const,
   });
   const [editingMentor, setEditingMentor] = useState<{
     id: string;
@@ -80,6 +82,7 @@ const AdminMentors = () => {
     phone: string;
     password: string;
     supervisorId: string;
+    role: "mentor";
   } | null>(null);
 
   const coordinators = users.filter((user) => user.role === "coordinator");
@@ -158,6 +161,7 @@ const AdminMentors = () => {
       phone: mentor.phone || "",
       password: "",
       supervisorId: mentor.supervisorId || "",
+      role: "mentor",
     });
     setIsEditingMentor(true);
   };
@@ -169,55 +173,54 @@ const AdminMentors = () => {
 
   const confirmDeleteMentor = () => {
     if (!selectedMentor) return;
-
-    const updatedMentors = mentors.filter(
-      (m) => m.id !== selectedMentor.user.id
-    );
-    setMentors(updatedMentors);
-    setIsDeletingMentor(false);
-    setSelectedMentor(null);
+    
+    try {
+      setMentors(mentors.filter(mentor => mentor.id !== selectedMentor.user.id));
+      setIsDeletingMentor(false);
+      setSelectedMentor(null);
+      crudToasts.delete.success("Mentor");
+    } catch (error) {
+      crudToasts.delete.error("Mentor");
+    }
   };
 
   const handleAddMentor = () => {
-    const newUser: User = {
-      id: newMentor.id,
-      name: newMentor.name,
-      email: newMentor.email,
-      role: "mentor",
-      phone: newMentor.phone,
-      supervisorId: newMentor.supervisorId,
-    };
+    try {
+      if (!newMentor.name || !newMentor.email || !newMentor.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
 
-    setMentors([...mentors, newUser]);
-    setIsAddingMentor(false);
-    setNewMentor({
-      id: `mentor${users.filter(u => u.role === "mentor").length + 2}`,
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-      supervisorId: "",
-    });
+      setMentors([...mentors, { ...newMentor, role: "mentor" }]);
+      setIsAddingMentor(false);
+      setNewMentor({
+        id: `mentor${mentors.length + 2}`,
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        supervisorId: "",
+        role: "mentor" as const,
+      });
+      crudToasts.create.success("Mentor");
+    } catch (error) {
+      crudToasts.create.error("Mentor");
+    }
   };
 
   const handleUpdateMentor = () => {
     if (!editingMentor) return;
-
-    const updatedMentors = mentors.map((mentor) =>
-      mentor.id === editingMentor.id
-        ? {
-          ...mentor,
-          name: editingMentor.name,
-          email: editingMentor.email,
-          phone: editingMentor.phone,
-          supervisorId: editingMentor.supervisorId,
-        }
-        : mentor
-    );
-
-    setMentors(updatedMentors);
-    setIsEditingMentor(false);
-    setEditingMentor(null);
+    
+    try {
+      setMentors(mentors.map(mentor =>
+        mentor.id === editingMentor.id ? { ...editingMentor, role: "mentor" } : mentor
+      ));
+      setIsEditingMentor(false);
+      setEditingMentor(null);
+      crudToasts.update.success("Mentor");
+    } catch (error) {
+      crudToasts.update.error("Mentor");
+    }
   };
 
   // Add new state variables for student management

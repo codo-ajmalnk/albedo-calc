@@ -93,7 +93,7 @@ const MentorDashboard = () => {
       </text>
     );
   };
-
+  
   const updateStudent = (updatedStudent: Student) => {
     setStudents((prev) =>
       prev.map((student) =>
@@ -304,7 +304,7 @@ const MentorDashboard = () => {
                     {((stats.completedPayments / stats.totalPayments) * 100).toFixed(1)}%
                   </span>
                 </div>
-              </div>
+            </div>
             </CardContent>
           </Card>
         </div>
