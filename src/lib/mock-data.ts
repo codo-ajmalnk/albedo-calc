@@ -1,4 +1,3 @@
-
 import { Batch, DashboardStats, Role, Student, User } from "./types";
 
 // Mock users
@@ -117,7 +116,15 @@ export const generateMockStudents = (): Student[] => {
       sessionsRemaining: totalSessions - sessionsCompleted,
       progressPercentage: Math.floor((sessionsCompleted / totalSessions) * 100),
       mentorId: mentorId,
-      batchId: "batch1"
+      batchId: "batch1",
+      activeSessions: Math.floor(Math.random() * 5),
+      completedHours: Math.floor(Math.random() * 600),
+      pendingHours: Math.floor(Math.random() * 200),
+      totalPayments: 12000,
+      pendingPayments: Math.floor(Math.random() * 5000),
+      completedPayments: Math.floor(Math.random() * 7000),
+      activeHours: Math.floor(Math.random() * 100),
+      status: Math.random() > 0.2 ? 'active' : 'inactive' // 80% chance of being active
     });
   }
   
@@ -141,7 +148,15 @@ export const generateMockStudents = (): Student[] => {
       sessionsRemaining: totalSessions - sessionsCompleted,
       progressPercentage: Math.floor((sessionsCompleted / totalSessions) * 100),
       mentorId: mentorId,
-      batchId: "batch2"
+      batchId: "batch2",
+      activeSessions: Math.floor(Math.random() * 5),
+      completedHours: Math.floor(Math.random() * 600),
+      pendingHours: Math.floor(Math.random() * 200),
+      totalPayments: 12000,
+      pendingPayments: Math.floor(Math.random() * 5000),
+      completedPayments: Math.floor(Math.random() * 7000),
+      activeHours: Math.floor(Math.random() * 100),
+      status: Math.random() > 0.2 ? 'active' : 'inactive' // 80% chance of being active
     });
   }
   
@@ -163,12 +178,48 @@ export const generateDashboardStats = (
     (sum, student) => sum + student.totalSessions,
     0
   );
+  const totalHours = filteredStudents.reduce(
+    (sum, student) => sum + student.totalHours,
+    0
+  );
+  const completedHours = filteredStudents.reduce(
+    (sum, student) => sum + student.completedHours,
+    0
+  );
+  const pendingHours = filteredStudents.reduce(
+    (sum, student) => sum + student.pendingHours,
+    0
+  );
+  const activeHours = filteredStudents.reduce(
+    (sum, student) => sum + student.activeHours,
+    0
+  );
+  const totalPayments = filteredStudents.reduce(
+    (sum, student) => sum + student.totalPayments,
+    0
+  );
+  const completedPayments = filteredStudents.reduce(
+    (sum, student) => sum + student.completedPayments,
+    0
+  );
+  const pendingPayments = filteredStudents.reduce(
+    (sum, student) => sum + student.pendingPayments,
+    0
+  );
   
   return {
     totalStudents,
-    activeSessions: totalStudents,
+    activeSessions: filteredStudents.reduce((sum, student) => sum + student.activeSessions, 0),
     completedSessions,
+    totalSessions,
+    pendingSessions: totalSessions - completedSessions,
     overallProgress: Math.floor((completedSessions / totalSessions) * 100),
-    totalHours: filteredStudents.reduce((sum, student) => sum + student.totalHours, 0),
+    totalHours,
+    completedHours,
+    pendingHours,
+    activeHours,
+    totalPayments,
+    completedPayments,
+    pendingPayments,
   };
 };

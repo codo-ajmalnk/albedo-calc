@@ -4,7 +4,26 @@ import { students as allStudents, users, generateDashboardStats } from "@/lib/mo
 import { useAuth } from "@/context/AuthContext";
 import DashboardStatsCard from "@/components/DashboardStatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+
+const COLORS = {
+  completed: "#16a34a",
+  active: "#3b82f6",
+  pending: "#f97316",
+  remaining: "#ef4444",
+};
 
 const CoordinatorDashboard = () => {
   const { user } = useAuth();
@@ -25,6 +44,24 @@ const CoordinatorDashboard = () => {
   
   // Generate stats for these students
   const stats = generateDashboardStats(myStudents);
+
+  // Prepare pie chart data
+  const sessionsPieData = [
+    { name: "Completed", value: stats.completedSessions, color: COLORS.completed },
+    { name: "Active", value: stats.activeSessions, color: COLORS.active },
+    { name: "Pending", value: stats.pendingSessions, color: COLORS.pending },
+  ];
+
+  const hoursPieData = [
+    { name: "Completed", value: stats.completedHours, color: COLORS.completed },
+    { name: "Active", value: stats.activeHours, color: COLORS.active },
+    { name: "Pending", value: stats.pendingHours, color: COLORS.pending },
+  ];
+
+  const paymentsPieData = [
+    { name: "Completed", value: stats.completedPayments, color: COLORS.completed },
+    { name: "Pending", value: stats.pendingPayments, color: COLORS.pending },
+  ];
   
   // Generate performance data for mentors
   const mentorPerformanceData = mentors.map(mentor => {
@@ -60,6 +97,25 @@ const CoordinatorDashboard = () => {
       progress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0
     };
   });
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="white" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
   
   return (
     <DashboardLayout>
@@ -67,6 +123,92 @@ const CoordinatorDashboard = () => {
         <h1 className="text-2xl font-bold">Coordinator Dashboard</h1>
         
         <DashboardStatsCard stats={stats} title="My Team Overview" />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sessions Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={sessionsPieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderCustomizedLabel}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {sessionsPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Hours Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={hoursPieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderCustomizedLabel}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {hoursPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Payments Distribution</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={paymentsPieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderCustomizedLabel}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {paymentsPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>

@@ -28,6 +28,7 @@ export interface Student {
   pendingPayments: number;
   completedPayments: number;
   activeHours: number;
+  status: 'active' | 'inactive';
 }
 
 export interface Batch {
