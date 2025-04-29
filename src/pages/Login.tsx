@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,10 +51,10 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
-            Progress Pathways
+            Welcome to
           </CardTitle>
           <CardDescription className="text-center">
-            {forgotMode ? "Enter your email to reset your password" : "Enter your credentials to access your dashboard"}
+            <h1 className="text-2xl font-bold mb-2">Albedo Educator | Calc</h1>
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

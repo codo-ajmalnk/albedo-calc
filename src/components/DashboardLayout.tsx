@@ -59,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold">Albedo | Calc</h1>
+              <h1 className="text-xl font-bold">Albedo Educator | Calc</h1>
               <div className="hidden md:block text-sm bg-white/20 rounded-full px-3 py-1">
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </div>

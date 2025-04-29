@@ -1,4 +1,3 @@
-
 export type Role = "admin" | "coordinator" | "mentor";
 
 export interface User {
@@ -22,6 +21,13 @@ export interface Student {
   progressPercentage: number;
   mentorId: string;
   batchId: string;
+  activeSessions: number;
+  completedHours: number;
+  pendingHours: number;
+  totalPayments: number;
+  pendingPayments: number;
+  completedPayments: number;
+  activeHours: number;
 }
 
 export interface Batch {
@@ -37,6 +43,14 @@ export interface DashboardStats {
   totalStudents: number;
   activeSessions: number;
   completedSessions: number;
-  overallProgress: number;
   totalHours: number;
+  overallProgress: number;
+  completedHours: number;
+  pendingHours: number;
+  pendingSessions: number;
+  totalSessions: number;
+  totalPayments: number;
+  pendingPayments: number;
+  completedPayments: number;
+  activeHours: number;
 }

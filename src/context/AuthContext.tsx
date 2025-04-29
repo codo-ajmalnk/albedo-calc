@@ -1,5 +1,4 @@
-
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { User, Role } from "@/lib/types";
 import { users } from "@/lib/mock-data";
 import { toast } from "@/components/ui/sonner";
@@ -14,7 +13,20 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    // Initialize user state from localStorage
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  // Persist user state to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   // Mock login function
   const login = async (email: string, password: string) => {
@@ -37,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Mock logout function
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user'); // Clear user data from localStorage
     toast.info("You have been logged out");
   };
 

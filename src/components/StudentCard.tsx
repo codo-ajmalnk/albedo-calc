@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Student } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -69,34 +68,79 @@ const StudentCard = ({ student, onUpdateStudent, canEdit }: StudentCardProps) =>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="font-medium">Total Hours:</div>
-          <div>{student.totalHours}</div>
-          
-          <div className="font-medium">Session Duration:</div>
-          <div>{student.sessionDuration} hours</div>
-          
-          <div className="font-medium">Total Sessions:</div>
-          <div>{student.totalSessions}</div>
-          
-          <div className="font-medium">Start Date:</div>
-          <div>{formatDate(student.startDate)}</div>
-          
-          <div className="font-medium">End Date:</div>
-          <div>{formatDate(student.endDate)}</div>
-          
-          <div className="font-medium">Completed Sessions:</div>
-          <div>{student.sessionsCompleted}</div>
-          
-          <div className="font-medium">Remaining Sessions:</div>
-          <div>{student.sessionsRemaining}</div>
-          
-          <div className="font-medium">Progress:</div>
-          <div>{student.progressPercentage}%</div>
+      <CardContent className="space-y-4">
+        {/* Sessions Overview */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Sessions Overview</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="font-medium">Total Sessions:</div>
+            <div>{student.totalSessions}</div>
+            
+            <div className="font-medium">Completed Sessions:</div>
+            <div>{student.sessionsCompleted}</div>
+            
+            <div className="font-medium">Pending Sessions:</div>
+            <div>{student.sessionsRemaining}</div>
+            
+            <div className="font-medium">Active Sessions:</div>
+            <div>{student.activeSessions || 0}</div>
+          </div>
         </div>
-        
-        <div className="pt-2">
+
+        {/* Hours Overview */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Hours Overview</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="font-medium">Total Hours:</div>
+            <div>{student.totalHours}</div>
+            
+            <div className="font-medium">Session Duration:</div>
+            <div>{student.sessionDuration} hours</div>
+            
+            <div className="font-medium">Completed Hours:</div>
+            <div>{student.completedHours || 0}</div>
+            
+            <div className="font-medium">Pending Hours:</div>
+            <div>{student.pendingHours || 0}</div>
+            
+            <div className="font-medium">Active Hours:</div>
+            <div>{student.activeHours || 0}</div>
+          </div>
+        </div>
+
+        {/* Payments Overview */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Payments Overview</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="font-medium">Total Payments:</div>
+            <div>{student.totalPayments || 0}</div>
+            
+            <div className="font-medium">Completed Payments:</div>
+            <div>{student.completedPayments || 0}</div>
+            
+            <div className="font-medium">Pending Payments:</div>
+            <div>{student.pendingPayments || 0}</div>
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">Timeline</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="font-medium">Start Date:</div>
+            <div>{formatDate(student.startDate)}</div>
+            
+            <div className="font-medium">End Date:</div>
+            <div>{formatDate(student.endDate)}</div>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-muted-foreground">Overall Progress</span>
+            <span className="text-sm font-medium">{student.progressPercentage}%</span>
+          </div>
           <ProgressBar progress={student.progressPercentage} />
         </div>
       </CardContent>
