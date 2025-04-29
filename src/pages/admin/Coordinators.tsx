@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus } from "lucide-react";
+import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -15,7 +15,32 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const AdminCoordinators = () => {
   const navigate = useNavigate();
@@ -25,6 +50,14 @@ const AdminCoordinators = () => {
     stats: ReturnType<typeof getCoordinatorStats>;
   } | null>(null);
   const [isAddingCoordinator, setIsAddingCoordinator] = useState(false);
+  const [isEditingCoordinator, setIsEditingCoordinator] = useState(false);
+  const [editingCoordinator, setEditingCoordinator] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+  } | null>(null);
   const [newCoordinator, setNewCoordinator] = useState({
     id: `coord${users.filter(u => u.role === "coordinator").length + 1}`,
     name: "",
@@ -35,7 +68,30 @@ const AdminCoordinators = () => {
   const [coordinators, setCoordinators] = useState(
     users.filter((user) => user.role === "coordinator")
   );
-  
+  const [isViewingMentors, setIsViewingMentors] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState<User | null>(null);
+  const [isAddingMentor, setIsAddingMentor] = useState(false);
+  const [isEditingMentor, setIsEditingMentor] = useState(false);
+  const [isDeletingCoordinator, setIsDeletingCoordinator] = useState(false);
+  const [newMentor, setNewMentor] = useState({
+    id: "",
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [isDeletingMentor, setIsDeletingMentor] = useState(false);
+  const [editingMentor, setEditingMentor] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+  } | null>(null);
+  const [isAssigningMentor, setIsAssigningMentor] = useState(false);
+  const [selectedMentorId, setSelectedMentorId] = useState<string>("");
+  const [isViewingStudents, setIsViewingStudents] = useState(false);
+
   const filteredCoordinators = coordinators.filter((coordinator) =>
     coordinator.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -93,10 +149,15 @@ const AdminCoordinators = () => {
     setSelectedCoordinator({ user: coordinator, stats });
   };
 
-  const handleEditProfile = (coordinatorId: string) => {
-    // In a real app, this would navigate to a coordinator edit page
-    console.log("Editing coordinator profile:", coordinatorId);
-    // navigate(`/admin/coordinators/edit/${coordinatorId}`);
+  const handleEditProfile = (coordinator: User) => {
+    setEditingCoordinator({
+      id: coordinator.id,
+      name: coordinator.name,
+      email: coordinator.email,
+      phone: coordinator.phone || "",
+      password: "", // Empty password field in edit mode
+    });
+    setIsEditingCoordinator(true);
   };
 
   const handleAddCoordinator = () => {
@@ -119,14 +180,172 @@ const AdminCoordinators = () => {
       password: "",
     });
   };
-  
+
+  const handleUpdateCoordinator = () => {
+    if (!editingCoordinator) return;
+
+    // Here you would typically make an API call to update the coordinator
+    const updatedCoordinators = coordinators.map((coord) =>
+      coord.id === editingCoordinator.id
+        ? {
+          ...coord,
+          name: editingCoordinator.name,
+          email: editingCoordinator.email,
+          phone: editingCoordinator.phone,
+        }
+        : coord
+    );
+
+    setCoordinators(updatedCoordinators);
+    setIsEditingCoordinator(false);
+    setEditingCoordinator(null);
+  };
+
+  const handleViewMentors = (coordinator: User) => {
+    // Only set what's needed for mentor management
+    setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
+    setIsViewingMentors(true);
+  };
+
+  const handleDeleteCoordinator = (coordinator: User) => {
+    // Only set what's needed for delete confirmation
+    setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
+    setIsDeletingCoordinator(true);
+  };
+
+  const confirmDeleteCoordinator = () => {
+    if (!selectedCoordinator) return;
+
+    const updatedCoordinators = coordinators.filter(
+      (c) => c.id !== selectedCoordinator.user.id
+    );
+    setCoordinators(updatedCoordinators);
+    setIsDeletingCoordinator(false);
+    setSelectedCoordinator(null);
+  };
+
+  const getAssignedMentors = (coordinatorId: string) => {
+    return users.filter(user => user.role === "mentor" && user.supervisorId === coordinatorId);
+  };
+
+  const handleAddMentor = () => {
+    if (!selectedCoordinator) return;
+
+    const mentorId = `mentor${users.filter(u => u.role === "mentor").length + 1}`;
+    const newUser: User = {
+      id: mentorId,
+      name: newMentor.name,
+      email: newMentor.email,
+      role: "mentor",
+      supervisorId: selectedCoordinator.user.id,
+      phone: newMentor.phone,
+    };
+
+    // Here you would typically make an API call to create the mentor
+    users.push(newUser);
+    setIsAddingMentor(false);
+    setNewMentor({
+      id: "",
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+    });
+  };
+
+  const handleDeleteMentor = (mentor: User) => {
+    setSelectedMentor(mentor);
+    setIsDeletingMentor(true);
+  };
+
+  const confirmDeleteMentor = () => {
+    if (!selectedMentor) return;
+
+    // Here you would typically make an API call to delete the mentor
+    const updatedUsers = users.filter(
+      (u) => u.id !== selectedMentor.id
+    );
+    users.length = 0;
+    users.push(...updatedUsers);
+    setIsDeletingMentor(false);
+    setSelectedMentor(null);
+  };
+
+  const handleEditMentor = (mentor: User) => {
+    setEditingMentor({
+      id: mentor.id,
+      name: mentor.name,
+      email: mentor.email,
+      phone: mentor.phone || "",
+      password: "",
+    });
+    setIsEditingMentor(true);
+  };
+
+  const handleUpdateMentor = () => {
+    if (!editingMentor) return;
+
+    // Here you would typically make an API call to update the mentor
+    const updatedUsers = users.map((user) =>
+      user.id === editingMentor.id
+        ? {
+          ...user,
+          name: editingMentor.name,
+          email: editingMentor.email,
+          phone: editingMentor.phone,
+        }
+        : user
+    );
+    users.length = 0;
+    users.push(...updatedUsers);
+    setIsEditingMentor(false);
+    setEditingMentor(null);
+  };
+
+  const getUnassignedMentors = () => {
+    return users.filter(user =>
+      user.role === "mentor" &&
+      (!user.supervisorId || user.supervisorId === "")
+    );
+  };
+
+  const handleAssignMentor = () => {
+    if (!selectedCoordinator || !selectedMentorId) return;
+
+    // Here you would typically make an API call to assign the mentor
+    const updatedUsers = users.map(user => {
+      if (user.id === selectedMentorId) {
+        return { ...user, supervisorId: selectedCoordinator.user.id };
+      }
+      return user;
+    });
+    users.length = 0;
+    users.push(...updatedUsers);
+
+    setIsAssigningMentor(false);
+    setSelectedMentorId("");
+  };
+
+  const handleViewStudents = (coordinator: User) => {
+    setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
+    setIsViewingStudents(true);
+  };
+
+  const getCoordinatorStudents = (coordinatorId: string) => {
+    const mentors = users.filter(
+      user => user.role === "mentor" && user.supervisorId === coordinatorId
+    );
+    const mentorIds = mentors.map(mentor => mentor.id);
+    return students.filter(student => mentorIds.includes(student.mentorId));
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h1 className="text-xl sm:text-2xl font-bold">Coordinators Management</h1>
-          
-          <Button 
+
+          <Button
             className="w-full sm:w-auto"
             onClick={() => setIsAddingCoordinator(true)}
           >
@@ -134,7 +353,7 @@ const AdminCoordinators = () => {
             Add New Coordinator
           </Button>
         </div>
-        
+
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Search Coordinators</CardTitle>
@@ -154,7 +373,7 @@ const AdminCoordinators = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {filteredCoordinators.map((coordinator) => {
             const stats = getCoordinatorStats(coordinator.id);
@@ -200,7 +419,7 @@ const AdminCoordinators = () => {
                           <span className="font-medium">{stats.sessionProgress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 h-2 rounded-full">
-                          <div 
+                          <div
                             className="bg-primary h-2 rounded-full transition-all duration-300"
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
@@ -217,7 +436,7 @@ const AdminCoordinators = () => {
                           <span className="font-medium">{stats.hoursProgress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 h-2 rounded-full">
-                          <div 
+                          <div
                             className="bg-primary h-2 rounded-full transition-all duration-300"
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
@@ -234,7 +453,7 @@ const AdminCoordinators = () => {
                           <span className="font-medium">{stats.paymentsProgress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 h-2 rounded-full">
-                          <div 
+                          <div
                             className="bg-primary h-2 rounded-full transition-all duration-300"
                             style={{ width: `${stats.paymentsProgress}%` }}
                           />
@@ -251,7 +470,7 @@ const AdminCoordinators = () => {
                           <span className="font-medium">{stats.overallProgress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 h-2 rounded-full">
-                          <div 
+                          <div
                             className="bg-primary h-2 rounded-full transition-all duration-300"
                             style={{ width: `${stats.overallProgress}%` }}
                           />
@@ -263,38 +482,66 @@ const AdminCoordinators = () => {
                       <div className="p-3 bg-muted/10 rounded-lg">
                         <p className="text-sm text-muted-foreground">Active Students</p>
                         <p className="text-lg font-medium mt-1">{stats.activeStudents}</p>
-                  </div>
+                      </div>
                       <div className="p-3 bg-muted/10 rounded-lg">
                         <p className="text-sm text-muted-foreground">Pending Payments</p>
                         <p className="text-lg font-medium mt-1">₹{stats.pendingPayments.toLocaleString()}</p>
-                  </div>
-                  </div>
+                      </div>
+                    </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2 sm:justify-end pt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="w-full sm:w-auto"
+                    <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
                         onClick={() => handleViewDetails(coordinator)}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Details
-                    </Button>
-                    <Button 
-                      size="sm"
-                      className="w-full sm:w-auto"
-                      onClick={() => handleEditProfile(coordinator.id)}
-                    >
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit Profile
-                    </Button>
+                      >
+                        <Eye className="mr-1.5 h-3.5 w-3.5" />
+                        Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleViewMentors(coordinator)}
+                      >
+                        <Users className="mr-1.5 h-3.5 w-3.5" />
+                        Mentors
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleViewStudents(coordinator)}
+                      >
+                        <Users className="mr-1.5 h-3.5 w-3.5" />
+                        Students
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleEditProfile(coordinator)}
+                      >
+                        <Edit className="mr-1.5 h-3.5 w-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleDeleteCoordinator(coordinator)}
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             );
           })}
-          
+
           {filteredCoordinators.length === 0 && (
             <div className="col-span-full text-center p-8">
               <p className="text-muted-foreground">
@@ -372,7 +619,12 @@ const AdminCoordinators = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={!!selectedCoordinator} onOpenChange={() => setSelectedCoordinator(null)}>
+        <Dialog
+          open={!!selectedCoordinator && !isViewingMentors && !isDeletingCoordinator}
+          onOpenChange={(open) => {
+            if (!open) setSelectedCoordinator(null);
+          }}
+        >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <div className="flex justify-between items-start">
@@ -497,6 +749,455 @@ const AdminCoordinators = () => {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isEditingCoordinator} onOpenChange={setIsEditingCoordinator}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Coordinator</DialogTitle>
+              <DialogDescription>
+                Update the coordinator's information.
+              </DialogDescription>
+            </DialogHeader>
+            {editingCoordinator && (
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-coordinator-id">Coordinator ID</Label>
+                  <Input
+                    id="edit-coordinator-id"
+                    value={editingCoordinator.id}
+                    disabled
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-name">Full Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editingCoordinator.name}
+                    onChange={(e) => setEditingCoordinator({
+                      ...editingCoordinator,
+                      name: e.target.value
+                    })}
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editingCoordinator.email}
+                    onChange={(e) => setEditingCoordinator({
+                      ...editingCoordinator,
+                      email: e.target.value
+                    })}
+                    placeholder="coordinator@example.com"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-phone">Phone Number</Label>
+                  <Input
+                    id="edit-phone"
+                    type="tel"
+                    value={editingCoordinator.phone}
+                    onChange={(e) => setEditingCoordinator({
+                      ...editingCoordinator,
+                      phone: e.target.value
+                    })}
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-password">New Password (optional)</Label>
+                  <Input
+                    id="edit-password"
+                    type="password"
+                    value={editingCoordinator.password}
+                    onChange={(e) => setEditingCoordinator({
+                      ...editingCoordinator,
+                      password: e.target.value
+                    })}
+                    placeholder="Leave blank to keep current password"
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditingCoordinator(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateCoordinator}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={isDeletingCoordinator} onOpenChange={setIsDeletingCoordinator}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete {selectedCoordinator?.user.name}'s profile and remove all associated data.
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setIsDeletingCoordinator(false);
+                setSelectedCoordinator(null);
+              }}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteCoordinator}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Dialog
+          open={isViewingMentors}
+          onOpenChange={(open) => {
+            setIsViewingMentors(open);
+            if (!open) {
+              setSelectedCoordinator(null);
+            }
+          }}
+        >
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Assigned Mentors - {selectedCoordinator?.user.name}</DialogTitle>
+              <DialogDescription>
+                Manage mentors assigned to this coordinator.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex justify-end gap-4 mb-4">
+              <Button variant="outline" onClick={() => setIsAssigningMentor(true)}>
+                <Users className="mr-2 h-4 w-4" />
+                Assign Mentor
+              </Button>
+              <Button onClick={() => setIsAddingMentor(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add New Mentor
+              </Button>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedCoordinator &&
+                  getAssignedMentors(selectedCoordinator.user.id).map((mentor) => (
+                    <TableRow key={mentor.id}>
+                      <TableCell>{mentor.id}</TableCell>
+                      <TableCell>{mentor.name}</TableCell>
+                      <TableCell>{mentor.email}</TableCell>
+                      <TableCell>{mentor.phone || "No phone number"}</TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedMentor(mentor);
+                            setIsEditingMentor(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteMentor(mentor)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAddingMentor} onOpenChange={setIsAddingMentor}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Mentor</DialogTitle>
+              <DialogDescription>
+                Add a new mentor to {selectedCoordinator?.user.name}'s team.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="mentor-name">Full Name</Label>
+                <Input
+                  id="mentor-name"
+                  value={newMentor.name}
+                  onChange={(e) => setNewMentor({ ...newMentor, name: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="mentor-email">Email</Label>
+                <Input
+                  id="mentor-email"
+                  type="email"
+                  value={newMentor.email}
+                  onChange={(e) => setNewMentor({ ...newMentor, email: e.target.value })}
+                  placeholder="mentor@example.com"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="mentor-phone">Phone Number</Label>
+                <Input
+                  id="mentor-phone"
+                  type="tel"
+                  value={newMentor.phone}
+                  onChange={(e) => setNewMentor({ ...newMentor, phone: e.target.value })}
+                  placeholder="+91 98765 43210"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="mentor-password">Password</Label>
+                <Input
+                  id="mentor-password"
+                  type="password"
+                  value={newMentor.password}
+                  onChange={(e) => setNewMentor({ ...newMentor, password: e.target.value })}
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddingMentor(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddMentor}>Create Mentor</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={isDeletingMentor} onOpenChange={setIsDeletingMentor}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete {selectedMentor?.name}'s profile and remove all associated data.
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteMentor}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Dialog open={isEditingMentor} onOpenChange={setIsEditingMentor}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Mentor</DialogTitle>
+              <DialogDescription>
+                Update mentor's information.
+              </DialogDescription>
+            </DialogHeader>
+            {editingMentor && (
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-mentor-id">Mentor ID</Label>
+                  <Input
+                    id="edit-mentor-id"
+                    value={editingMentor.id}
+                    disabled
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-mentor-name">Full Name</Label>
+                  <Input
+                    id="edit-mentor-name"
+                    value={editingMentor.name}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      name: e.target.value
+                    })}
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-mentor-email">Email</Label>
+                  <Input
+                    id="edit-mentor-email"
+                    type="email"
+                    value={editingMentor.email}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      email: e.target.value
+                    })}
+                    placeholder="mentor@example.com"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-mentor-phone">Phone Number</Label>
+                  <Input
+                    id="edit-mentor-phone"
+                    type="tel"
+                    value={editingMentor.phone}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      phone: e.target.value
+                    })}
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-mentor-password">New Password (optional)</Label>
+                  <Input
+                    id="edit-mentor-password"
+                    type="password"
+                    value={editingMentor.password}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      password: e.target.value
+                    })}
+                    placeholder="Leave blank to keep current password"
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditingMentor(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateMentor}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAssigningMentor} onOpenChange={setIsAssigningMentor}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Assign Existing Mentor</DialogTitle>
+              <DialogDescription>
+                Select a mentor to assign to {selectedCoordinator?.user.name}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="mentor-select">Select Mentor</Label>
+                <Select
+                  value={selectedMentorId}
+                  onValueChange={setSelectedMentorId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a mentor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getUnassignedMentors().map((mentor) => (
+                      <SelectItem key={mentor.id} value={mentor.id}>
+                        {mentor.name} ({mentor.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsAssigningMentor(false);
+                setSelectedMentorId("");
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAssignMentor}
+                disabled={!selectedMentorId}
+              >
+                Assign Mentor
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isViewingStudents}
+          onOpenChange={(open) => {
+            setIsViewingStudents(open);
+            if (!open) {
+              setSelectedCoordinator(null);
+            }
+          }}
+        >
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Students Under {selectedCoordinator?.user.name}</DialogTitle>
+              <DialogDescription>
+                View all students managed by this coordinator's mentors.
+              </DialogDescription>
+            </DialogHeader>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Mentor</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedCoordinator &&
+                  getCoordinatorStudents(selectedCoordinator.user.id).map((student) => {
+                    const mentor = users.find(u => u.id === student.mentorId);
+                    return (
+                      <TableRow key={student.id}>
+                        <TableCell>{student.id}</TableCell>
+                        <TableCell>{student.name}</TableCell>
+                        <TableCell>{mentor?.name || 'Not Assigned'}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${student.status === 'active'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {student.status}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-primary rounded-full h-2"
+                                style={{ 
+                                  width: `${Math.round((student.sessionsCompleted / student.totalSessions) * 100)}%`
+                                }}
+                              />
+                            </div>
+                            <span className="text-sm">
+                              {Math.round((student.sessionsCompleted / student.totalSessions) * 100)}%
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
           </DialogContent>
         </Dialog>
       </div>
