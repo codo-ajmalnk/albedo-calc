@@ -50,12 +50,12 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            Welcome to
-          </CardTitle>
-          <CardDescription className="text-center">
-            <h1 className="text-2xl font-bold mb-2">Albedo Educator | Calc</h1>
-          </CardDescription>
+          <div className="text-center space-y-2">
+            <CardTitle className="text-sm text-muted-foreground">
+              Welcome to
+            </CardTitle>
+            <h1 className="text-2xl font-bold">Albedo Educator | Calc</h1>
+          </div>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
