@@ -92,7 +92,7 @@ const AdminMentors = () => {
 
   const getMentorStats = (mentorId: string) => {
     const mentorStudents = students.filter(student => student.mentorId === mentorId);
-    
+
     const totalSessions = mentorStudents.reduce(
       (sum, student) => sum + student.totalSessions,
       0
@@ -128,7 +128,7 @@ const AdminMentors = () => {
       paymentsProgress: stats.totalPayments > 0 ? Math.floor((stats.completedPayments / stats.totalPayments) * 100) : 0,
     };
   };
-  
+
   const filteredMentors = mentors.filter((mentor) => {
     const matchesSearch = mentor.name.toLowerCase().includes(search.toLowerCase());
     const matchesCoordinator = coordinatorFilter === "all" || mentor.supervisorId === coordinatorFilter;
@@ -139,7 +139,7 @@ const AdminMentors = () => {
     const coordinator = users.find((user) => user.id === coordinatorId);
     return coordinator ? coordinator.name : "Unassigned";
   };
-  
+
   const handleViewDetails = (mentor: User) => {
     const stats = getMentorStats(mentor.id);
     setSelectedMentor({ user: mentor, stats });
@@ -169,7 +169,7 @@ const AdminMentors = () => {
 
   const confirmDeleteMentor = () => {
     if (!selectedMentor) return;
-    
+
     const updatedMentors = mentors.filter(
       (m) => m.id !== selectedMentor.user.id
     );
@@ -206,12 +206,12 @@ const AdminMentors = () => {
     const updatedMentors = mentors.map((mentor) =>
       mentor.id === editingMentor.id
         ? {
-            ...mentor,
-            name: editingMentor.name,
-            email: editingMentor.email,
-            phone: editingMentor.phone,
-            supervisorId: editingMentor.supervisorId,
-          }
+          ...mentor,
+          name: editingMentor.name,
+          email: editingMentor.email,
+          phone: editingMentor.phone,
+          supervisorId: editingMentor.supervisorId,
+        }
         : mentor
     );
 
@@ -249,13 +249,13 @@ const AdminMentors = () => {
   // Add handlers for student operations
   const handleAddStudent = () => {
     if (!selectedMentor) return;
-    
+
     students.push({
       ...newStudent,
       id: `student${students.length + 1}`,
       mentorId: selectedMentor.user.id
     });
-    
+
     setIsAddingStudent(false);
     setNewStudent({
       id: `student${students.length + 2}`,
@@ -302,7 +302,7 @@ const AdminMentors = () => {
 
   const confirmDeleteStudent = () => {
     if (!selectedStudent) return;
-    
+
     const updatedStudents = students.filter(
       student => student.id !== selectedStudent.id
     );
@@ -320,7 +320,7 @@ const AdminMentors = () => {
   // Add handler for assigning students
   const handleAssignStudents = () => {
     if (!selectedMentor) return;
-    
+
     const updatedStudents = students.map(student => {
       if (selectedStudentsToAssign.includes(student.id)) {
         return {
@@ -337,7 +337,7 @@ const AdminMentors = () => {
     setSelectedStudentsToAssign([]);
     setStudentSearchQuery("");
   };
-  
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
@@ -352,7 +352,7 @@ const AdminMentors = () => {
             Add New Mentor
           </Button>
         </div>
-        
+
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
             <CardTitle>Filter Mentors</CardTitle>
@@ -362,17 +362,17 @@ const AdminMentors = () => {
               <div className="space-y-2">
                 <Label>Search by Name</Label>
                 <div className="flex items-center gap-3">
-                <Input
-                  placeholder="Search mentors..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  <Input
+                    placeholder="Search mentors..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     className="w-full text-sm"
-                />
+                  />
                   <Button variant="outline" className="shrink-0 text-sm">
                     <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                     Search
                   </Button>
-              </div>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Filter by Coordinator</Label>
@@ -396,7 +396,7 @@ const AdminMentors = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredMentors.map((mentor) => {
             const stats = getMentorStats(mentor.id);
@@ -434,51 +434,49 @@ const AdminMentors = () => {
                       </div>
                     </div>
 
-                  <div className="space-y-4">
+                    <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Sessions Progress</span>
                           <span className="font-medium">{stats.sessionProgress}%</span>
-                    </div>
+                        </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.sessionProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
-                    </div>
+                        </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>{stats.completedSessions} completed</span>
                           <span>{stats.totalSessions} total</span>
-                    </div>
-                    </div>
+                        </div>
+                      </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Hours Progress</span>
                           <span className="font-medium">{stats.hoursProgress}%</span>
-                    </div>
+                        </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.hoursProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
-                    </div>
+                        </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>{stats.completedHours} completed</span>
                           <span>{stats.totalHours} total</span>
@@ -492,15 +490,14 @@ const AdminMentors = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.paymentsProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.paymentsProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentsProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.paymentsProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.paymentsProgress}%` }}
                           />
                         </div>
@@ -517,15 +514,14 @@ const AdminMentors = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.overallProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.overallProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.overallProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.overallProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.overallProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.overallProgress}%` }}
                           />
                         </div>
@@ -540,12 +536,12 @@ const AdminMentors = () => {
                       <div className="p-3 bg-muted/10 rounded-lg">
                         <p className="text-sm text-muted-foreground">Pending Payments</p>
                         <p className="text-lg font-medium mt-1">₹{stats.pendingPayments.toLocaleString()}</p>
-                    </div>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => handleViewDetails(mentor)}
@@ -553,7 +549,7 @@ const AdminMentors = () => {
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -562,7 +558,7 @@ const AdminMentors = () => {
                         <Users className="mr-1.5 h-3.5 w-3.5" />
                         Students
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -571,7 +567,7 @@ const AdminMentors = () => {
                         <Edit className="mr-1.5 h-3.5 w-3.5" />
                         Edit
                       </Button>
-                      <Button 
+                      <Button
                         variant="destructive"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -586,7 +582,7 @@ const AdminMentors = () => {
               </Card>
             );
           })}
-          
+
           {filteredMentors.length === 0 && (
             <div className="col-span-full text-center p-8">
               <p className="text-muted-foreground">
@@ -598,8 +594,8 @@ const AdminMentors = () => {
       </div>
 
       {/* View Details Dialog */}
-      <Dialog 
-        open={!!selectedMentor && !isViewingStudents && !isDeletingMentor} 
+      <Dialog
+        open={!!selectedMentor && !isViewingStudents && !isDeletingMentor}
         onOpenChange={(open) => {
           if (!open) {
             setSelectedMentor(null);
@@ -696,15 +692,14 @@ const AdminMentors = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            selectedMentor.stats.sessionProgress === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${selectedMentor.stats.sessionProgress === 100
                               ? 'bg-progress-complete'
                               : selectedMentor.stats.sessionProgress >= 75
-                              ? 'bg-progress-high'
-                              : selectedMentor.stats.sessionProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : selectedMentor.stats.sessionProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${selectedMentor.stats.sessionProgress}%` }}
                         />
                       </div>
@@ -717,15 +712,14 @@ const AdminMentors = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            selectedMentor.stats.hoursProgress === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${selectedMentor.stats.hoursProgress === 100
                               ? 'bg-progress-complete'
                               : selectedMentor.stats.hoursProgress >= 75
-                              ? 'bg-progress-high'
-                              : selectedMentor.stats.hoursProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : selectedMentor.stats.hoursProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${selectedMentor.stats.hoursProgress}%` }}
                         />
                       </div>
@@ -738,15 +732,14 @@ const AdminMentors = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            selectedMentor.stats.paymentsProgress === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${selectedMentor.stats.paymentsProgress === 100
                               ? 'bg-progress-complete'
                               : selectedMentor.stats.paymentsProgress >= 75
-                              ? 'bg-progress-high'
-                              : selectedMentor.stats.paymentsProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : selectedMentor.stats.paymentsProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${selectedMentor.stats.paymentsProgress}%` }}
                         />
                       </div>
@@ -759,15 +752,14 @@ const AdminMentors = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            selectedMentor.stats.overallProgress === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${selectedMentor.stats.overallProgress === 100
                               ? 'bg-progress-complete'
                               : selectedMentor.stats.overallProgress >= 75
-                              ? 'bg-progress-high'
-                              : selectedMentor.stats.overallProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : selectedMentor.stats.overallProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${selectedMentor.stats.overallProgress}%` }}
                         />
                       </div>
@@ -1022,8 +1014,8 @@ const AdminMentors = () => {
       </AlertDialog>
 
       {/* View Students Dialog */}
-      <Dialog 
-        open={isViewingStudents} 
+      <Dialog
+        open={isViewingStudents}
         onOpenChange={(open) => {
           if (!open) {
             setIsViewingStudents(false);
@@ -1031,35 +1023,24 @@ const AdminMentors = () => {
           }
         }}
       >
-        <DialogContent className="max-w-[95vw] w-full sm:max-w-4xl max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
-          <DialogHeader className="mb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <DialogTitle className="text-base sm:text-lg font-semibold">
-                  Students Under {selectedMentor?.user.name}
-                </DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground mt-1">
-                  View and manage students assigned to this mentor.
-                </DialogDescription>
-              </div>
-              <div className="flex flex-col xs:flex-row gap-2">
-                <Button 
-                  onClick={() => setIsAssigningStudents(true)} 
-                  variant="outline"
-                  className="w-full xs:w-auto text-sm h-9"
-                >
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Assigned Students - {selectedMentor?.user.name}</DialogTitle>
+              <DialogDescription>
+                Manage students assigned to this mentor.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogHeader>
+              <div className="flex justify-end gap-4 mb-4">
+                <Button variant="outline" onClick={() => setIsAssigningStudents(true)}>
                   <Users className="mr-2 h-4 w-4" />
                   Assign Students
                 </Button>
-                <Button 
-                  onClick={() => setIsAddingStudent(true)}
-                  className="w-full xs:w-auto text-sm h-9"
-                >
+                <Button onClick={() => setIsAddingStudent(true)}>
                   <UserPlus className="mr-2 h-4 w-4" />
                   Add New Student
                 </Button>
               </div>
-            </div>
           </DialogHeader>
 
           <div className="relative overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6">
@@ -1094,11 +1075,10 @@ const AdminMentors = () => {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                  student.status === 'active'
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
                                     ? 'bg-green-100 text-green-800'
                                     : 'bg-gray-100 text-gray-800'
-                                }`}>
+                                  }`}>
                                   {student.status}
                                 </span>
                               </TableCell>
@@ -1108,7 +1088,7 @@ const AdminMentors = () => {
                                     <span>Progress</span>
                                     <span>{progress}%</span>
                                   </div>
-                                  <Progress 
+                                  <Progress
                                     value={progress}
                                     className="h-2"
                                   />
@@ -1288,15 +1268,15 @@ const AdminMentors = () => {
             </div>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-2 sm:mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsAddingStudent(false)} 
+            <Button
+              variant="outline"
+              onClick={() => setIsAddingStudent(false)}
               className="w-full sm:w-auto text-sm h-8 sm:h-9"
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleAddStudent} 
+            <Button
+              onClick={handleAddStudent}
               className="w-full sm:w-auto text-sm h-8 sm:h-9"
             >
               Create Student
@@ -1512,152 +1492,49 @@ const AdminMentors = () => {
 
       {/* Assign Students Dialog */}
       <Dialog open={isAssigningStudents} onOpenChange={setIsAssigningStudents}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
-          <DialogHeader className="space-y-2 sm:space-y-3">
-            <DialogTitle className="text-lg sm:text-xl font-bold">Assign Students</DialogTitle>
-            <DialogDescription className="text-sm">
-              Select students to assign to <span className="font-medium">{selectedMentor?.user.name}</span>.
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Assign Existing Students</DialogTitle>
+            <DialogDescription>
+              Select students to assign to {selectedMentor?.user.name}.
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Select Students</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className="w-full justify-between text-sm h-9 sm:h-10"
-                    >
-                      {selectedStudentsToAssign.length > 0 
-                        ? `${selectedStudentsToAssign.length} student${selectedStudentsToAssign.length > 1 ? 's' : ''} selected`
-                        : "Select students..."}
-                      <Users className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    className="w-full p-0 max-w-[calc(100vw-2rem)] sm:max-w-[520px]" 
-                    align="start"
-                    side="bottom"
-                    sideOffset={4}
-                  >
-                    <Command className="w-full">
-                      <CommandInput 
-                        placeholder="Search students..." 
-                        className="h-9 text-sm"
-                      />
-                      <CommandEmpty className="p-2 text-sm text-muted-foreground">
-                        No students found.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        <ScrollArea className="h-[40vh] sm:h-[300px]">
-                          {students
-                            ?.filter(s => !s.mentorId || s.mentorId === selectedMentor?.user.id)
-                            ?.map((student) => (
-                              <CommandItem
-                                key={student.id}
-                                value={student.id}
-                                onSelect={() => {
-                                  setSelectedStudentsToAssign(prev => {
-                                    if (prev.includes(student.id)) {
-                                      return prev.filter(id => id !== student.id);
-                                    } else {
-                                      return [...prev, student.id];
-                                    }
-                                  });
-                                }}
-                                className="px-2 py-1.5 sm:px-3 sm:py-2"
-                              >
-                                <div className="flex items-center justify-between w-full gap-2">
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="font-medium truncate">{student.name}</span>
-                                    <span className="text-xs sm:text-sm text-muted-foreground truncate">
-                                      {student.email}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <Badge 
-                                      variant={student.status === 'active' ? 'default' : 'secondary'}
-                                      className="text-xs"
-                                    >
-                                      {student.status}
-                                    </Badge>
-                                    {selectedStudentsToAssign.includes(student.id) && (
-                                      <Check className="h-4 w-4 shrink-0" />
-                                    )}
-                                  </div>
-                                </div>
-                              </CommandItem>
-                            )) || []}
-                        </ScrollArea>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {selectedStudentsToAssign.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">Selected Students</Label>
-                    <span className="text-xs text-muted-foreground">
-                      {selectedStudentsToAssign.length} selected
-                    </span>
-                  </div>
-                  <div className="border rounded-lg divide-y">
-                    {students
-                      ?.filter(s => selectedStudentsToAssign.includes(s.id))
-                      .map(student => (
-                        <div
-                          key={student.id}
-                          className="flex items-center justify-between p-2 sm:p-3 hover:bg-muted/50"
-                        >
-                          <div className="flex flex-col min-w-0 pr-4">
-                            <span className="font-medium truncate">{student.name}</span>
-                            <span className="text-xs sm:text-sm text-muted-foreground truncate">
-                              {student.email}
-                            </span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedStudentsToAssign(prev =>
-                                prev.filter(id => id !== student.id)
-                              );
-                            }}
-                            className="h-8 w-8 p-0 shrink-0"
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove</span>
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="student-select">Select Students</Label>
+              <Select
+                value={selectedStudentsToAssign[0] || ""}
+                onValueChange={(value) => {
+                  setSelectedStudentsToAssign([value]);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a student" />
+                </SelectTrigger>
+                <SelectContent>
+                  {students
+                    ?.filter(s => !s.mentorId || s.mentorId === selectedMentor?.user.id)
+                    ?.map((student) => (
+                      <SelectItem key={student.id} value={student.id}>
+                        {student.name} ({student.email})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-2 sm:mt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAssigningStudents(false);
-                setSelectedStudentsToAssign([]);
-              }}
-              className="w-full sm:w-auto text-sm h-9 sm:h-10"
-            >
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsAssigningStudents(false);
+              setSelectedStudentsToAssign([]);
+            }}>
               Cancel
             </Button>
             <Button
               onClick={handleAssignStudents}
-              className="w-full sm:w-auto text-sm h-9 sm:h-10"
               disabled={selectedStudentsToAssign.length === 0}
             >
-              Assign Selected Students
+              Assign Student
             </Button>
           </DialogFooter>
         </DialogContent>
