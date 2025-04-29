@@ -6,6 +6,8 @@ export interface User {
   email: string;
   role: Role;
   supervisorId?: string; // For mentors, their coordinator ID
+  phone?: string;
+  password?: string;
 }
 
 export interface Student {

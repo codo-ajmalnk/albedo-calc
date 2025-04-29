@@ -13,12 +13,14 @@ export const users: User[] = [
     name: "Coordinator One",
     email: "coordinator1@example.com",
     role: "coordinator",
+    phone: "1234567890",
   },
   {
     id: "coord2",
     name: "Coordinator Two",
     email: "coordinator2@example.com",
     role: "coordinator",
+    phone: "1234567890",
   },
   {
     id: "mentor1",
