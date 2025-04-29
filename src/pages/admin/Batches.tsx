@@ -5,7 +5,11 @@ import { Batch } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Eye, Edit, Plus } from "lucide-react";
+import { Calendar, CalendarPlus, Eye, Edit, Plus } from "lucide-react";
+import AddBatchModal from "@/components/batch/AddBatchModal";
+import EditBatchModal from "@/components/batch/EditBatchModal";
+import ViewStudentsModal from "@/components/batch/ViewStudentsModal";
+import { Progress } from "@/components/ui/progress";
 
 // Mock batch data (would come from API in real app)
 const batchesMockData: Batch[] = [
@@ -30,6 +34,12 @@ const batchesMockData: Batch[] = [
 const AdminBatches = () => {
   const [search, setSearch] = useState("");
   const [batches, setBatches] = useState<Batch[]>(batchesMockData);
+  
+  // Modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewStudentsModalOpen, setIsViewStudentsModalOpen] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
   
   const filteredBatches = batches.filter((batch) =>
     batch.name.toLowerCase().includes(search.toLowerCase())
@@ -58,14 +68,34 @@ const AdminBatches = () => {
     return Math.round((elapsed / totalDuration) * 100);
   };
 
-  const handleViewStudents = (batchId: string) => {
-    // In a real app, this would navigate to a batch students page
-    console.log("Viewing students for batch:", batchId);
+  const handleAddBatch = (newBatch: Batch) => {
+    setBatches([...batches, newBatch]);
   };
 
-  const handleEditBatch = (batchId: string) => {
-    // In a real app, this would navigate to a batch edit page
-    console.log("Editing batch:", batchId);
+  const handleUpdateBatch = (updatedBatch: Batch) => {
+    setBatches(
+      batches.map((batch) => 
+        batch.id === updatedBatch.id ? updatedBatch : batch
+      )
+    );
+  };
+
+  const handleEditBatch = (batch: Batch) => {
+    setSelectedBatch(batch);
+    setIsEditModalOpen(true);
+  };
+
+  const handleViewStudents = (batch: Batch) => {
+    setSelectedBatch(batch);
+    setIsViewStudentsModalOpen(true);
+  };
+  
+  // Function to determine progress bar color class
+  const getProgressColorClass = (progress: number) => {
+    if (progress < 30) return "bg-progress-low";
+    if (progress < 70) return "bg-progress-medium";
+    if (progress < 100) return "bg-progress-high";
+    return "bg-progress-complete";
   };
   
   return (
@@ -74,7 +104,7 @@ const AdminBatches = () => {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h1 className="text-2xl font-bold">Batches Management</h1>
           
-          <Button className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto" onClick={() => setIsAddModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add New Batch
           </Button>
@@ -104,6 +134,7 @@ const AdminBatches = () => {
           {filteredBatches.map((batch) => {
             const progress = getBatchProgress(batch.sessionStart, batch.sessionEnd);
             const daysRemaining = getDaysRemaining(batch.sessionEnd);
+            const progressColorClass = getProgressColorClass(progress);
             
             return (
               <Card key={batch.id}>
@@ -138,12 +169,11 @@ const AdminBatches = () => {
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium block mb-1">Overall Progress:</label>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5">
-                          <div
-                            className="h-2.5 rounded-full bg-primary"
-                            style={{ width: `${progress}%` }}
-                          ></div>
-                        </div>
+                        <Progress 
+                          value={progress} 
+                          className="h-2.5"
+                          indicatorClassName={progressColorClass}
+                        />
                         <div className="flex justify-end text-sm mt-1">{progress}%</div>
                       </div>
                       <div className="flex justify-between">
@@ -159,7 +189,7 @@ const AdminBatches = () => {
                           variant="outline" 
                           size="sm"
                           className="w-full sm:w-auto"
-                          onClick={() => handleViewStudents(batch.id)}
+                          onClick={() => handleViewStudents(batch)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           View Students
@@ -167,7 +197,7 @@ const AdminBatches = () => {
                         <Button 
                           size="sm"
                           className="w-full sm:w-auto"
-                          onClick={() => handleEditBatch(batch.id)}
+                          onClick={() => handleEditBatch(batch)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Batch
@@ -189,6 +219,28 @@ const AdminBatches = () => {
           )}
         </div>
       </div>
+      
+      {/* Add Batch Modal */}
+      <AddBatchModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddBatch={handleAddBatch}
+      />
+      
+      {/* Edit Batch Modal */}
+      <EditBatchModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        batch={selectedBatch}
+        onUpdateBatch={handleUpdateBatch}
+      />
+      
+      {/* View Students Modal */}
+      <ViewStudentsModal
+        isOpen={isViewStudentsModalOpen}
+        onClose={() => setIsViewStudentsModalOpen(false)}
+        batch={selectedBatch}
+      />
     </DashboardLayout>
   );
 };
