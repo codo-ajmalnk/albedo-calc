@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { ConfirmationModal } from "./ui/confirmation-modal";
 
 type Role = "admin" | "coordinator" | "mentor" | "student";
 
@@ -9,10 +10,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
   };
 
   const renderNavLinks = (role: Role) => {
@@ -53,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold">Progress Pathways</h1>
+              <h1 className="text-xl font-bold">Albedo | Calc</h1>
               <div className="hidden md:block text-sm bg-white/20 rounded-full px-3 py-1">
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </div>
@@ -69,9 +75,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             
             {/* Desktop navigation */}
             <div className="hidden md:flex items-center space-x-4">
-              <div className="text-sm">Welcome, {user.name}</div>
+              {/* <div className="text-sm">Welcome, {user.name}</div> */}
               {renderNavLinks(user.role)}
-              <Button variant="secondary" size="sm" onClick={handleLogout}>
+              <Button variant="secondary" size="sm" onClick={handleLogoutClick}>
                 Logout
               </Button>
             </div>
@@ -87,7 +93,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   variant="destructive" 
                   size="sm" 
                   className="w-full mt-4"
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                 >
                   Logout
                 </Button>
@@ -100,6 +106,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="container mx-auto px-4 py-6">
         {children}
       </main>
+
+      <ConfirmationModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+      />
     </div>
   );
 }
