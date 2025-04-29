@@ -123,12 +123,12 @@ const AdminStudents = () => {
               <div className="space-y-2">
                 <Label>Search by Name</Label>
                 <div className="flex items-center gap-3">
-                  <Input
-                    placeholder="Search students..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                <Input
+                  placeholder="Search students..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                     className="w-full text-sm"
-                  />
+                />
                   <Button variant="outline" className="shrink-0 text-sm">
                     <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                     Search
@@ -278,7 +278,7 @@ const AdminStudents = () => {
                         <div className="flex justify-between text-sm mb-1">
                           <span>Overall Progress</span>
                           <span className="font-medium">{stats.overallProgress}%</span>
-                        </div>
+              </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${
@@ -291,8 +291,8 @@ const AdminStudents = () => {
                                 : 'bg-progress-low'
                             }`}
                             style={{ width: `${stats.overallProgress}%` }}
-                          />
-                        </div>
+              />
+            </div>
                       </div>
                     </div>
 

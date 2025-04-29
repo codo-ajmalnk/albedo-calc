@@ -9,6 +9,8 @@ import { Eye, UserPlus, Search, Mail, Phone, IndianRupee } from "lucide-react";
 import AddStudentsToBatchModal from "./AddStudentsToBatchModal";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Student } from "@/lib/types";
 
 interface ViewStudentsModalProps {
   isOpen: boolean;
@@ -28,6 +30,14 @@ const ViewStudentsModal = ({ isOpen, onClose, batch }: ViewStudentsModalProps) =
     student.id.toLowerCase().includes(search.toLowerCase()) ||
     student.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+
+  const handleViewDetails = (student: Student) => {
+    setSelectedStudent(student);
+    setShowDetailsDialog(true);
+  };
 
   // Function to determine progress bar color class
   const getProgressColorClass = (progressPercentage: number) => {
@@ -162,6 +172,7 @@ const ViewStudentsModal = ({ isOpen, onClose, batch }: ViewStudentsModalProps) =
                               variant="outline" 
                               size="sm" 
                               className="w-full"
+                              onClick={() => handleViewDetails(student)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
@@ -203,6 +214,229 @@ const ViewStudentsModal = ({ isOpen, onClose, batch }: ViewStudentsModalProps) =
         onClose={() => setIsAddStudentsModalOpen(false)}
         batch={batch}
       />
+
+      {/* Student Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <DialogTitle className="text-xl font-bold">
+                  {selectedStudent?.name}
+                </DialogTitle>
+                <DialogDescription className="mt-1.5">
+                  {selectedStudent?.email}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {selectedStudent && (
+            <div className="space-y-6 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Total Sessions</p>
+                  <p className="text-2xl font-bold mt-1">{selectedStudent.totalSessions}</p>
+                  <p className="text-sm text-muted-foreground">sessions</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Completed Sessions</p>
+                  <p className="text-2xl font-bold mt-1">{selectedStudent.sessionsCompleted}</p>
+                  <p className="text-sm text-muted-foreground">completed</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-2xl font-bold mt-1">{selectedStudent.status}</p>
+                  <p className="text-sm text-muted-foreground">current</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Batch</p>
+                  <p className="text-2xl font-bold mt-1 truncate">{selectedStudent.batchId}</p>
+                  <p className="text-sm text-muted-foreground">assigned to</p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold mb-4">Sessions & Hours</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Sessions</span>
+                      <span className="font-medium">{selectedStudent.totalSessions}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Completed Sessions</span>
+                      <span className="font-medium">{selectedStudent.sessionsCompleted}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Remaining Sessions</span>
+                      <span className="font-medium">{selectedStudent.sessionsRemaining}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Active Sessions</span>
+                      <span className="font-medium">{selectedStudent.activeSessions || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Hours</span>
+                      <span className="font-medium">{selectedStudent.totalHours}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Completed Hours</span>
+                      <span className="font-medium">{selectedStudent.completedHours?.toFixed(1) || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration).toFixed(1)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Pending Hours</span>
+                      <span className="font-medium">{selectedStudent.pendingHours?.toFixed(1) || (selectedStudent.totalHours - selectedStudent.sessionsCompleted * selectedStudent.sessionDuration).toFixed(1)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Active Hours</span>
+                      <span className="font-medium">{selectedStudent.activeHours?.toFixed(1) || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4">Payments</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Payment</span>
+                      <span className="font-medium">₹{selectedStudent.totalPayment.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Paid Amount</span>
+                      <span className="font-medium">₹{selectedStudent.paidAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Pending Payment</span>
+                      <span className="font-medium">₹{(selectedStudent.totalPayment - selectedStudent.paidAmount).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4">Progress Overview</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Sessions Progress</span>
+                        <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
+                              ? 'bg-progress-complete'
+                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
+                              ? 'bg-progress-high'
+                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                              ? 'bg-progress-medium'
+                              : 'bg-progress-low'
+                          }`}
+                          style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Hours Progress</span>
+                        <span>{Math.round((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 === 100
+                              ? 'bg-progress-complete'
+                              : ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 >= 75
+                              ? 'bg-progress-high'
+                              : ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 >= 40
+                              ? 'bg-progress-medium'
+                              : 'bg-progress-low'
+                          }`}
+                          style={{ width: `${((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Payment Progress</span>
+                        <span>{Math.round((selectedStudent.paidAmount / selectedStudent.totalPayment) * 100)}%</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
+                              ? 'bg-progress-complete'
+                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
+                              ? 'bg-progress-high'
+                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
+                              ? 'bg-progress-medium'
+                              : 'bg-progress-low'
+                          }`}
+                          style={{ width: `${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Overall Progress</span>
+                        <span>{Math.round((
+                          (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                          ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 +
+                          (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100
+                        ) / 3)}%</span>
+                      </div>
+                      <div className="w-full bg-muted h-2 rounded-full">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            ((
+                              (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                              ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 +
+                              (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100
+                            ) / 3) === 100
+                              ? 'bg-progress-complete'
+                              : ((
+                                  (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                                  ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 +
+                                  (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100
+                                ) / 3) >= 75
+                              ? 'bg-progress-high'
+                              : ((
+                                  (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                                  ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 +
+                                  (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100
+                                ) / 3) >= 40
+                              ? 'bg-progress-medium'
+                              : 'bg-progress-low'
+                          }`}
+                          style={{ width: `${(
+                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                            ((selectedStudent.completedHours || (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration)) / selectedStudent.totalHours) * 100 +
+                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100
+                          ) / 3}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Start Date</p>
+                    <p className="text-sm">{selectedStudent.startDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">End Date</p>
+                    <p className="text-sm">{selectedStudent.endDate}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

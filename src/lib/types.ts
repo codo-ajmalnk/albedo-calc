@@ -28,6 +28,13 @@ export interface Student {
   startDate: string;
   endDate: string;
   sessionDuration: number;
+  completedHours?: number;
+  pendingHours?: number;
+  activeHours?: number;
+  activeSessions?: number;
+  totalPayments?: number;
+  completedPayments?: number;
+  pendingPayments?: number;
 }
 
 export interface Batch {

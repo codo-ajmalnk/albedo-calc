@@ -93,6 +93,19 @@ export const generateMockStudents = (): Student[] => {
     const sessionsCompleted = Math.floor(Math.random() * 13);
     const sessionsRemaining = totalSessions - sessionsCompleted;
     const progressPercentage = Math.round((sessionsCompleted / totalSessions) * 100);
+    const totalHours = 24;
+    const sessionDuration = 1.33;
+    const totalPayment = 12000;
+    const paidAmount = Math.floor(Math.random() * 12001);
+    
+    // Calculate additional stats
+    const completedHours = sessionsCompleted * sessionDuration;
+    const pendingHours = totalHours - completedHours;
+    const activeHours = sessionsRemaining * sessionDuration;
+    const activeSessions = sessionsRemaining;
+    const totalPayments = totalPayment;
+    const completedPayments = paidAmount;
+    const pendingPayments = totalPayment - paidAmount;
 
     return {
       id: `student${i + 1}`,
@@ -103,15 +116,23 @@ export const generateMockStudents = (): Student[] => {
       status: "active" as const,
       totalSessions,
       sessionsCompleted,
-      totalHours: 24,
-      totalPayment: 12000,
-      paidAmount: Math.floor(Math.random() * 12001),
+      totalHours,
+      totalPayment,
+      paidAmount,
       batchId: `batch${Math.floor(i / 2) + 1}`,
-      sessionDuration: 1.33,
+      sessionDuration,
       startDate: "January 1, 2024",
       endDate: "June 30, 2024",
       sessionsRemaining,
-      progressPercentage
+      progressPercentage,
+      // Additional stats
+      completedHours,
+      pendingHours,
+      activeHours,
+      activeSessions,
+      totalPayments,
+      completedPayments,
+      pendingPayments
     };
   });
 };

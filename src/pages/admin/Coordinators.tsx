@@ -660,9 +660,11 @@ const AdminCoordinators = () => {
         </Dialog>
 
         <Dialog
-          open={!!selectedCoordinator && !isViewingMentors && !isDeletingCoordinator}
+          open={!!selectedCoordinator && !isViewingMentors && !isViewingStudents && !isDeletingCoordinator}
           onOpenChange={(open) => {
-            if (!open) setSelectedCoordinator(null);
+            if (!open) {
+              setSelectedCoordinator(null);
+            }
           }}
         >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
