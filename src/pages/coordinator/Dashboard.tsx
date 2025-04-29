@@ -4,6 +4,7 @@ import { students as allStudents, users, generateDashboardStats } from "@/lib/mo
 import { useAuth } from "@/context/AuthContext";
 import DashboardStatsCard from "@/components/DashboardStatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -120,8 +121,6 @@ const CoordinatorDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Coordinator Dashboard</h1>
-        
         <DashboardStatsCard stats={stats} title="My Team Overview" />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -209,7 +208,7 @@ const CoordinatorDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -263,7 +262,7 @@ const CoordinatorDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -272,7 +271,7 @@ const CoordinatorDashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span>Mentors:</span>
+                  <span>Total Mentors:</span>
                   <span className="font-bold">{mentors.length}</span>
                 </div>
                 <div className="flex justify-between">
@@ -281,7 +280,7 @@ const CoordinatorDashboard = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Student-Mentor Ratio:</span>
-                  <span className="font-bold">{Math.round(myStudents.length / mentors.length)}:1</span>
+                  <span className="font-bold">{(myStudents.length / mentors.length).toFixed(1)}:1</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Overall Progress:</span>
@@ -299,75 +298,92 @@ const CoordinatorDashboard = () => {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span>Total Payments:</span>
-                  <span className="font-bold">{stats.totalPayments}</span>
+                  <span className="font-bold">₹{stats.totalPayments.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Completed Payments:</span>
-                  <span className="font-bold">{stats.completedPayments}</span>
+                  <span className="font-bold">₹{stats.completedPayments.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Pending Payments:</span>
-                  <span className="font-bold">{stats.pendingPayments}</span>
+                  <span className="font-bold">₹{stats.pendingPayments.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Collection Rate:</span>
+                  <span className="font-bold">
+                    {((stats.completedPayments / stats.totalPayments) * 100).toFixed(1)}%
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Mentor Performance</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mentorPerformanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="completedSessions" stackId="a" fill="#16a34a" name="Completed Sessions" />
-                <Bar dataKey="remainingSessions" stackId="a" fill="#f97316" name="Remaining Sessions" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Mentor Workload Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {mentorPerformanceData.map((mentor, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="font-medium">{mentor.name}</span>
-                      <span className="text-sm text-muted-foreground ml-2">
-                        ({mentor.students} students)
-                      </span>
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">Team Performance</TabsTrigger>
+            <TabsTrigger value="details">Mentor Details</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Mentor Progress Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={mentorPerformanceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="completedSessions" stackId="a" fill={COLORS.completed} name="Completed Sessions" />
+                    <Bar dataKey="remainingSessions" stackId="a" fill={COLORS.pending} name="Remaining Sessions" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="details" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Mentor Workload Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {mentorPerformanceData.map((mentor, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium">{mentor.name}</span>
+                          <span className="text-sm text-muted-foreground ml-2">
+                            ({mentor.students} students)
+                          </span>
+                        </div>
+                        <div className="text-sm space-x-4">
+                          <span>Sessions: {mentor.completedSessions}/{mentor.completedSessions + mentor.remainingSessions}</span>
+                          <span>Hours: {mentor.completedHours}/{mentor.completedHours + mentor.remainingHours}</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${mentor.progress}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>Total Hours: {mentor.totalHours}</span>
+                        <span>Progress: {mentor.progress}%</span>
+                      </div>
                     </div>
-                    <div className="text-sm space-x-4">
-                      <span>Sessions: {mentor.completedSessions}/{mentor.completedSessions + mentor.remainingSessions}</span>
-                      <span>Hours: {mentor.completedHours}/{mentor.completedHours + mentor.remainingHours}</span>
-                    </div>
-                  </div>
-                  <div className="w-full bg-gray-200 h-2.5 rounded-full">
-                    <div 
-                      className="bg-primary h-2.5 rounded-full"
-                      style={{ width: `${mentor.progress}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Total Hours: {mentor.totalHours}</span>
-                    <span>Progress: {mentor.progress}%</span>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
