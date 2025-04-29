@@ -584,69 +584,77 @@ const AdminCoordinators = () => {
         </div>
 
         <Dialog open={isAddingCoordinator} onOpenChange={setIsAddingCoordinator}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Coordinator</DialogTitle>
+          <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+            <DialogHeader className="space-y-3">
+              <DialogTitle className="text-xl font-bold">Add New Coordinator</DialogTitle>
               <DialogDescription>
-                Fill in the details to create a new coordinator account.
+                Fill in the coordinator details below. All fields marked with * are required.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="coordinator-id">Coordinator ID</Label>
-                <Input
-                  id="coordinator-id"
-                  value={newCoordinator.id}
-                  onChange={(e) => setNewCoordinator({ ...newCoordinator, id: e.target.value })}
-                  placeholder="coord4"
-                  disabled
-                />
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="coordinator-id">Coordinator ID</Label>
+                  <Input
+                    id="coordinator-id"
+                    value={newCoordinator.id}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name *</Label>
+                  <Input
+                    id="name"
+                    value={newCoordinator.name}
+                    onChange={(e) => setNewCoordinator({ ...newCoordinator, name: e.target.value })}
+                    placeholder="Enter coordinator's full name"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newCoordinator.email}
+                    onChange={(e) => setNewCoordinator({ ...newCoordinator, email: e.target.value })}
+                    placeholder="coordinator@example.com"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={newCoordinator.phone}
+                    onChange={(e) => setNewCoordinator({ ...newCoordinator, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full"
+                  />
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={newCoordinator.name}
-                  onChange={(e) => setNewCoordinator({ ...newCoordinator, name: e.target.value })}
-                  placeholder="John Doe"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newCoordinator.email}
-                  onChange={(e) => setNewCoordinator({ ...newCoordinator, email: e.target.value })}
-                  placeholder="coordinator@example.com"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={newCoordinator.phone}
-                  onChange={(e) => setNewCoordinator({ ...newCoordinator, phone: e.target.value })}
-                  placeholder="+91 98765 43210"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
                 <Input
                   id="password"
                   type="password"
                   value={newCoordinator.password}
                   onChange={(e) => setNewCoordinator({ ...newCoordinator, password: e.target.value })}
-                  placeholder="••••••••"
+                  placeholder="Enter secure password"
+                  className="w-full"
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddingCoordinator(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setIsAddingCoordinator(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleAddCoordinator}>Create Coordinator</Button>
+              <Button onClick={handleAddCoordinator} className="w-full sm:w-auto">
+                Create Coordinator
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -809,62 +817,69 @@ const AdminCoordinators = () => {
         </Dialog>
 
         <Dialog open={isEditingCoordinator} onOpenChange={setIsEditingCoordinator}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Edit Coordinator</DialogTitle>
+          <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+            <DialogHeader className="space-y-3">
+              <DialogTitle className="text-xl font-bold">Edit Coordinator</DialogTitle>
               <DialogDescription>
-                Update the coordinator's information.
+                Update the coordinator's information. All fields marked with * are required.
               </DialogDescription>
             </DialogHeader>
             {editingCoordinator && (
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-coordinator-id">Coordinator ID</Label>
-                  <Input
-                    id="edit-coordinator-id"
-                    value={editingCoordinator.id}
-                    disabled
-                  />
+              <div className="grid gap-6 py-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-coordinator-id">Coordinator ID</Label>
+                    <Input
+                      id="edit-coordinator-id"
+                      value={editingCoordinator.id}
+                      disabled
+                      className="bg-muted"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name">Full Name *</Label>
+                    <Input
+                      id="edit-name"
+                      value={editingCoordinator.name}
+                      onChange={(e) => setEditingCoordinator({
+                        ...editingCoordinator,
+                        name: e.target.value
+                      })}
+                      placeholder="Enter coordinator's full name"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email">Email Address *</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={editingCoordinator.email}
+                      onChange={(e) => setEditingCoordinator({
+                        ...editingCoordinator,
+                        email: e.target.value
+                      })}
+                      placeholder="coordinator@example.com"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-phone">Phone Number *</Label>
+                    <Input
+                      id="edit-phone"
+                      type="tel"
+                      value={editingCoordinator.phone}
+                      onChange={(e) => setEditingCoordinator({
+                        ...editingCoordinator,
+                        phone: e.target.value
+                      })}
+                      placeholder="+91 98765 43210"
+                      className="w-full"
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-name">Full Name</Label>
-                  <Input
-                    id="edit-name"
-                    value={editingCoordinator.name}
-                    onChange={(e) => setEditingCoordinator({
-                      ...editingCoordinator,
-                      name: e.target.value
-                    })}
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-email">Email</Label>
-                  <Input
-                    id="edit-email"
-                    type="email"
-                    value={editingCoordinator.email}
-                    onChange={(e) => setEditingCoordinator({
-                      ...editingCoordinator,
-                      email: e.target.value
-                    })}
-                    placeholder="coordinator@example.com"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-phone">Phone Number</Label>
-                  <Input
-                    id="edit-phone"
-                    type="tel"
-                    value={editingCoordinator.phone}
-                    onChange={(e) => setEditingCoordinator({
-                      ...editingCoordinator,
-                      phone: e.target.value
-                    })}
-                    placeholder="+91 98765 43210"
-                  />
-                </div>
-                <div className="grid gap-2">
+
+                <div className="space-y-2">
                   <Label htmlFor="edit-password">New Password (optional)</Label>
                   <Input
                     id="edit-password"
@@ -875,15 +890,21 @@ const AdminCoordinators = () => {
                       password: e.target.value
                     })}
                     placeholder="Leave blank to keep current password"
+                    className="w-full"
                   />
                 </div>
               </div>
             )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditingCoordinator(false)}>
+            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => {
+                setIsEditingCoordinator(false);
+                setEditingCoordinator(null);
+              }} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleUpdateCoordinator}>Save Changes</Button>
+              <Button onClick={handleUpdateCoordinator} className="w-full sm:w-auto">
+                Save Changes
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

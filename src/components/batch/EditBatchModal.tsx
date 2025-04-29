@@ -1,209 +1,175 @@
-
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Batch } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { CalendarIcon } from "lucide-react";
 import { format, parse } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Batch } from "@/lib/types";
-import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface EditBatchModalProps {
   isOpen: boolean;
   onClose: () => void;
   batch: Batch | null;
-  onUpdateBatch: (updatedBatch: Batch) => void;
+  onUpdateBatch: (batch: Batch) => void;
 }
 
 const EditBatchModal = ({ isOpen, onClose, batch, onUpdateBatch }: EditBatchModalProps) => {
-  const [batchName, setBatchName] = useState("");
-  const [addedDate, setAddedDate] = useState<Date | undefined>(new Date());
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [studentCount, setStudentCount] = useState<number>(0);
+  const [editingBatch, setEditingBatch] = useState<Batch | null>(null);
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
 
   useEffect(() => {
     if (batch) {
-      setBatchName(batch.name);
-      setAddedDate(parse(batch.addedOn, "MMMM d, yyyy", new Date()));
-      setStartDate(parse(batch.sessionStart, "MMMM d, yyyy", new Date()));
-      setEndDate(parse(batch.sessionEnd, "MMMM d, yyyy", new Date()));
-      setStudentCount(batch.studentCount);
+      setEditingBatch(batch);
+      setStartDate(parse(batch.sessionStart, "MMMM dd, yyyy", new Date()));
+      setEndDate(parse(batch.sessionEnd, "MMMM dd, yyyy", new Date()));
     }
   }, [batch]);
 
   const handleSubmit = () => {
-    if (!batch) return;
-    
-    if (!batchName) {
-      toast.error("Please enter a batch name");
-      return;
-    }
+    if (!editingBatch || !startDate || !endDate) return;
 
-    if (!addedDate || !startDate || !endDate) {
-      toast.error("Please select all dates");
-      return;
-    }
-
-    if (studentCount <= 0) {
-      toast.error("Please enter a valid student count");
-      return;
-    }
-
-    const updatedBatch: Batch = {
-      ...batch,
-      name: batchName,
-      addedOn: format(addedDate, "MMMM d, yyyy"),
-      sessionStart: format(startDate, "MMMM d, yyyy"),
-      sessionEnd: format(endDate, "MMMM d, yyyy"),
-      studentCount: studentCount
-    };
-
-    onUpdateBatch(updatedBatch);
-    toast.success("Batch updated successfully!");
+    onUpdateBatch({
+      ...editingBatch,
+      sessionStart: format(startDate, "MMMM dd, yyyy"),
+      sessionEnd: format(endDate, "MMMM dd, yyyy"),
+    });
     onClose();
   };
 
-  if (!batch) return null;
+  if (!editingBatch) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="space-y-3">
           <DialogTitle className="text-xl font-bold">Edit Batch</DialogTitle>
+          <DialogDescription>
+            Update the batch information below. All fields marked with * are required.
+          </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="batchName" className="text-right">
-              Batch Name
-            </Label>
+        <div className="grid gap-6 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-batch-id">Batch ID</Label>
+              <Input
+                id="edit-batch-id"
+                value={editingBatch.id}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Batch Name *</Label>
+              <Input
+                id="edit-name"
+                value={editingBatch.name}
+                onChange={(e) => setEditingBatch({ ...editingBatch, name: e.target.value })}
+                placeholder="Enter batch name"
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Session Start Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "MMMM dd, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label>Session End Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "MMMM dd, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-student-count">Student Count *</Label>
             <Input
-              id="batchName"
-              value={batchName}
-              onChange={(e) => setBatchName(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="dateAdded" className="text-right">
-              Date Added
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="dateAdded"
-                  variant={"outline"}
-                  className={cn(
-                    "col-span-3 justify-start text-left font-normal",
-                    !addedDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {addedDate ? format(addedDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={addedDate}
-                  onSelect={setAddedDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="startDate" className="text-right">
-              Start Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="startDate"
-                  variant={"outline"}
-                  className={cn(
-                    "col-span-3 justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={(date) => {
-                    setStartDate(date);
-                    if (date) {
-                      const newEndDate = new Date(date);
-                      newEndDate.setDate(date.getDate() + 120);
-                      setEndDate(newEndDate);
-                    }
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="endDate" className="text-right">
-              End Date
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="endDate"
-                  variant={"outline"}
-                  className={cn(
-                    "col-span-3 justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  disabled={(date) => startDate ? date <= startDate : false}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="studentCount" className="text-right">
-              Student Count
-            </Label>
-            <Input
-              id="studentCount"
+              id="edit-student-count"
               type="number"
               min="0"
-              value={studentCount}
-              onChange={(e) => setStudentCount(parseInt(e.target.value) || 0)}
-              className="col-span-3"
+              value={editingBatch.studentCount}
+              onChange={(e) => setEditingBatch({
+                ...editingBatch,
+                studentCount: parseInt(e.target.value) || 0
+              })}
+              placeholder="Enter number of students"
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Added On</Label>
+            <Input
+              value={editingBatch.addedOn}
+              disabled
+              className="bg-muted"
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="bg-primary">
-            Update Batch
+          <Button onClick={handleSubmit} className="w-full sm:w-auto">
+            Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>

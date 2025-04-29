@@ -13,24 +13,15 @@ export interface User {
 export interface Student {
   id: string;
   name: string;
-  totalHours: number;
-  sessionDuration: number; // Hours per session
-  totalSessions: number;
-  startDate: string;
-  endDate: string;
-  sessionsCompleted: number;
-  sessionsRemaining: number;
-  progressPercentage: number;
+  email: string;
+  phone: string;
   mentorId: string;
-  batchId: string;
-  activeSessions: number;
-  completedHours: number;
-  pendingHours: number;
-  totalPayments: number;
-  pendingPayments: number;
-  completedPayments: number;
-  activeHours: number;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
+  totalSessions: number;
+  sessionsCompleted: number;
+  totalHours: number;
+  totalPayment: number;
+  paidAmount: number;
 }
 
 export interface Batch {

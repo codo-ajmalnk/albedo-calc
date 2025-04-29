@@ -638,159 +638,67 @@ const AdminMentors = () => {
 
       {/* Add Mentor Dialog */}
       <Dialog open={isAddingMentor} onOpenChange={setIsAddingMentor}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Mentor</DialogTitle>
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">Add New Mentor</DialogTitle>
             <DialogDescription>
-              Fill in the details to create a new mentor account.
+              Fill in the mentor details below. All fields marked with * are required.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="mentor-id">Mentor ID</Label>
-              <Input
-                id="mentor-id"
-                value={newMentor.id}
-                onChange={(e) => setNewMentor({ ...newMentor, id: e.target.value })}
-                placeholder="mentor4"
-                disabled
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                value={newMentor.name}
-                onChange={(e) => setNewMentor({ ...newMentor, name: e.target.value })}
-                placeholder="John Doe"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newMentor.email}
-                onChange={(e) => setNewMentor({ ...newMentor, email: e.target.value })}
-                placeholder="mentor@example.com"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={newMentor.phone}
-                onChange={(e) => setNewMentor({ ...newMentor, phone: e.target.value })}
-                placeholder="+91 98765 43210"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="coordinator">Coordinator</Label>
-              <Select
-                value={newMentor.supervisorId}
-                onValueChange={(value) => setNewMentor({ ...newMentor, supervisorId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Coordinator" />
-                </SelectTrigger>
-                <SelectContent>
-                  {coordinators.map((coordinator) => (
-                    <SelectItem key={coordinator.id} value={coordinator.id}>
-                      {coordinator.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={newMentor.password}
-                onChange={(e) => setNewMentor({ ...newMentor, password: e.target.value })}
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddingMentor(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddMentor}>Create Mentor</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Mentor Dialog */}
-      <Dialog open={isEditingMentor} onOpenChange={setIsEditingMentor}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Mentor</DialogTitle>
-            <DialogDescription>
-              Update the mentor's information.
-            </DialogDescription>
-          </DialogHeader>
-          {editingMentor && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-mentor-id">Mentor ID</Label>
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="mentor-id">Mentor ID</Label>
                 <Input
-                  id="edit-mentor-id"
-                  value={editingMentor.id}
+                  id="mentor-id"
+                  value={newMentor.id}
                   disabled
+                  className="bg-muted"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-name">Full Name</Label>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
                 <Input
-                  id="edit-name"
-                  value={editingMentor.name}
-                  onChange={(e) => setEditingMentor({
-                    ...editingMentor,
-                    name: e.target.value
-                  })}
-                  placeholder="John Doe"
+                  id="name"
+                  value={newMentor.name}
+                  onChange={(e) => setNewMentor({ ...newMentor, name: e.target.value })}
+                  placeholder="Enter mentor's full name"
+                  className="w-full"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-email">Email</Label>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
                 <Input
-                  id="edit-email"
+                  id="email"
                   type="email"
-                  value={editingMentor.email}
-                  onChange={(e) => setEditingMentor({
-                    ...editingMentor,
-                    email: e.target.value
-                  })}
+                  value={newMentor.email}
+                  onChange={(e) => setNewMentor({ ...newMentor, email: e.target.value })}
                   placeholder="mentor@example.com"
+                  className="w-full"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-phone">Phone Number</Label>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
                 <Input
-                  id="edit-phone"
+                  id="phone"
                   type="tel"
-                  value={editingMentor.phone}
-                  onChange={(e) => setEditingMentor({
-                    ...editingMentor,
-                    phone: e.target.value
-                  })}
+                  value={newMentor.phone}
+                  onChange={(e) => setNewMentor({ ...newMentor, phone: e.target.value })}
                   placeholder="+91 98765 43210"
+                  className="w-full"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-coordinator">Coordinator</Label>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="coordinator">Assigned Coordinator *</Label>
                 <Select
-                  value={editingMentor.supervisorId}
-                  onValueChange={(value) => setEditingMentor({
-                    ...editingMentor,
-                    supervisorId: value
-                  })}
+                  value={newMentor.supervisorId}
+                  onValueChange={(value) => setNewMentor({ ...newMentor, supervisorId: value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Coordinator" />
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a coordinator" />
                   </SelectTrigger>
                   <SelectContent>
                     {coordinators.map((coordinator) => (
@@ -801,26 +709,143 @@ const AdminMentors = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-password">New Password (optional)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
                 <Input
-                  id="edit-password"
+                  id="password"
                   type="password"
-                  value={editingMentor.password}
-                  onChange={(e) => setEditingMentor({
-                    ...editingMentor,
-                    password: e.target.value
-                  })}
-                  placeholder="Leave blank to keep current password"
+                  value={newMentor.password}
+                  onChange={(e) => setNewMentor({ ...newMentor, password: e.target.value })}
+                  placeholder="Enter secure password"
+                  className="w-full"
                 />
               </div>
             </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditingMentor(false)}>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsAddingMentor(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button onClick={handleUpdateMentor}>Save Changes</Button>
+            <Button onClick={handleAddMentor} className="w-full sm:w-auto">
+              Create Mentor
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Mentor Dialog */}
+      <Dialog open={isEditingMentor} onOpenChange={setIsEditingMentor}>
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">Edit Mentor</DialogTitle>
+            <DialogDescription>
+              Update the mentor's information. All fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+          {editingMentor && (
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-mentor-id">Mentor ID</Label>
+                  <Input
+                    id="edit-mentor-id"
+                    value={editingMentor.id}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Full Name *</Label>
+                  <Input
+                    id="edit-name"
+                    value={editingMentor.name}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      name: e.target.value
+                    })}
+                    placeholder="Enter mentor's full name"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-email">Email Address *</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editingMentor.email}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      email: e.target.value
+                    })}
+                    placeholder="mentor@example.com"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">Phone Number *</Label>
+                  <Input
+                    id="edit-phone"
+                    type="tel"
+                    value={editingMentor.phone}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      phone: e.target.value
+                    })}
+                    placeholder="+91 98765 43210"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-coordinator">Assigned Coordinator *</Label>
+                  <Select
+                    value={editingMentor.supervisorId}
+                    onValueChange={(value) => setEditingMentor({
+                      ...editingMentor,
+                      supervisorId: value
+                    })}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a coordinator" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {coordinators.map((coordinator) => (
+                        <SelectItem key={coordinator.id} value={coordinator.id}>
+                          {coordinator.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-password">New Password (optional)</Label>
+                  <Input
+                    id="edit-password"
+                    type="password"
+                    value={editingMentor.password}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      password: e.target.value
+                    })}
+                    placeholder="Leave blank to keep current password"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => {
+              setIsEditingMentor(false);
+              setEditingMentor(null);
+            }} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateMentor} className="w-full sm:w-auto">
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
