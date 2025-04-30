@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Mock password check - in real app, would check hashed password
       if (password) {
         setUser(foundUser);
-        toast.success(`Welcome back, ${foundUser.name}`);
+        // toast.success(`Welcome back, ${foundUser.name}`);
         return;
       }
     }
