@@ -23,9 +23,9 @@ export * from "./scroll-area";
 export * from "./progress";
 export * from "./skeleton";
 export * from "./tooltip";
-export * from "./toast";
-export * from "./toaster";
-export * from "./sonner";
+export { Toast, ToastAction, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, type ToastActionElement, type ToastProps } from "./toast";
+export { Toaster } from "./toaster";
+export { toast as sonnerToast, Toaster as SonnerToaster } from "./sonner";
 
 // Navigation components
 export * from "./navigation-menu";
@@ -46,5 +46,12 @@ export * from "./toggle-group";
 export * from "./collapsible";
 export * from "./table";
 export * from "./confirmation-modal";
+
+// Additional components
+export * from "./avatar";
+export * from "./alert";
+export * from "./badge";
+export * from "./card";
+export * from "./aspect-ratio";
 
 // Make sure all components are properly exported through this index file
