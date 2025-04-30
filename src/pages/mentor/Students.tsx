@@ -49,11 +49,10 @@ const MentorStudents = () => {
     totalHours: 24,
     totalPayment: 12000,
     paidAmount: 0,
-    batchId: "",
     sessionsRemaining: 12,
     progressPercentage: 0,
     startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from now
+    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     sessionDuration: 1.33
   });
   
@@ -141,7 +140,6 @@ const MentorStudents = () => {
         totalHours: 24,
         totalPayment: 12000,
         paidAmount: 0,
-        batchId: "",
         sessionsRemaining: 12,
         progressPercentage: 0,
         startDate: new Date().toISOString(),
@@ -805,7 +803,6 @@ const MentorStudents = () => {
                 totalHours: 24,
                 totalPayment: 12000,
                 paidAmount: 0,
-                batchId: "",
                 sessionsRemaining: 12,
                 progressPercentage: 0,
                 startDate: new Date().toISOString(),

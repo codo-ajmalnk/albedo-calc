@@ -57,7 +57,6 @@ const CoordinatorStudents = () => {
     totalHours: 24,
     totalPayment: 12000,
     paidAmount: 0,
-    batchId: "",
     sessionsRemaining: 12,
     progressPercentage: 0,
     startDate: "",
@@ -165,7 +164,6 @@ const CoordinatorStudents = () => {
         totalHours: 24,
         totalPayment: 12000,
         paidAmount: 0,
-        batchId: "",
         sessionsRemaining: 12,
         progressPercentage: 0,
         startDate: new Date().toISOString(),
@@ -378,7 +376,7 @@ const CoordinatorStudents = () => {
                         <div className="flex justify-between text-sm mb-1">
                           <span>Overall Progress</span>
                           <span className="font-medium">{stats.overallProgress}%</span>
-              </div>
+                        </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${
@@ -391,8 +389,8 @@ const CoordinatorStudents = () => {
                                 : 'bg-progress-low'
                             }`}
                             style={{ width: `${stats.overallProgress}%` }}
-              />
-            </div>
+                          />
+                        </div>
                       </div>
                     </div>
 

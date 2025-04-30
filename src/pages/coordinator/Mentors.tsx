@@ -182,7 +182,7 @@ const CoordinatorMentors = () => {
         collectedPayment: 0,
       };
 
-      users.push(mentorWithSupervisor);
+      users.push(mentorWithSupervisor as User);
       setIsAddingMentor(false);
       setNewMentor({
         id: "",

@@ -5,9 +5,15 @@ export interface User {
   name: string;
   email: string;
   role: Role;
+  phone: string;
+  status?: "active" | "inactive";
   supervisorId?: string; // For mentors, their coordinator ID
-  phone?: string;
   password?: string;
+}
+
+// Add Coordinator type that extends User with a specific role
+export interface Coordinator extends Omit<User, 'role'> {
+  role: 'coordinator';
 }
 
 export interface Student {
@@ -17,7 +23,6 @@ export interface Student {
   phone: string;
   mentorId: string;
   status: "active" | "inactive";
-  batchId: string;
   totalHours: number;
   totalSessions: number;
   sessionsCompleted: number;
@@ -35,15 +40,6 @@ export interface Student {
   totalPayments?: number;
   completedPayments?: number;
   pendingPayments?: number;
-}
-
-export interface Batch {
-  id: string;
-  name: string;
-  addedOn: string;
-  sessionStart: string;
-  sessionEnd: string;
-  studentCount: number;
 }
 
 export interface DashboardStats {

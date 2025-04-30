@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,7 +14,6 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminStudents from "./pages/admin/Students";
 import AdminCoordinators from "./pages/admin/Coordinators";
 import AdminMentors from "./pages/admin/Mentors";
-import AdminBatches from "./pages/admin/Batches";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorMentors from "./pages/coordinator/Mentors";
 import CoordinatorStudents from "./pages/coordinator/Students";
@@ -65,14 +63,6 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminMentors />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/batches" 
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminBatches />
                 </ProtectedRoute>
               } 
             />

@@ -108,18 +108,6 @@ export const crudToasts = {
     ),
   },
   
-  // Batch operations
-  batch: {
-    success: (action: string, count: number, entity: string) => showSuccessToast(
-      `Batch ${action} successful`,
-      `${count} ${entity.toLowerCase()}${count === 1 ? '' : 's'} have been ${action.toLowerCase()}.`
-    ),
-    error: (action: string, entity: string) => showErrorToast(
-      `Batch ${action} failed`,
-      `Failed to ${action.toLowerCase()} ${entity.toLowerCase()}s. Please try again.`
-    ),
-  },
-  
   // Generic validation error
   validation: {
     error: (message: string) => showWarningToast(

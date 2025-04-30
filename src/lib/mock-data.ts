@@ -1,4 +1,4 @@
-import { Batch, DashboardStats, Role, Student, User } from "./types";
+import { DashboardStats, Role, Student, User } from "./types";
 
 // Mock users
 export const users: User[] = [
@@ -7,41 +7,51 @@ export const users: User[] = [
     name: "Admin User",
     email: "admin@example.com",
     role: "admin",
+    phone: "+91 98765 43210",
+    status: "active"
   },
   {
     id: "coord1",
-    name: "Coordinator One",
-    email: "coordinator1@example.com",
+    name: "John Coordinator",
+    email: "john@example.com",
     role: "coordinator",
-    phone: "1234567890",
+    phone: "+91 98765 43211",
+    status: "active"
   },
   {
     id: "coord2",
-    name: "Coordinator Two",
-    email: "coordinator2@example.com",
+    name: "Jane Coordinator",
+    email: "jane@example.com",
     role: "coordinator",
-    phone: "1234567890",
+    phone: "+91 98765 43212",
+    status: "active"
   },
   {
     id: "mentor1",
-    name: "Mentor One",
-    email: "mentor1@example.com",
+    name: "Mike Mentor",
+    email: "mike@example.com",
     role: "mentor",
     supervisorId: "coord1",
+    phone: "+91 98765 43213",
+    status: "active"
   },
   {
     id: "mentor2",
-    name: "Mentor Two",
-    email: "mentor2@example.com",
+    name: "Mary Mentor",
+    email: "mary@example.com",
     role: "mentor",
     supervisorId: "coord1",
+    phone: "+91 98765 43214",
+    status: "active"
   },
   {
     id: "mentor3",
-    name: "Mentor Three",
-    email: "mentor3@example.com",
+    name: "Mark Mentor",
+    email: "mark@example.com",
     role: "mentor",
-    supervisorId: "coord1",
+    supervisorId: "coord2",
+    phone: "+91 98765 43215",
+    status: "active"
   },
   {
     id: "mentor4",
@@ -49,6 +59,8 @@ export const users: User[] = [
     email: "mentor4@example.com",
     role: "mentor",
     supervisorId: "coord2",
+    phone: "+91 98765 43216",
+    status: "active"
   },
   {
     id: "mentor5",
@@ -56,6 +68,8 @@ export const users: User[] = [
     email: "mentor5@example.com",
     role: "mentor",
     supervisorId: "coord2",
+    phone: "+91 98765 43217",
+    status: "active"
   },
   {
     id: "mentor6",
@@ -63,32 +77,14 @@ export const users: User[] = [
     email: "mentor6@example.com",
     role: "mentor",
     supervisorId: "coord2",
-  },
-];
-
-// Mock batches
-export const batches: Batch[] = [
-  {
-    id: "batch1",
-    name: "Batch 1",
-    addedOn: "2024-01-28",
-    sessionStart: "2024-01-29",
-    sessionEnd: "2024-05-29",
-    studentCount: 12,
-  },
-  {
-    id: "batch2",
-    name: "Batch 2",
-    addedOn: "2024-01-29",
-    sessionStart: "2024-01-30",
-    sessionEnd: "2024-05-30",
-    studentCount: 24,
+    phone: "+91 98765 43218",
+    status: "active"
   },
 ];
 
 // Generate mock students
 export const generateMockStudents = (): Student[] => {
-  return Array.from({ length: 5 }, (_, i) => {
+  return Array.from({ length: 6 }, (_, i) => {
     const totalSessions = 12;
     const sessionsCompleted = Math.floor(Math.random() * 13);
     const sessionsRemaining = totalSessions - sessionsCompleted;
@@ -119,7 +115,6 @@ export const generateMockStudents = (): Student[] => {
       totalHours,
       totalPayment,
       paidAmount,
-      batchId: `batch${Math.floor(i / 2) + 1}`,
       sessionDuration,
       startDate: "January 1, 2024",
       endDate: "June 30, 2024",
