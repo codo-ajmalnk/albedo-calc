@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@/components/ui'],
+          ui: ['@/components/ui/index.ts'], // Update to point to the index file
         }
       }
     }
