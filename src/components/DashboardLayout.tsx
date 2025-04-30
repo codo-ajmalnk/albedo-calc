@@ -1,3 +1,4 @@
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
@@ -5,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ConfirmationModal } from "./ui/confirmation-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
 
 type Role = "admin" | "coordinator" | "mentor" | "student";
 
@@ -94,7 +96,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors duration-300">
       <header 
         className={cn(
           "fixed w-full top-0 z-50 transition-all duration-300",
@@ -169,6 +171,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {renderNavLinks(user.role)}
               </nav>
               <div className="h-6 w-px bg-white/20" />
+              <ThemeToggle />
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="secondary" 
@@ -214,6 +217,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </div>
                     </div>
+                  </div>
+                  <div className="flex justify-between items-center px-2">
+                    <ThemeToggle />
                   </div>
                   <nav className="flex flex-col space-y-1 px-2">
                     {renderNavLinks(user.role)}
