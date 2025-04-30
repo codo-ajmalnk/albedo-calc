@@ -61,6 +61,13 @@
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --sidebar-bg-color: #1e1e1e;
+    --border-color: #333;
+    --highlight-color: #263238;
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
@@ -85,6 +92,9 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 142 70% 50%;
+
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-border: 217.2 32.6% 17.5%;
   }
 }
 
@@ -143,6 +153,17 @@ input[type="url"], input[type="text"], input[type="email"], input[type="password
 input[type="url"]:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+
+.dark .card {
+  @apply bg-gray-800 border border-gray-700;
+}
+
+.dark input[type="url"], 
+.dark input[type="text"], 
+.dark input[type="email"], 
+.dark input[type="password"] {
+  @apply bg-gray-800 border-gray-700 text-gray-100;
 }
 
 /* Responsive adjustments */
