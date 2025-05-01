@@ -256,7 +256,10 @@ const AdminCoordinators = () => {
     setActiveDialog("mentors");
   };
 
-  const handleViewStudents = (coordinator: User) => {
+  const handleViewStudents = (coordinator: Coordinator) => {
+    // Close all other dialogs first
+    closeAllDialogs();
+    // Set the selected coordinator and open students dialog
     setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
     setActiveDialog("students");
   };
@@ -751,8 +754,11 @@ const AdminCoordinators = () => {
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => {
-                          handleViewStudents(coordinator);
-                          setSelectedCoordinator(null);
+                          const coordUser = asCoordinator(coordinator);
+                          if (coordUser) {
+                            handleViewStudents(coordUser);
+                            setActiveDialog("students");
+                          }
                         }}
                       >
                         <Users className="mr-1.5 h-3.5 w-3.5" />
