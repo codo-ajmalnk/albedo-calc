@@ -76,9 +76,7 @@ export function MentorDialog({
   setNewMentor,
   setEditingMentor,
   isAssigningStudents,
-  isAddingStudent,
   setIsAssigningStudents,
-  setIsAddingStudent,
   handleDeleteStudent,
   handleEditStudent,
   handleAddStudent,
@@ -90,6 +88,9 @@ export function MentorDialog({
 }: MentorDialogProps) {
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
+  const [isAddingStudent, setIsAddingStudent] = useState(false);
+  const [isDeletingStudent, setIsDeletingStudent] = useState(false);
+  const [deletingStudent, setDeletingStudent] = useState<any>(null);
 
   const generateDefaultPassword = (name: string, phone: string) => {
     // Get first three letters of the name (lowercase)
@@ -681,18 +682,8 @@ export function MentorDialog({
                               variant="destructive"
                               size="sm"
                               onClick={() => {
-                                try {
-                                  // Update both local state and allStudents array
-                                  handleDeleteStudent(student);
-                                  // Update the allStudents array directly
-                                  const index = students.findIndex(s => s.id === student.id);
-                                  if (index !== -1) {
-                                    students.splice(index, 1);
-                                  }
-                                  crudToasts.delete.success("Student");
-                                } catch (error) {
-                                  crudToasts.delete.error("Student");
-                                }
+                                setDeletingStudent(student);
+                                setIsDeletingStudent(true);
                               }}
                               className="h-8 w-8 p-0"
                             >
@@ -1347,6 +1338,48 @@ export function MentorDialog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Student Confirmation Dialog */}
+      <AlertDialog open={isDeletingStudent} onOpenChange={setIsDeletingStudent}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete {deletingStudent?.name}'s profile and remove all associated data.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setIsDeletingStudent(false);
+              setDeletingStudent(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingStudent) {
+                  try {
+                    handleDeleteStudent(deletingStudent);
+                    const index = students.findIndex(s => s.id === deletingStudent.id);
+                    if (index !== -1) {
+                      students.splice(index, 1);
+                    }
+                    crudToasts.delete.success("Student");
+                  } catch (error) {
+                    crudToasts.delete.error("Student");
+                  }
+                  setIsDeletingStudent(false);
+                  setDeletingStudent(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 } 
