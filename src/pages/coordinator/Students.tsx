@@ -61,7 +61,7 @@ const CoordinatorStudents = () => {
     progressPercentage: 0,
     startDate: "",
     endDate: "",
-    sessionDuration: 1.33
+    sessionDuration: 60
   });
   
   if (!user) return null;
@@ -168,7 +168,7 @@ const CoordinatorStudents = () => {
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 1.33
+        sessionDuration: 60
       });
       crudToasts.create.success("Student");
     } catch (error) {

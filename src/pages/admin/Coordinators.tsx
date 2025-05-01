@@ -135,7 +135,7 @@ const AdminCoordinators = () => {
     progressPercentage: 0,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 1.33
+    sessionDuration: 60
   });
 
   const filteredCoordinators = coordinators.filter((coordinator) =>
@@ -618,7 +618,7 @@ const AdminCoordinators = () => {
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 1.33
+        sessionDuration: 60
       });
       crudToasts.create.success("Student");
     } catch (error) {

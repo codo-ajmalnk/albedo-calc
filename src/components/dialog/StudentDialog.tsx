@@ -117,99 +117,144 @@ export function StudentDialog({
     <>
       {/* View Details Dialog */}
       <Dialog open={isViewDetailsOpen} onOpenChange={onViewDetailsClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
           {selectedStudent && hasAccessToStudentData(selectedStudent) ? (
             <>
-              <DialogHeader>
-                <div className="flex justify-between items-start">
+              <DialogHeader className="space-y-2 sm:space-y-3">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-4">
                   <div>
-                    <DialogTitle className="text-xl font-bold">
+                    <DialogTitle className="text-lg sm:text-xl font-bold">
                       {selectedStudent?.name}
                     </DialogTitle>
-                    <DialogDescription className="mt-1.5">
+                    <DialogDescription className="text-sm">
                       {selectedStudent?.email}
                     </DialogDescription>
                   </div>
                 </div>
               </DialogHeader>
 
-              <div className="space-y-6 mt-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="p-4 bg-muted/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Total Sessions</p>
-                    <p className="text-2xl font-bold mt-1">{selectedStudent.totalSessions}</p>
-                    <p className="text-sm text-muted-foreground">sessions</p>
+              <div className="space-y-4 sm:space-y-6 mt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Total Sessions</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1">{selectedStudent.totalSessions}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">sessions</p>
                   </div>
-                  <div className="p-4 bg-muted/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Completed Sessions</p>
-                    <p className="text-2xl font-bold mt-1">{selectedStudent.sessionsCompleted}</p>
-                    <p className="text-sm text-muted-foreground">completed</p>
+                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Completed Sessions</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1">{selectedStudent.sessionsCompleted}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">completed</p>
                   </div>
-                  <div className="p-4 bg-muted/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Mentor</p>
-                    <p className="text-2xl font-bold mt-1 truncate">{getMentorName(selectedStudent.mentorId)}</p>
-                    <p className="text-sm text-muted-foreground">assigned to</p>
+                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Total Hours</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1 truncate">{selectedStudent.totalHours}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">hours</p>
                   </div>
-                  <div className="p-4 bg-muted/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    <p className="text-2xl font-bold mt-1">{selectedStudent.status}</p>
-                    <p className="text-sm text-muted-foreground">current</p>
+                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Remaining Hours</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1 truncate">
+                      {Math.round((selectedStudent.totalHours - (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration / 60)) * 100) / 100}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">hours</p>
                   </div>
                 </div>
-
-                <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Session Details</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                      <span className="text-xs sm:text-sm">Student Added On</span>
+                      <p className="text-base sm:text-lg font-medium mt-1">
+                        {selectedStudent.createdAt ? (
+                          <div className="space-y-0.5">
+                            <div>{format(new Date(selectedStudent.createdAt), "PPP")}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {format(new Date(selectedStudent.createdAt), "p")}
+                            </div>
+                          </div>
+                        ) : "Not available"}
+                      </p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                      <span className="text-xs sm:text-sm">Session Start</span>
+                      <p className="text-base sm:text-lg font-medium mt-1">
+                        {selectedStudent.startDate ? format(new Date(selectedStudent.startDate), "PPP") : "Not set"}
+                      </p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                      <span className="text-xs sm:text-sm">Session End</span>
+                      <p className="text-base sm:text-lg font-medium mt-1">
+                        {selectedStudent.endDate ? format(new Date(selectedStudent.endDate), "PPP") : "Not set"}
+                      </p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                      <span className="text-xs sm:text-sm">Session Duration</span>
+                      <p className="text-base sm:text-lg font-medium mt-1">
+                        {selectedStudent.sessionDuration} Minutes
+                      </p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                      <span className="text-xs sm:text-sm">Remaining Days</span>
+                      <p className="text-base sm:text-lg font-medium mt-1">
+                        {(selectedStudent.startDate && selectedStudent.endDate) ?
+                          Math.ceil((new Date(selectedStudent.endDate).getTime() - new Date(selectedStudent.startDate).getTime()) / (1000 * 60 * 60 * 24))
+                          : "N/A"} Days
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4 sm:space-y-6">
                   <div>
-                    <h3 className="font-semibold mb-4">Sessions & Hours</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Total Sessions</span>
-                        <span className="font-medium">{selectedStudent.totalSessions}</span>
+                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Sessions & Hours</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Total Sessions</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">{selectedStudent.totalSessions}</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Completed Sessions</span>
-                        <span className="font-medium">{selectedStudent.sessionsCompleted}</span>
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Completed Sessions</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">{selectedStudent.sessionsCompleted}</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Total Hours</span>
-                        <span className="font-medium">{selectedStudent.totalHours}</span>
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Total Hours</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">{selectedStudent.totalHours}</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Completed Hours</span>
-                        <span className="font-medium">
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Completed Hours</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">
                           {Math.round((selectedStudent.totalHours * selectedStudent.sessionsCompleted) / selectedStudent.totalSessions)}
-                        </span>
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-4">Payments</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Total Payment</span>
-                        <span className="font-medium">₹{(selectedStudent?.totalPayment || 0).toLocaleString()}</span>
+                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Payments</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Total Payment</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">₹{(selectedStudent?.totalPayment || 0).toLocaleString()}</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Paid Amount</span>
-                        <span className="font-medium">₹{(selectedStudent?.paidAmount || 0).toLocaleString()}</span>
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Paid Amount</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">₹{(selectedStudent?.paidAmount || 0).toLocaleString()}</p>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Pending Payment</span>
-                        <span className="font-medium">₹{((selectedStudent?.totalPayment || 0) - (selectedStudent?.paidAmount || 0)).toLocaleString()}</span>
+                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
+                        <span className="text-xs sm:text-sm">Pending Payment</span>
+                        <p className="text-base sm:text-lg font-medium mt-1">₹{((selectedStudent?.totalPayment || 0) - (selectedStudent?.paidAmount || 0)).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-4">Available Mentors</h3>
-                    <div className="space-y-4">
+                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Available Mentors</h3>
+                    <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Students</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Name</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Email</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Students</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -217,21 +262,21 @@ export function StudentDialog({
                             const mentorStudents = students.filter(s => s.mentorId === mentor.id);
                             return (
                               <TableRow key={mentor.id}>
-                                <TableCell>
+                                <TableCell className="text-xs sm:text-sm">
                                   <div className="flex items-center gap-2">
                                     <span className="font-medium">{mentor.name}</span>
                                     {mentor.id === selectedStudent.mentorId && (
-                                      <Badge variant="default">Current</Badge>
+                                      <Badge variant="default" className="text-xs">Current</Badge>
                                     )}
                                   </div>
                                 </TableCell>
-                                <TableCell>{mentor.email}</TableCell>
-                                <TableCell>
-                                  <Badge variant={mentor.status === "active" ? "default" : "secondary"}>
+                                <TableCell className="text-xs sm:text-sm">{mentor.email}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  <Badge variant={mentor.status === "active" ? "default" : "secondary"} className="text-xs">
                                     {mentor.status}
                                   </Badge>
                                 </TableCell>
-                                <TableCell>{mentorStudents.length} students</TableCell>
+                                <TableCell className="text-xs sm:text-sm">{mentorStudents.length} students</TableCell>
                               </TableRow>
                             );
                           })}
@@ -241,10 +286,10 @@ export function StudentDialog({
                   </div>
 
                   <div>
-                    <h3 className="font-semibold mb-4">Progress Overview</h3>
+                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Progress Overview</h3>
                     <div className="space-y-4">
                       <div>
-                        <div className="flex justify-between text-sm mb-2">
+                        <div className="flex justify-between text-xs sm:text-sm mb-2">
                           <span>Sessions Progress</span>
                           <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
                         </div>
@@ -264,7 +309,7 @@ export function StudentDialog({
                       </div>
 
                       <div>
-                        <div className="flex justify-between text-sm mb-2">
+                        <div className="flex justify-between text-xs sm:text-sm mb-2">
                           <span>Hours Progress</span>
                           <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
                         </div>
@@ -284,7 +329,7 @@ export function StudentDialog({
                       </div>
 
                       <div>
-                        <div className="flex justify-between text-sm mb-2">
+                        <div className="flex justify-between text-xs sm:text-sm mb-2">
                           <span>Payment Progress</span>
                           <span>{Math.round((selectedStudent.paidAmount / selectedStudent.totalPayment) * 100)}%</span>
                         </div>
@@ -308,8 +353,8 @@ export function StudentDialog({
               </div>
             </>
           ) : (
-            <div className="p-6 text-center">
-              <p className="text-muted-foreground">
+            <div className="p-4 sm:p-6 text-center">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 You don't have permission to view this student's details.
               </p>
             </div>
@@ -419,12 +464,12 @@ export function StudentDialog({
                     const sessions = parseInt(e.target.value);
                     const duration = newStudent.sessionDuration || 60;
                     const hours = Math.round((sessions * duration) / 60);
-                    
+
                     let endDate = newStudent.startDate ? new Date(newStudent.startDate) : null;
                     if (endDate) {
                       endDate.setDate(endDate.getDate() + ((sessions - 1) * 7)); // Weekly sessions
                     }
-                    
+
                     setNewStudent({
                       ...newStudent,
                       totalSessions: sessions,
@@ -470,7 +515,7 @@ export function StudentDialog({
                     const duration = parseInt(value);
                     const sessions = newStudent.totalSessions || 0;
                     const hours = Math.round((sessions * duration) / 60);
-                    
+
                     setNewStudent({
                       ...newStudent,
                       sessionDuration: duration,
@@ -516,7 +561,7 @@ export function StudentDialog({
                           // Calculate end date based on total sessions (assuming weekly sessions)
                           const endDate = new Date(date);
                           endDate.setDate(endDate.getDate() + ((newStudent.totalSessions - 1) * 7));
-                          
+
                           setNewStudent({
                             ...newStudent,
                             startDate: date.toISOString(),
@@ -783,7 +828,7 @@ export function StudentDialog({
                         const sessions = editingStudent.totalSessions || 0;
                         // Calculate total hours based on sessions and duration
                         const hours = Math.round((sessions * duration) / 60);
-                        
+
                         setEditingStudent({
                           ...editingStudent,
                           sessionDuration: duration,

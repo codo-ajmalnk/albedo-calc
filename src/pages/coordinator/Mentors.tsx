@@ -105,19 +105,19 @@ const CoordinatorMentors = () => {
   });
   const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<string[]>([]);
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
-
+  
   if (!user) return null;
-
+  
   // Get mentors under this coordinator
   const filteredMentors = mentors.filter((mentor) =>
     mentor.name.toLowerCase().includes(search.toLowerCase())
   );
-
+  
   const getMentorStats = (mentorId: string) => {
     const mentorStudents = allStudents.filter(
       (student) => student.mentorId === mentorId
     );
-
+    
     const totalSessions = mentorStudents.reduce(
       (sum, student) => sum + student.totalSessions,
       0
@@ -136,7 +136,7 @@ const CoordinatorMentors = () => {
     );
 
     const stats = generateDashboardStats(mentorStudents);
-
+    
     return {
       studentCount: mentorStudents.length,
       totalSessions,
@@ -176,7 +176,7 @@ const CoordinatorMentors = () => {
 
   const handleUpdateMentor = () => {
     if (!editingMentor) return;
-
+    
     try {
       setMentors(mentors.map(mentor =>
         mentor.id === editingMentor.id ? editingMentor : mentor
@@ -191,7 +191,7 @@ const CoordinatorMentors = () => {
 
   const confirmDeleteMentor = () => {
     if (!selectedMentor) return;
-
+    
     try {
       setMentors(mentors.filter(mentor => mentor.id !== selectedMentor.user.id));
       setIsDeletingMentor(false);
@@ -336,7 +336,7 @@ const CoordinatorMentors = () => {
       crudToasts.update.error("Student assignment");
     }
   };
-
+  
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
@@ -350,7 +350,7 @@ const CoordinatorMentors = () => {
             Add Mentor
           </Button>
         </div>
-
+        
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
             <CardTitle>Search Mentors</CardTitle>
@@ -366,15 +366,15 @@ const CoordinatorMentors = () => {
                   className="w-full text-sm"
                 />
               </div>
-            </div>
+                      </div>
           </CardContent>
         </Card>
-
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredMentors.map((mentor) => {
             const stats = getMentorStats(mentor.id);
             const mentorStudents = allStudents.filter(student => student.mentorId === mentor.id);
-            
+
             return (
               <Card key={mentor.id} className="flex flex-col">
                 <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -390,7 +390,7 @@ const CoordinatorMentors = () => {
                       </p>
                     </div>
                   </div>
-                </CardHeader>
+              </CardHeader>
                 <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
@@ -408,7 +408,7 @@ const CoordinatorMentors = () => {
                     </div>
 
                     {mentorStudents.length > 0 && (
-                    <div className="space-y-4">
+                <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Sessions Progress</span>
@@ -416,14 +416,14 @@ const CoordinatorMentors = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.sessionProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                            }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
                         </div>
@@ -440,14 +440,14 @@ const CoordinatorMentors = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.hoursProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                            }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
                         </div>
@@ -464,14 +464,14 @@ const CoordinatorMentors = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.paymentsProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentsProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.paymentsProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.paymentsProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                            }`}
                             style={{ width: `${stats.paymentsProgress}%` }}
                           />
                         </div>
@@ -479,13 +479,13 @@ const CoordinatorMentors = () => {
                           <span>₹{stats.completedPayments.toLocaleString()} completed</span>
                           <span>₹{stats.totalPayments.toLocaleString()} total</span>
                         </div>
-                        </div>
                       </div>
+                        </div>
                     )}
 
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
-                      <Button
-                        variant="outline"
+                      <Button 
+                        variant="outline" 
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => handleViewDetails(mentor)}
@@ -493,7 +493,7 @@ const CoordinatorMentors = () => {
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
                       </Button>
-                      <Button
+                      <Button 
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -527,7 +527,7 @@ const CoordinatorMentors = () => {
               </Card>
             );
           })}
-
+          
           {filteredMentors.length === 0 && (
             <div className="col-span-full text-center p-8">
               <p className="text-muted-foreground">
@@ -644,7 +644,7 @@ const CoordinatorMentors = () => {
                                 : selectedMentor.stats.sessionProgress >= 40
                                   ? 'bg-progress-medium'
                                   : 'bg-progress-low'
-                            }`}
+                          }`}
                           style={{ width: `${selectedMentor.stats.sessionProgress}%` }}
                         />
                       </div>
@@ -664,7 +664,7 @@ const CoordinatorMentors = () => {
                                 : selectedMentor.stats.hoursProgress >= 40
                                   ? 'bg-progress-medium'
                                   : 'bg-progress-low'
-                            }`}
+                          }`}
                           style={{ width: `${selectedMentor.stats.hoursProgress}%` }}
                         />
                       </div>
@@ -684,7 +684,7 @@ const CoordinatorMentors = () => {
                                 : selectedMentor.stats.paymentsProgress >= 40
                                   ? 'bg-progress-medium'
                                   : 'bg-progress-low'
-                            }`}
+                          }`}
                           style={{ width: `${selectedMentor.stats.paymentsProgress}%` }}
                         />
                       </div>
@@ -704,7 +704,7 @@ const CoordinatorMentors = () => {
                                 : selectedMentor.stats.overallProgress >= 40
                                   ? 'bg-progress-medium'
                                   : 'bg-progress-low'
-                            }`}
+                          }`}
                           style={{ width: `${selectedMentor.stats.overallProgress}%` }}
                         />
                       </div>
@@ -747,8 +747,8 @@ const CoordinatorMentors = () => {
           </div>
 
           <div className="relative overflow-x-auto">
-            <Table>
-              <TableHeader>
+                <Table>
+                  <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">ID</TableHead>
                   <TableHead>Name</TableHead>
@@ -758,43 +758,43 @@ const CoordinatorMentors = () => {
                   <TableHead>Hours</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {selectedMentor &&
-                  allStudents
-                    ?.filter(student => student.mentorId === selectedMentor.user.id)
-                    .map((student) => {
-                      const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedMentor &&
+                      allStudents
+                        ?.filter(student => student.mentorId === selectedMentor.user.id)
+                        .map((student) => {
+                          const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
                       const hoursCompleted = Math.round(student.sessionsCompleted * student.sessionDuration);
                       const totalHours = Math.round(student.totalSessions * student.sessionDuration);
-                      return (
+                          return (
                         <TableRow key={student.id}>
                           <TableCell>{student.id}</TableCell>
-                          <TableCell>
+                              <TableCell>
                             <div className="flex flex-col">
                               <span className="font-medium">{student.name}</span>
                               <span className="text-sm text-muted-foreground">{student.email}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                                </div>
+                              </TableCell>
+                              <TableCell>
                             <Badge variant={student.status === "active" ? "default" : "secondary"}>
-                              {student.status}
+                                  {student.status}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="w-full">
-                              <div className="flex justify-between text-xs mb-1">
-                                <span>Progress</span>
-                                <span>{progress}%</span>
-                              </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="w-full">
+                                  <div className="flex justify-between text-xs mb-1">
+                                    <span>Progress</span>
+                                    <span>{progress}%</span>
+                                  </div>
                               <Progress value={progress} className="h-2" />
-                            </div>
-                          </TableCell>
-                          <TableCell>
+                                </div>
+                              </TableCell>
+                              <TableCell>
                             {student.sessionsCompleted}/{student.totalSessions}
-                          </TableCell>
-                          <TableCell>
+                              </TableCell>
+                              <TableCell>
                             {hoursCompleted}/{totalHours}
                           </TableCell>
                           <TableCell>
@@ -826,25 +826,25 @@ const CoordinatorMentors = () => {
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Delete</span>
                               </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                {(!selectedMentor?.user.id || allStudents?.filter(student => student.mentorId === selectedMentor.user.id).length === 0) && (
-                  <TableRow>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    {(!selectedMentor?.user.id || allStudents?.filter(student => student.mentorId === selectedMentor.user.id).length === 0) && (
+                      <TableRow>
                     <TableCell colSpan={8} className="h-24 text-center">
-                      <div className="flex flex-col items-center justify-center gap-1">
-                        <Users className="h-8 w-8 text-muted-foreground/60" />
-                        <p className="text-sm text-muted-foreground">No students found</p>
+                          <div className="flex flex-col items-center justify-center gap-1">
+                            <Users className="h-8 w-8 text-muted-foreground/60" />
+                            <p className="text-sm text-muted-foreground">No students found</p>
                         <p className="text-xs text-muted-foreground">Assign or add new students to get started</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
         </DialogContent>
       </Dialog>
 
@@ -868,7 +868,7 @@ const CoordinatorMentors = () => {
                     disabled
                     className="bg-muted"
                   />
-                </div>
+            </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">Full Name *</Label>
                   <Input
@@ -881,7 +881,7 @@ const CoordinatorMentors = () => {
                     placeholder="Enter student's full name"
                     className="w-full"
                   />
-                </div>
+          </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-email">Email Address *</Label>
                   <Input
@@ -1547,7 +1547,7 @@ const CoordinatorMentors = () => {
                     placeholder="mentor@example.com"
                     className="w-full text-sm"
                   />
-                </div>
+                  </div>
                 <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="edit-phone" className="text-sm">Phone Number *</Label>
                   <Input
@@ -1585,17 +1585,17 @@ const CoordinatorMentors = () => {
                 </div>
                 <div className="space-y-1.5 sm:space-y-2">
                   <Label htmlFor="edit-password" className="text-sm">Password</Label>
-                  <Input
-                    id="edit-password"
-                    type="password"
-                    value={editingMentor.password || ''}
-                    onChange={(e) => setEditingMentor({
-                      ...editingMentor,
-                      password: e.target.value
-                    })}
-                    placeholder="Leave blank to keep current password"
+                <Input
+                  id="edit-password"
+                  type="password"
+                  value={editingMentor.password || ''}
+                  onChange={(e) => setEditingMentor({
+                    ...editingMentor,
+                    password: e.target.value
+                  })}
+                  placeholder="Leave blank to keep current password"
                     className="w-full text-sm"
-                  />
+                />
                 </div>
               </div>
             </div>
@@ -1703,22 +1703,22 @@ const CoordinatorMentors = () => {
                       Use default password (first 3 letters of name + last 4 digits of phone)
                     </Label>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={newMentor.password}
-                    onChange={(e) => setNewMentor({ ...newMentor, password: e.target.value })}
+              <Input
+                id="password"
+                type="password"
+                value={newMentor.password}
+                onChange={(e) => setNewMentor({ ...newMentor, password: e.target.value })}
                     placeholder="Enter mentor's password"
                     className="w-full text-sm"
                     disabled={newMentor.useDefaultPassword}
-                  />
+              />
                   {newMentor.useDefaultPassword && (
                     <p className="text-xs text-muted-foreground">
                       Default password will be: {generateDefaultPassword(newMentor.name, newMentor.phone)}
                     </p>
                   )}
-                </div>
-              </div>
+        </div>
+      </div>
             </div>
           </div>
           <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-4">
