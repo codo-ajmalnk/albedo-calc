@@ -179,6 +179,13 @@ const AdminMentors = () => {
   };
 
   const handleDeleteMentor = (mentor: User) => {
+    const mentorStudents = students.filter(student => student.mentorId === mentor.id);
+    
+    if (mentorStudents.length > 0) {
+      crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
+      return;
+    }
+
     setSelectedMentor({ user: mentor, stats: getMentorStats(mentor.id) });
     setActiveDialog("delete");
   };
@@ -187,6 +194,13 @@ const AdminMentors = () => {
     if (!selectedMentor) return;
 
     try {
+      const mentorStudents = students.filter(student => student.mentorId === selectedMentor.user.id);
+      
+      if (mentorStudents.length > 0) {
+        crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
+        return;
+      }
+
       setMentors(mentors.filter(mentor => mentor.id !== selectedMentor.user.id));
       setActiveDialog(null);
       setSelectedMentor(null);
@@ -249,7 +263,7 @@ const AdminMentors = () => {
     email: "",
     phone: "",
     mentorId: "",
-    status: "active" as const,
+    status: "active",
     totalSessions: 12,
     sessionsCompleted: 0,
     totalHours: 24,
@@ -290,20 +304,31 @@ const AdminMentors = () => {
 
   const handleAddStudent = () => {
     try {
-      // Validate required fields
       if (!newStudent.name || !newStudent.email || !newStudent.phone) {
         crudToasts.validation.error("Please fill in all required fields.");
         return;
       }
 
-      setStudents([...students, newStudent]);
-    setIsAddingStudent(false);
-    setNewStudent({
+      if (!selectedMentor?.user.id) {
+        crudToasts.validation.error("No mentor selected.");
+        return;
+      }
+
+      const studentToAdd: Student = {
         ...newStudent,
+        mentorId: selectedMentor.user.id
+      };
+
+      setStudents([...students, studentToAdd]);
+      allStudents.push(studentToAdd);
+      setIsAddingStudent(false);
+      setNewStudent({
       id: `student${students.length + 2}`,
       name: "",
       email: "",
       phone: "",
+        mentorId: "",
+        status: "active",
       totalSessions: 12,
       sessionsCompleted: 0,
       totalHours: 24,
@@ -335,15 +360,37 @@ const AdminMentors = () => {
   };
 
   const handleAssignStudents = () => {
-    if (selectedStudentsToAssign.length === 0) return;
-    
     try {
-      // Add assignment logic here
+      if (!selectedMentor?.user.id) {
+        crudToasts.validation.error("No mentor selected.");
+        return;
+      }
+
+      if (selectedStudentsToAssign.length === 0) {
+        crudToasts.validation.error("Please select at least one student to assign.");
+        return;
+      }
+
+      const updatedStudents = students.map(student => {
+        if (selectedStudentsToAssign.includes(student.id)) {
+          return { ...student, mentorId: selectedMentor.user.id };
+        }
+        return student;
+      });
+
+      setStudents(updatedStudents);
+      selectedStudentsToAssign.forEach(studentId => {
+        const student = allStudents.find(s => s.id === studentId);
+        if (student) {
+          student.mentorId = selectedMentor.user.id;
+        }
+      });
+
     setIsAssigningStudents(false);
     setSelectedStudentsToAssign([]);
-      crudToasts.assign.success("Students", "Mentor");
+      crudToasts.assign.success("Students", "mentor");
     } catch (error) {
-      crudToasts.assign.error("Students", "Mentor");
+      crudToasts.assign.error("Students", "mentor");
     }
   };
 
@@ -409,6 +456,8 @@ const AdminMentors = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredMentors.map((mentor) => {
             const stats = getMentorStats(mentor.id);
+            const mentorStudents = students.filter(student => student.mentorId === mentor.id);
+            
             return (
               <Card key={mentor.id} className="flex flex-col">
                 <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -436,13 +485,12 @@ const AdminMentors = () => {
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Coordinator</p>
-                        <p className="text-base font-medium truncate">
-                          {getCoordinatorName(mentor.supervisorId || "")}
-                        </p>
+                        <p className="text-sm text-muted-foreground">Active Students</p>
+                        <p className="text-base font-medium">{stats.activeStudents}</p>
                       </div>
                     </div>
 
+                    {mentorStudents.length > 0 && (
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
@@ -514,39 +562,9 @@ const AdminMentors = () => {
                           <span>₹{stats.completedPayments.toLocaleString()} completed</span>
                           <span>₹{stats.totalPayments.toLocaleString()} total</span>
                         </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Overall Progress</span>
-                          <span className="font-medium">{stats.overallProgress}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.overallProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.overallProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.overallProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.overallProgress}%` }}
-                          />
                         </div>
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-muted/10 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Active Students</p>
-                        <p className="text-lg font-medium mt-1">{stats.activeStudents}</p>
-                      </div>
-                      <div className="p-3 bg-muted/10 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Pending Payments</p>
-                        <p className="text-lg font-medium mt-1">₹{stats.pendingPayments.toLocaleString()}</p>
-                      </div>
-                    </div>
+                    )}
 
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
                       <Button
@@ -581,6 +599,7 @@ const AdminMentors = () => {
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => handleDeleteMentor(mentor)}
+                        disabled={mentorStudents.length > 0}
                       >
                         <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                         Delete
@@ -622,6 +641,18 @@ const AdminMentors = () => {
           onDeleteMentor={confirmDeleteMentor}
           setNewMentor={setNewMentor}
           setEditingMentor={setEditingMentor}
+          isAssigningStudents={isAssigningStudents}
+          isAddingStudent={isAddingStudent}
+          setIsAssigningStudents={setIsAssigningStudents}
+          setIsAddingStudent={setIsAddingStudent}
+          handleEditStudent={handleEditStudent}
+          handleDeleteStudent={handleDeleteStudent}
+          handleAddStudent={handleAddStudent}
+          handleAssignStudents={handleAssignStudents}
+          selectedStudentsToAssign={selectedStudentsToAssign}
+          setSelectedStudentsToAssign={setSelectedStudentsToAssign}
+          newStudent={newStudent}
+          setNewStudent={setNewStudent}
         />
       </div>
     </DashboardLayout>

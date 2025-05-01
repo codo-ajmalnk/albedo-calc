@@ -72,18 +72,18 @@ export default function Students() {
     name: "",
     email: "",
     phone: "",
-    mentorId: "",
+    mentorId: selectedMentor?.id || "",
     status: "active",
     totalSessions: 12,
     sessionsCompleted: 0,
-    totalHours: 24,
+    totalHours: 12,
     totalPayment: 12000,
     paidAmount: 0,
     sessionsRemaining: 12,
     progressPercentage: 0,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 1.33
+    sessionDuration: 60
   });
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
 
@@ -171,29 +171,43 @@ export default function Students() {
 
   const handleAddStudent = () => {
     try {
-      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
+      if (!newStudent.name || !newStudent.email || !newStudent.phone || !newStudent.mentorId) {
         crudToasts.validation.error("Please fill in all required fields.");
         return;
       }
 
-      setStudents([...students, newStudent]);
-      setIsAddOpen(false);
-      setNewStudent({
+      // Calculate derived values
+      const totalHours = Math.round((newStudent.totalSessions * newStudent.sessionDuration) / 60);
+      const endDate = new Date(newStudent.startDate);
+      endDate.setDate(endDate.getDate() + ((newStudent.totalSessions - 1) * 7)); // Assuming one session per week
+
+      const studentToAdd = {
         ...newStudent,
+        totalHours,
+        endDate: endDate.toISOString(),
+        sessionsRemaining: newStudent.totalSessions,
+        progressPercentage: 0
+      };
+
+      setStudents([...students, studentToAdd]);
+      setIsAddingStudent(false);
+      setNewStudent({
         id: `student${students.length + 2}`,
         name: "",
         email: "",
         phone: "",
+        mentorId: selectedMentor?.id || "",
+        status: "active",
         totalSessions: 12,
         sessionsCompleted: 0,
-        totalHours: 24,
+        totalHours: 12,
         totalPayment: 12000,
         paidAmount: 0,
         sessionsRemaining: 12,
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 1.33
+        sessionDuration: 60
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -244,7 +258,27 @@ export default function Students() {
             </p>
           </div>
           {(currentUser.role === "admin" || currentUser.role === "coordinator") && (
-            <Button onClick={() => setIsAddOpen(true)} className="w-full sm:w-auto text-sm">
+            <Button onClick={() => {
+              setIsAddingStudent(true);
+              setNewStudent({
+                id: `student${students.length + 1}`,
+                name: "",
+                email: "",
+                phone: "",
+                mentorId: selectedMentor?.id || "",
+                status: "active",
+                totalSessions: 12,
+                sessionsCompleted: 0,
+                totalHours: 12,
+                totalPayment: 12000,
+                paidAmount: 0,
+                sessionsRemaining: 12,
+                progressPercentage: 0,
+                startDate: new Date().toISOString(),
+                endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+                sessionDuration: 60
+              });
+            }} className="w-full sm:w-auto text-sm">
               <UserPlus className="mr-1.5 h-3.5 w-3.5" />
               Add New Student
             </Button>

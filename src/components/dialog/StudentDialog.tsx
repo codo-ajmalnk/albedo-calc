@@ -5,10 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Edit, Trash2, UserPlus, Users } from "lucide-react";
+import { Edit, Trash2, UserPlus, Users, Calendar as CalendarIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/lib/types";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface StudentDialogProps {
   isViewDetailsOpen: boolean;
@@ -84,8 +88,8 @@ export function StudentDialog({
   const hasAccessToStudentData = (student: any) => {
     if (currentUser.role === "admin") return true;
     if (currentUser.role === "coordinator") {
-      return mentors.some(mentor => 
-        mentor.supervisorId === currentUser.id && 
+      return mentors.some(mentor =>
+        mentor.supervisorId === currentUser.id &&
         mentor.id === student.mentorId
       );
     }
@@ -98,8 +102,8 @@ export function StudentDialog({
   const canModifyStudent = (student: any) => {
     if (currentUser.role === "admin") return true;
     if (currentUser.role === "coordinator") {
-      return mentors.some(mentor => 
-        mentor.supervisorId === currentUser.id && 
+      return mentors.some(mentor =>
+        mentor.supervisorId === currentUser.id &&
         mentor.id === student.mentorId
       );
     }
@@ -197,6 +201,46 @@ export function StudentDialog({
                   </div>
 
                   <div>
+                    <h3 className="font-semibold mb-4">Available Mentors</h3>
+                    <div className="space-y-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Students</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {mentors.map((mentor) => {
+                            const mentorStudents = students.filter(s => s.mentorId === mentor.id);
+                            return (
+                              <TableRow key={mentor.id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{mentor.name}</span>
+                                    {mentor.id === selectedStudent.mentorId && (
+                                      <Badge variant="default">Current</Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>{mentor.email}</TableCell>
+                                <TableCell>
+                                  <Badge variant={mentor.status === "active" ? "default" : "secondary"}>
+                                    {mentor.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>{mentorStudents.length} students</TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+
+                  <div>
                     <h3 className="font-semibold mb-4">Progress Overview</h3>
                     <div className="space-y-4">
                       <div>
@@ -207,12 +251,12 @@ export function StudentDialog({
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
-                                ? 'bg-progress-complete'
-                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                                  ? 'bg-progress-high'
-                                  : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                              ? 'bg-progress-complete'
+                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
+                                ? 'bg-progress-high'
+                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
                               }`}
                             style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
                           />
@@ -227,12 +271,12 @@ export function StudentDialog({
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
-                                ? 'bg-progress-complete'
-                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                                  ? 'bg-progress-high'
-                                  : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                              ? 'bg-progress-complete'
+                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
+                                ? 'bg-progress-high'
+                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
                               }`}
                             style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
                           />
@@ -247,46 +291,14 @@ export function StudentDialog({
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
-                                ? 'bg-progress-complete'
-                                : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
-                                  ? 'bg-progress-high'
-                                  : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                              ? 'bg-progress-complete'
+                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
+                                ? 'bg-progress-high'
+                                : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
                               }`}
                             style={{ width: `${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Overall Progress</span>
-                          <span>{Math.round(((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3)}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 === 100
-                                ? 'bg-progress-complete'
-                                : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                  (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                  (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 75
-                                  ? 'bg-progress-high'
-                                  : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                    (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                    (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                              }`}
-                            style={{
-                              width: `${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3}%`
-                            }}
                           />
                         </div>
                       </div>
@@ -305,227 +317,256 @@ export function StudentDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Add Student Dialog - Only show if user has permission */}
-      {(currentUser.role === "admin" || currentUser.role === "coordinator") && (
-        <Dialog open={isAddOpen} onOpenChange={onAddClose}>
-          <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-            <DialogHeader className="space-y-3">
-              <DialogTitle className="text-xl font-bold">Add New Student</DialogTitle>
-              <DialogDescription>
-                Fill in the student details below. All fields marked with * are required.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-6 py-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="student-id">Student ID</Label>
-                  <Input
-                    id="student-id"
-                    value={newStudent.id}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    value={newStudent.name}
-                    onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                    placeholder="Enter student's full name"
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newStudent.email}
-                    onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-                    placeholder="student@example.com"
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={newStudent.phone}
-                    onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
-                    placeholder="+91 98765 43210"
-                    className="w-full"
-                  />
-                </div>
+      {/* Add Student Dialog */}
+      <Dialog open={isAddingStudent} onOpenChange={setIsAddingStudent}>
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">Add New Student</DialogTitle>
+            <DialogDescription>
+              Fill in the student details below. All fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="student-id">Student ID</Label>
+                <Input
+                  id="student-id"
+                  value={newStudent.id}
+                  disabled
+                  className="bg-muted"
+                />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="mentor">Assigned Mentor *</Label>
-                  <Select
-                    value={newStudent.mentorId}
-                    onValueChange={(value) => setNewStudent({ ...newStudent, mentorId: value })}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a mentor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mentors.map((mentor) => (
-                        <SelectItem key={mentor.id} value={mentor.id}>
-                          {mentor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status *</Label>
-                  <Select
-                    value={newStudent.status}
-                    onValueChange={(value) => setNewStudent({ ...newStudent, status: value as "active" | "inactive" })}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  value={newStudent.name}
+                  onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                  placeholder="Enter student's full name"
+                  className="w-full"
+                />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="total-sessions">Total Sessions *</Label>
-                  <Input
-                    id="total-sessions"
-                    type="number"
-                    min="0"
-                    value={newStudent.totalSessions}
-                    onChange={(e) => {
-                      const sessions = parseInt(e.target.value);
-                      const duration = newStudent.sessionDuration || 0;
-                      // Calculate total hours based on sessions and duration
-                      const hours = Math.round((sessions * duration) / 60);
-                      
-                      // Calculate end date based on starting date and total sessions
-                      let endDate = newStudent.startDate ? new Date(newStudent.startDate) : null;
-                      if (endDate) {
-                        endDate.setDate(endDate.getDate() + sessions - 1);
-                      }
-                      
-                      setNewStudent({
-                        ...newStudent,
-                        totalSessions: sessions,
-                        totalHours: hours,
-                        endDate: endDate ? endDate.toISOString().split('T')[0] : ''
-                      });
-                    }}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="total-hours">Total Hours</Label>
-                  <Input
-                    id="total-hours"
-                    type="number"
-                    min="0"
-                    value={newStudent.totalHours}
-                    disabled
-                    className="w-full bg-muted"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="total-payment">Total Payment (₹) *</Label>
-                  <Input
-                    id="total-payment"
-                    type="number"
-                    min="0"
-                    value={newStudent.totalPayment}
-                    onChange={(e) => setNewStudent({ ...newStudent, totalPayment: parseInt(e.target.value) })}
-                    className="w-full"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newStudent.email}
+                  onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                  placeholder="student@example.com"
+                  className="w-full"
+                />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="start-date">Session Starting Date *</Label>
-                  <Input
-                    id="start-date"
-                    type="date"
-                    value={newStudent.startDate}
-                    onChange={(e) => {
-                      const startDate = e.target.value;
-                      // Calculate end date based on starting date and total sessions
-                      let endDate = startDate ? new Date(startDate) : null;
-                      if (endDate && newStudent.totalSessions) {
-                        endDate.setDate(endDate.getDate() + newStudent.totalSessions - 1);
-                      }
-                      
-                      setNewStudent({
-                        ...newStudent,
-                        startDate,
-                        endDate: endDate ? endDate.toISOString().split('T')[0] : ''
-                      });
-                    }}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="end-date">Session Ending Date</Label>
-                  <Input
-                    id="end-date"
-                    type="date"
-                    value={newStudent.endDate}
-                    disabled
-                    className="w-full bg-muted"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="session-duration">Session Duration *</Label>
-                  <Select
-                    value={newStudent.sessionDuration.toString()}
-                    onValueChange={(value) => {
-                      const duration = parseInt(value);
-                      const sessions = newStudent.totalSessions || 0;
-                      // Calculate total hours based on sessions and duration
-                      const hours = Math.round((sessions * duration) / 60);
-                      
-                      setNewStudent({
-                        ...newStudent,
-                        sessionDuration: duration,
-                        totalHours: hours
-                      });
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="45">45 Minutes</SelectItem>
-                      <SelectItem value="60">60 Minutes</SelectItem>
-                      <SelectItem value="75">75 Minutes</SelectItem>
-                      <SelectItem value="90">90 Minutes</SelectItem>
-                      <SelectItem value="120">120 Minutes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={newStudent.phone}
+                  onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
+                  placeholder="+91 98765 43210"
+                  className="w-full"
+                />
               </div>
             </div>
-            <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-              <Button variant="outline" onClick={onAddClose} className="w-full sm:w-auto">
-                Cancel
-              </Button>
-              <Button onClick={onAddStudent} className="w-full sm:w-auto">
-                Create Student
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="mentor">Assigned Mentor *</Label>
+                <Select
+                  value={newStudent.mentorId}
+                  onValueChange={(value) => setNewStudent({ ...newStudent, mentorId: value })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a mentor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mentors.map((mentor) => (
+                      <SelectItem key={mentor.id} value={mentor.id}>
+                        {mentor.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status *</Label>
+                <Select
+                  value={newStudent.status}
+                  onValueChange={(value) => setNewStudent({ ...newStudent, status: value as "active" | "inactive" })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="total-sessions">Total Sessions *</Label>
+                <Input
+                  id="total-sessions"
+                  type="number"
+                  min="0"
+                  value={newStudent.totalSessions}
+                  onChange={(e) => {
+                    const sessions = parseInt(e.target.value);
+                    const duration = newStudent.sessionDuration || 60;
+                    const hours = Math.round((sessions * duration) / 60);
+                    
+                    let endDate = newStudent.startDate ? new Date(newStudent.startDate) : null;
+                    if (endDate) {
+                      endDate.setDate(endDate.getDate() + ((sessions - 1) * 7)); // Weekly sessions
+                    }
+                    
+                    setNewStudent({
+                      ...newStudent,
+                      totalSessions: sessions,
+                      totalHours: hours,
+                      endDate: endDate ? endDate.toISOString() : '',
+                      sessionsCompleted: 0,
+                      paidAmount: 0
+                    });
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="total-hours">Total Hours</Label>
+                <Input
+                  id="total-hours"
+                  type="number"
+                  min="0"
+                  value={newStudent.totalHours}
+                  disabled
+                  className="w-full bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="total-payment">Total Payment (₹) *</Label>
+                <Input
+                  id="total-payment"
+                  type="number"
+                  min="0"
+                  value={newStudent.totalPayment}
+                  onChange={(e) => setNewStudent({ ...newStudent, totalPayment: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="session-duration">Session Duration *</Label>
+                <Select
+                  value={newStudent?.sessionDuration ? newStudent.sessionDuration.toString() : "60"}
+                  onValueChange={(value) => {
+                    const duration = parseInt(value);
+                    const sessions = newStudent.totalSessions || 0;
+                    const hours = Math.round((sessions * duration) / 60);
+                    
+                    setNewStudent({
+                      ...newStudent,
+                      sessionDuration: duration,
+                      totalHours: hours
+                    });
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select duration">
+                      {newStudent?.sessionDuration ? `${newStudent.sessionDuration} Minutes` : "60 Minutes"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="45">45 Minutes</SelectItem>
+                    <SelectItem value="60">60 Minutes</SelectItem>
+                    <SelectItem value="75">75 Minutes</SelectItem>
+                    <SelectItem value="90">90 Minutes</SelectItem>
+                    <SelectItem value="120">120 Minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="start-date">Session Starting Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newStudent.startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newStudent.startDate ? format(new Date(newStudent.startDate), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newStudent.startDate ? new Date(newStudent.startDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          // Calculate end date based on total sessions (assuming weekly sessions)
+                          const endDate = new Date(date);
+                          endDate.setDate(endDate.getDate() + ((newStudent.totalSessions - 1) * 7));
+                          
+                          setNewStudent({
+                            ...newStudent,
+                            startDate: date.toISOString(),
+                            endDate: endDate.toISOString()
+                          });
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end-date">Session Ending Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-muted",
+                        !newStudent.endDate && "text-muted-foreground"
+                      )}
+                      disabled
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newStudent.endDate ? format(new Date(newStudent.endDate), "PPP") : <span>Auto-calculated</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newStudent.endDate ? new Date(newStudent.endDate) : undefined}
+                      disabled
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsAddingStudent(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button onClick={onAddStudent} className="w-full sm:w-auto">
+              Create Student
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Student Dialog - Only show if user has permission */}
       {editingStudent && canModifyStudent(editingStudent) && (
@@ -661,13 +702,13 @@ export function StudentDialog({
                         const duration = editingStudent.sessionDuration || 0;
                         // Calculate total hours based on sessions and duration
                         const hours = Math.round((sessions * duration) / 60);
-                        
+
                         // Calculate end date based on starting date and total sessions
                         let endDate = editingStudent.startDate ? new Date(editingStudent.startDate) : null;
                         if (endDate) {
                           endDate.setDate(endDate.getDate() + sessions - 1);
                         }
-                        
+
                         setEditingStudent({
                           ...editingStudent,
                           totalSessions: sessions,
@@ -720,46 +761,23 @@ export function StudentDialog({
                       className="w-full"
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-start-date">Session Starting Date *</Label>
+                    <Label htmlFor="edit-pending-payment">Pending Payment (₹)</Label>
                     <Input
-                      id="edit-start-date"
-                      type="date"
-                      value={editingStudent.startDate}
-                      onChange={(e) => {
-                        const startDate = e.target.value;
-                        // Calculate end date based on starting date and total sessions
-                        let endDate = startDate ? new Date(startDate) : null;
-                        if (endDate && editingStudent.totalSessions) {
-                          endDate.setDate(endDate.getDate() + editingStudent.totalSessions - 1);
-                        }
-                        
-                        setEditingStudent({
-                          ...editingStudent,
-                          startDate,
-                          endDate: endDate ? endDate.toISOString().split('T')[0] : ''
-                        });
-                      }}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-end-date">Session Ending Date</Label>
-                    <Input
-                      id="edit-end-date"
-                      type="date"
-                      value={editingStudent.endDate}
+                      id="edit-pending-payment"
+                      type="number"
+                      value={editingStudent.totalPayment - editingStudent.paidAmount}
                       disabled
                       className="w-full bg-muted"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="edit-session-duration">Session Duration *</Label>
                     <Select
-                      value={editingStudent.sessionDuration.toString()}
+                      value={editingStudent?.sessionDuration ? editingStudent.sessionDuration.toString() : ""}
                       onValueChange={(value) => {
                         const duration = parseInt(value);
                         const sessions = editingStudent.totalSessions || 0;
@@ -774,7 +792,9 @@ export function StudentDialog({
                       }}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select duration" />
+                        <SelectValue placeholder="Select duration">
+                          {editingStudent?.sessionDuration ? `${editingStudent.sessionDuration} Minutes` : "Select duration"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="45">45 Minutes</SelectItem>
@@ -784,6 +804,70 @@ export function StudentDialog({
                         <SelectItem value="120">120 Minutes</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-start-date">Session Starting Date *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !editingStudent.startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {editingStudent.startDate ? format(new Date(editingStudent.startDate), "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={editingStudent.startDate ? new Date(editingStudent.startDate) : undefined}
+                          onSelect={(date) => {
+                            const startDate = date ? date.toISOString().split('T')[0] : '';
+                            // Calculate end date based on starting date and total sessions
+                            let endDate = startDate ? new Date(startDate) : null;
+                            if (endDate && editingStudent.totalSessions) {
+                              endDate.setDate(endDate.getDate() + editingStudent.totalSessions - 1);
+                            }
+
+                            setEditingStudent({
+                              ...editingStudent,
+                              startDate,
+                              endDate: endDate ? endDate.toISOString().split('T')[0] : ''
+                            });
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-end-date">Session Ending Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal bg-muted",
+                            !editingStudent.endDate && "text-muted-foreground"
+                          )}
+                          disabled
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {editingStudent.endDate ? format(new Date(editingStudent.endDate), "PPP") : <span>Auto-calculated</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={editingStudent.endDate ? new Date(editingStudent.endDate) : undefined}
+                          disabled
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </div>
@@ -832,7 +916,7 @@ export function StudentDialog({
           <DialogHeader>
             <DialogTitle>Assigned Students - {selectedMentor?.name}</DialogTitle>
             <DialogDescription>
-              {currentUser.role === "mentor" 
+              {currentUser.role === "mentor"
                 ? "View and manage your students"
                 : `Manage students assigned to ${selectedMentor?.name}`}
             </DialogDescription>
@@ -868,8 +952,8 @@ export function StudentDialog({
                   <TableBody>
                     {selectedMentor &&
                       students
-                        ?.filter(student => 
-                          student.mentorId === selectedMentor.id && 
+                        ?.filter(student =>
+                          student.mentorId === selectedMentor.id &&
                           hasAccessToStudentData(student)
                         )
                         .map((student) => {
@@ -886,8 +970,8 @@ export function StudentDialog({
                               </TableCell>
                               <TableCell>
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-gray-100 text-gray-800'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-gray-100 text-gray-800'
                                   }`}>
                                   {student.status}
                                 </span>

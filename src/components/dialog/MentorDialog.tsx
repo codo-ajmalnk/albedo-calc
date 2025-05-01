@@ -5,13 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Edit, Trash2, UserPlus, Users } from "lucide-react";
+import { Edit, Trash2, UserPlus, Users, Trash, Calendar as CalendarIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { crudToasts } from "@/lib/toast";
-import { User } from "@/lib/types";
+import { User, Student } from "@/lib/types";
 import { users } from "@/lib/mock-data";
+import { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 
 interface MentorDialogProps {
@@ -35,6 +40,18 @@ interface MentorDialogProps {
   onDeleteMentor: () => void;
   setNewMentor: (mentor: any) => void;
   setEditingMentor: (mentor: any) => void;
+  isAssigningStudents: boolean;
+  isAddingStudent: boolean;
+  setIsAssigningStudents: (value: boolean) => void;
+  setIsAddingStudent: (value: boolean) => void;
+  handleDeleteStudent: (student: any) => void;
+  handleEditStudent: (student: any) => void;
+  handleAddStudent: () => void;
+  handleAssignStudents: () => void;
+  selectedStudentsToAssign: string[];
+  setSelectedStudentsToAssign: (students: string[]) => void;
+  newStudent: Student;
+  setNewStudent: (student: Student) => void;
 }
 
 export function MentorDialog({
@@ -58,7 +75,22 @@ export function MentorDialog({
   onDeleteMentor,
   setNewMentor,
   setEditingMentor,
+  isAssigningStudents,
+  isAddingStudent,
+  setIsAssigningStudents,
+  setIsAddingStudent,
+  handleDeleteStudent,
+  handleEditStudent,
+  handleAddStudent,
+  handleAssignStudents,
+  selectedStudentsToAssign,
+  setSelectedStudentsToAssign,
+  newStudent,
+  setNewStudent,
 }: MentorDialogProps) {
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
+
   const generateDefaultPassword = (name: string, phone: string) => {
     // Get first three letters of the name (lowercase)
     const namePart = name.toLowerCase().substring(0, 3);
@@ -129,7 +161,7 @@ export function MentorDialog({
 
       // Add the new mentor to the users array
       users.push(newUser);
-      
+
       // Close the dialog and reset form
       onAddClose();
       setNewMentor({
@@ -263,9 +295,8 @@ export function MentorDialog({
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
-                              students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
+                            students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) === 100
                               ? 'bg-progress-complete'
                               : Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
                                 students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) >= 75
@@ -274,7 +305,7 @@ export function MentorDialog({
                                   students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) >= 40
                                   ? 'bg-progress-medium'
                                   : 'bg-progress-low'
-                          }`}
+                            }`}
                           style={{
                             width: `${Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
                               students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) || 0}%`
@@ -295,11 +326,10 @@ export function MentorDialog({
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            Math.round((students?.filter(s => s.mentorId === selectedMentor.id)
-                              .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
-                              students?.filter(s => s.mentorId === selectedMentor.id)
-                                .reduce((sum, student) => sum + student.totalSessions, 0)) * 100) === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${Math.round((students?.filter(s => s.mentorId === selectedMentor.id)
+                            .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
+                            students?.filter(s => s.mentorId === selectedMentor.id)
+                              .reduce((sum, student) => sum + student.totalSessions, 0)) * 100) === 100
                               ? 'bg-progress-complete'
                               : Math.round((students?.filter(s => s.mentorId === selectedMentor.id)
                                 .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
@@ -312,7 +342,7 @@ export function MentorDialog({
                                     .reduce((sum, student) => sum + student.totalSessions, 0)) * 100) >= 40
                                   ? 'bg-progress-medium'
                                   : 'bg-progress-low'
-                          }`}
+                            }`}
                           style={{
                             width: `${Math.round((students?.filter(s => s.mentorId === selectedMentor.id)
                               .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
@@ -531,6 +561,20 @@ export function MentorDialog({
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-password">Password</Label>
+                  <Input
+                    id="edit-password"
+                    type="password"
+                    value={editingMentor.password || ''}
+                    onChange={(e) => setEditingMentor({
+                      ...editingMentor,
+                      password: e.target.value
+                    })}
+                    placeholder="Leave blank to keep current password"
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -545,30 +589,6 @@ export function MentorDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteOpen} onOpenChange={handleDeleteClose}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete {selectedMentor?.name}'s profile and remove all associated data.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleDeleteClose}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={onDeleteMentor}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* View Students Dialog */}
       <Dialog open={isViewStudentsOpen} onOpenChange={handleViewStudentsClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -579,87 +599,739 @@ export function MentorDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="relative overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6">
-            <div className="p-3 sm:p-4 md:p-6">
-              <div className="w-full overflow-auto rounded-lg border">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="w-[100px] font-medium">ID</TableHead>
-                      <TableHead className="font-medium min-w-[200px]">Name</TableHead>
-                      <TableHead className="font-medium w-[100px]">Status</TableHead>
-                      <TableHead className="font-medium w-[140px]">Progress</TableHead>
-                      <TableHead className="font-medium w-[100px]">Sessions</TableHead>
-                      <TableHead className="font-medium min-w-[140px]">Payment</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedMentor &&
-                      students
-                        ?.filter(student => student.mentorId === selectedMentor.id)
-                        .map((student) => {
-                          const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-                          const paymentProgress = Math.round((student.paidAmount / student.totalPayment) * 100);
-                          return (
-                            <TableRow key={student.id} className="hover:bg-muted/50">
-                              <TableCell className="font-medium">{student.id}</TableCell>
-                              <TableCell>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-medium truncate">{student.name}</span>
-                                  <span className="text-xs sm:text-sm text-muted-foreground truncate">{student.email}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-gray-100 text-gray-800'
-                                  }`}>
-                                  {student.status}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="w-full">
-                                  <div className="flex justify-between text-xs mb-1">
-                                    <span>Progress</span>
-                                    <span>{progress}%</span>
-                                  </div>
-                                  <Progress
-                                    value={progress}
-                                    className="h-2"
-                                  />
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm whitespace-nowrap">
-                                  <span className="font-medium">{student.sessionsCompleted}</span>
-                                  <span className="text-muted-foreground">/{student.totalSessions}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm whitespace-nowrap">
-                                  <span className="font-medium">₹{student.paidAmount.toLocaleString()}</span>
-                                  <span className="text-muted-foreground">/₹{student.totalPayment.toLocaleString()}</span>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                    {(!selectedMentor?.id || students?.filter(student => student.mentorId === selectedMentor.id).length === 0) && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="h-24 text-center">
-                          <div className="flex flex-col items-center justify-center gap-1">
-                            <Users className="h-8 w-8 text-muted-foreground/60" />
-                            <p className="text-sm text-muted-foreground">No students found</p>
-                            <p className="text-xs text-muted-foreground">Assign or add new students to get started</p>
+          <div className="flex justify-end gap-4 mb-4">
+            <Button variant="outline" onClick={() => setIsAssigningStudents(true)}>
+              <Users className="mr-2 h-4 w-4" />
+              Assign Students
+            </Button>
+            <Button onClick={() => setIsAddingStudent(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add New Student
+            </Button>
+          </div>
+
+          <div className="relative overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Sessions</TableHead>
+                  <TableHead>Hours</TableHead>
+                  <TableHead>Payment</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedMentor && students
+                  ?.filter(student => student.mentorId === selectedMentor.id)
+                  .map((student) => {
+                    const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
+                    const hoursCompleted = Math.round(student.sessionsCompleted * student.sessionDuration);
+                    const totalHours = Math.round(student.totalSessions * student.sessionDuration);
+                    return (
+                      <TableRow key={student.id}>
+                        <TableCell>{student.id}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{student.name}</span>
+                            <span className="text-sm text-muted-foreground">{student.email}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={student.status === "active" ? "default" : "secondary"}>
+                            {student.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="w-full">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>Progress</span>
+                              <span>{progress}%</span>
+                            </div>
+                            <Progress value={progress} className="h-2" />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {student.sessionsCompleted}/{student.totalSessions}
+                        </TableCell>
+                        <TableCell>
+                          {hoursCompleted}/{totalHours}
+                        </TableCell>
+                        <TableCell>
+                          ₹{student.paidAmount.toLocaleString()}/₹{student.totalPayment.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingStudent(student);
+                                setIsEditStudentOpen(true);
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteStudent(student)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    );
+                  })}
+                {(!selectedMentor?.id || !students?.filter(student => student.mentorId === selectedMentor.id).length) && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="h-24 text-center">
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <Users className="h-8 w-8 text-muted-foreground/60" />
+                        <p className="text-sm text-muted-foreground">No students found</p>
+                        <p className="text-xs text-muted-foreground">Assign or add new students to get started</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Student Dialog */}
+      <Dialog open={isEditStudentOpen} onOpenChange={setIsEditStudentOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">Edit Student</DialogTitle>
+            <DialogDescription>
+              Update the student's information. All fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+          {editingStudent && (
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-student-id">Student ID</Label>
+                  <Input
+                    id="edit-student-id"
+                    value={editingStudent.id}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Full Name *</Label>
+                  <Input
+                    id="edit-name"
+                    value={editingStudent.name}
+                    onChange={(e) => setEditingStudent({
+                      ...editingStudent,
+                      name: e.target.value
+                    })}
+                    placeholder="Enter student's full name"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-email">Email Address *</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editingStudent.email}
+                    onChange={(e) => setEditingStudent({
+                      ...editingStudent,
+                      email: e.target.value
+                    })}
+                    placeholder="student@example.com"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-phone">Phone Number *</Label>
+                  <Input
+                    id="edit-phone"
+                    type="tel"
+                    value={editingStudent.phone}
+                    onChange={(e) => setEditingStudent({
+                      ...editingStudent,
+                      phone: e.target.value
+                    })}
+                    placeholder="+91 98765 43210"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-mentor">Assigned Mentor *</Label>
+                  <Input
+                    id="edit-mentor"
+                    value={selectedMentor?.name || ""}
+                    disabled
+                    className="w-full bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-status">Status *</Label>
+                  <Select
+                    value={editingStudent.status}
+                    onValueChange={(value) => setEditingStudent({
+                      ...editingStudent,
+                      status: value as "active" | "inactive"
+                    })}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-sessions-completed">Completed Sessions *</Label>
+                  <Input
+                    id="edit-sessions-completed"
+                    type="number"
+                    min="0"
+                    value={editingStudent.sessionsCompleted}
+                    onChange={(e) => setEditingStudent({
+                      ...editingStudent,
+                      sessionsCompleted: parseInt(e.target.value)
+                    })}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-total-sessions">Total Sessions *</Label>
+                  <Input
+                    id="edit-total-sessions"
+                    type="number"
+                    min="0"
+                    value={editingStudent.totalSessions}
+                    onChange={(e) => {
+                      const sessions = parseInt(e.target.value);
+                      const duration = editingStudent.sessionDuration || 0;
+                      // Calculate total hours based on sessions and duration
+                      const hours = Math.round((sessions * duration) / 60);
+
+                      // Calculate end date based on starting date and total sessions
+                      let endDate = editingStudent.startDate ? new Date(editingStudent.startDate) : null;
+                      if (endDate) {
+                        endDate.setDate(endDate.getDate() + sessions - 1);
+                      }
+
+                      setEditingStudent({
+                        ...editingStudent,
+                        totalSessions: sessions,
+                        totalHours: hours,
+                        endDate: endDate ? endDate.toISOString().split('T')[0] : ''
+                      });
+                    }}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-total-hours">Total Hours</Label>
+                  <Input
+                    id="edit-total-hours"
+                    type="number"
+                    min="0"
+                    value={editingStudent.totalHours}
+                    disabled
+                    className="w-full bg-muted"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-paid-amount">Paid Amount (₹) *</Label>
+                  <Input
+                    id="edit-paid-amount"
+                    type="number"
+                    min="0"
+                    value={editingStudent.paidAmount}
+                    onChange={(e) => setEditingStudent({
+                      ...editingStudent,
+                      paidAmount: parseInt(e.target.value)
+                    })}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-total-payment">Total Payment (₹) *</Label>
+                  <Input
+                    id="edit-total-payment"
+                    type="number"
+                    min="0"
+                    value={editingStudent.totalPayment}
+                    onChange={(e) => setEditingStudent({
+                      ...editingStudent,
+                      totalPayment: parseInt(e.target.value)
+                    })}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-pending-payment">Pending Payment (₹)</Label>
+                  <Input
+                    id="edit-pending-payment"
+                    type="number"
+                    value={editingStudent.totalPayment - editingStudent.paidAmount}
+                    disabled
+                    className="w-full bg-muted"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-session-duration">Session Duration *</Label>
+                  <Select
+                    value={editingStudent?.sessionDuration ? editingStudent.sessionDuration.toString() : ""}
+                    onValueChange={(value) => {
+                      const duration = parseInt(value);
+                      const sessions = editingStudent.totalSessions || 0;
+                      // Calculate total hours based on sessions and duration
+                      const hours = Math.round((sessions * duration) / 60);
+
+                      setEditingStudent({
+                        ...editingStudent,
+                        sessionDuration: duration,
+                        totalHours: hours
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select duration">
+                        {editingStudent?.sessionDuration ? `${editingStudent.sessionDuration} Minutes` : "Select duration"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="45">45 Minutes</SelectItem>
+                      <SelectItem value="60">60 Minutes</SelectItem>
+                      <SelectItem value="75">75 Minutes</SelectItem>
+                      <SelectItem value="90">90 Minutes</SelectItem>
+                      <SelectItem value="120">120 Minutes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-start-date">Session Starting Date *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !editingStudent.startDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editingStudent.startDate ? format(new Date(editingStudent.startDate), "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={editingStudent.startDate ? new Date(editingStudent.startDate) : undefined}
+                        onSelect={(date) => {
+                          const startDate = date ? date.toISOString().split('T')[0] : '';
+                          // Calculate end date based on starting date and total sessions
+                          let endDate = startDate ? new Date(startDate) : null;
+                          if (endDate && editingStudent.totalSessions) {
+                            endDate.setDate(endDate.getDate() + editingStudent.totalSessions - 1);
+                          }
+
+                          setEditingStudent({
+                            ...editingStudent,
+                            startDate,
+                            endDate: endDate ? endDate.toISOString().split('T')[0] : ''
+                          });
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-end-date">Session Ending Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal bg-muted",
+                          !editingStudent.endDate && "text-muted-foreground"
+                        )}
+                        disabled
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editingStudent.endDate ? format(new Date(editingStudent.endDate), "PPP") : <span>Auto-calculated</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={editingStudent.endDate ? new Date(editingStudent.endDate) : undefined}
+                        disabled
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => {
+              setIsEditStudentOpen(false);
+              setEditingStudent(null);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              handleEditStudent(editingStudent);
+              setIsEditStudentOpen(false);
+              setEditingStudent(null);
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Student Dialog */}
+      <Dialog open={isAddingStudent} onOpenChange={setIsAddingStudent}>
+        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">Add New Student</DialogTitle>
+            <DialogDescription>
+              Fill in the student details below. All fields marked with * are required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="student-id">Student ID</Label>
+                <Input
+                  id="student-id"
+                  value={newStudent.id}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  value={newStudent.name}
+                  onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                  placeholder="Enter student's full name"
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newStudent.email}
+                  onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                  placeholder="student@example.com"
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={newStudent.phone}
+                  onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
+                  placeholder="+91 98765 43210"
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="mentor">Assigned Mentor *</Label>
+                <Input
+                  id="mentor"
+                  value={selectedMentor?.name || ""}
+                  disabled
+                  className="w-full bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status *</Label>
+                <Select
+                  value={newStudent.status}
+                  onValueChange={(value) => setNewStudent({ ...newStudent, status: value as "active" | "inactive" })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="total-sessions">Total Sessions *</Label>
+                <Input
+                  id="total-sessions"
+                  type="number"
+                  min="0"
+                  value={newStudent.totalSessions}
+                  onChange={(e) => {
+                    const sessions = parseInt(e.target.value);
+                    const duration = newStudent.sessionDuration || 60;
+                    const hours = Math.round((sessions * duration) / 60);
+
+                    let endDate = newStudent.startDate ? new Date(newStudent.startDate) : null;
+                    if (endDate) {
+                      endDate.setDate(endDate.getDate() + ((sessions - 1) * 7)); // Weekly sessions
+                    }
+
+                    setNewStudent({
+                      ...newStudent,
+                      totalSessions: sessions,
+                      totalHours: hours,
+                      endDate: endDate ? endDate.toISOString() : '',
+                      sessionsCompleted: 0,
+                      paidAmount: 0
+                    });
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="total-hours">Total Hours</Label>
+                <Input
+                  id="total-hours"
+                  type="number"
+                  min="0"
+                  value={newStudent.totalHours}
+                  disabled
+                  className="w-full bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="total-payment">Total Payment (₹) *</Label>
+                <Input
+                  id="total-payment"
+                  type="number"
+                  min="0"
+                  value={newStudent.totalPayment}
+                  onChange={(e) => setNewStudent({ ...newStudent, totalPayment: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="session-duration">Session Duration *</Label>
+                <Select
+                  value={newStudent?.sessionDuration ? newStudent.sessionDuration.toString() : "60"}
+                  onValueChange={(value) => {
+                    const duration = parseInt(value);
+                    const sessions = newStudent.totalSessions || 0;
+                    const hours = Math.round((sessions * duration) / 60);
+
+                    setNewStudent({
+                      ...newStudent,
+                      sessionDuration: duration,
+                      totalHours: hours
+                    });
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select duration">
+                      {newStudent?.sessionDuration ? `${newStudent.sessionDuration} Minutes` : "60 Minutes"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="45">45 Minutes</SelectItem>
+                    <SelectItem value="60">60 Minutes</SelectItem>
+                    <SelectItem value="75">75 Minutes</SelectItem>
+                    <SelectItem value="90">90 Minutes</SelectItem>
+                    <SelectItem value="120">120 Minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="start-date">Session Starting Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newStudent.startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newStudent.startDate ? format(new Date(newStudent.startDate), "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newStudent.startDate ? new Date(newStudent.startDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          // Calculate end date based on total sessions (assuming weekly sessions)
+                          const endDate = new Date(date);
+                          endDate.setDate(endDate.getDate() + ((newStudent.totalSessions - 1) * 7));
+
+                          setNewStudent({
+                            ...newStudent,
+                            startDate: date.toISOString(),
+                            endDate: endDate.toISOString()
+                          });
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end-date">Session Ending Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-muted",
+                        !newStudent.endDate && "text-muted-foreground"
+                      )}
+                      disabled
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newStudent.endDate ? format(new Date(newStudent.endDate), "PPP") : <span>Auto-calculated</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newStudent.endDate ? new Date(newStudent.endDate) : undefined}
+                      disabled
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsAddingStudent(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button onClick={handleAddStudent} className="w-full sm:w-auto">
+              Create Student
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Students Dialog */}
+      <Dialog open={isAssigningStudents} onOpenChange={setIsAssigningStudents}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Assign Students</DialogTitle>
+            <DialogDescription>
+              Select students to assign to {selectedMentor?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="student-select">Select Students</Label>
+              <div className="border rounded-md">
+                {students.map((student) => {
+                  const currentMentor = users.find(u => u.id === student.mentorId);
+                  const isSelected = selectedStudentsToAssign.includes(student.id);
+
+                  return (
+                    <div
+                      key={student.id}
+                      className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`student-${student.id}`}
+                          checked={isSelected}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedStudentsToAssign([...selectedStudentsToAssign, student.id]);
+                            } else {
+                              setSelectedStudentsToAssign(selectedStudentsToAssign.filter(id => id !== student.id));
+                            }
+                          }}
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{student.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {currentMentor
+                              ? `Currently assigned to: ${currentMentor.name}`
+                              : 'Not assigned to any mentor'}
+                          </span>
+                        </div>
+                      </div>
+                      <Badge variant={student.mentorId ? "default" : "outline"}>
+                        {student.mentorId ? "Assigned" : "Unassigned"}
+                      </Badge>
+                    </div>
+                  );
+                })}
+                {students.length === 0 && (
+                  <div className="p-3 text-center text-sm text-muted-foreground">
+                    No students available
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setIsAssigningStudents(false);
+              setSelectedStudentsToAssign([]);
+            }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAssignStudents}
+              disabled={selectedStudentsToAssign.length === 0}
+            >
+              {selectedStudentsToAssign.length > 0
+                ? `Assign ${selectedStudentsToAssign.length} Student${selectedStudentsToAssign.length === 1 ? '' : 's'}`
+                : 'Assign Students'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

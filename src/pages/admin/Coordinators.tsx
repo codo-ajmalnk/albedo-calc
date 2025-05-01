@@ -44,7 +44,7 @@ import {
 import { crudToasts } from "@/lib/toast";
 import { CoordinatorDialog } from "@/components/dialog/CoordinatorDialog";
 import { MentorDialog } from "@/components/dialog/MentorDialog";
-import type { Coordinator } from "@/lib/types";
+import type { Coordinator, Student } from "@/lib/types";
 
 // Import coordinator-related types
 interface NewCoordinator {
@@ -114,6 +114,29 @@ const AdminCoordinators = () => {
   const [isAssigningMentor, setIsAssigningMentor] = useState(false);
   const [selectedMentorId, setSelectedMentorId] = useState<string>("");
   const [isViewingStudents, setIsViewingStudents] = useState(false);
+  const [isAssigningStudents, setIsAssigningStudents] = useState(false);
+  const [isAddingStudent, setIsAddingStudent] = useState(false);
+  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<string[]>([]);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [students, setStudents] = useState(allStudents);
+  const [newStudent, setNewStudent] = useState<Student>({
+    id: `student${allStudents.length + 1}`,
+    name: "",
+    email: "",
+    phone: "",
+    mentorId: selectedMentor?.id || "",
+    status: "active",
+    totalSessions: 12,
+    sessionsCompleted: 0,
+    totalHours: 24,
+    totalPayment: 12000,
+    paidAmount: 0,
+    sessionsRemaining: 12,
+    progressPercentage: 0,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+    sessionDuration: 1.33
+  });
 
   const filteredCoordinators = coordinators.filter((coordinator) =>
     coordinator.name.toLowerCase().includes(search.toLowerCase())
@@ -552,6 +575,87 @@ const AdminCoordinators = () => {
     setCoordinators(users.filter((user) => user.role === "coordinator"));
   }, []);
 
+  const handleEditStudent = (student: any) => {
+    setEditingStudent(student);
+    setIsEditingMentor(true);
+  };
+
+  const handleDeleteStudent = (student: any) => {
+    try {
+      const updatedStudents = students.filter(s => s.id !== student.id);
+      setStudents(updatedStudents);
+      allStudents.splice(allStudents.findIndex(s => s.id === student.id), 1);
+      crudToasts.delete.success("Student");
+    } catch (error) {
+      crudToasts.delete.error("Student");
+    }
+  };
+
+  const handleAddStudent = () => {
+    try {
+      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
+        crudToasts.validation.error("Please fill in all required fields.");
+        return;
+      }
+
+      const updatedStudents = [...students, newStudent];
+      setStudents(updatedStudents);
+      allStudents.push(newStudent);
+      setIsAddingStudent(false);
+      setNewStudent({
+        id: `student${allStudents.length + 1}`,
+        name: "",
+        email: "",
+        phone: "",
+        mentorId: selectedMentor?.id || "",
+        status: "active",
+        totalSessions: 12,
+        sessionsCompleted: 0,
+        totalHours: 24,
+        totalPayment: 12000,
+        paidAmount: 0,
+        sessionsRemaining: 12,
+        progressPercentage: 0,
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        sessionDuration: 1.33
+      });
+      crudToasts.create.success("Student");
+    } catch (error) {
+      crudToasts.create.error("Student");
+    }
+  };
+
+  const handleAssignStudents = () => {
+    try {
+      if (selectedStudentsToAssign.length === 0) {
+        crudToasts.validation.error("Please select at least one student to assign.");
+        return;
+      }
+
+      const updatedStudents = students.map(student => {
+        if (selectedStudentsToAssign.includes(student.id)) {
+          return { ...student, mentorId: selectedMentor?.id };
+        }
+        return student;
+      });
+
+      setStudents(updatedStudents);
+      selectedStudentsToAssign.forEach(studentId => {
+        const student = allStudents.find(s => s.id === studentId);
+        if (student) {
+          student.mentorId = selectedMentor?.id;
+        }
+      });
+
+      setIsAssigningStudents(false);
+      setSelectedStudentsToAssign([]);
+      crudToasts.assign.success("Students", "mentor");
+    } catch (error) {
+      crudToasts.assign.error("Students", "mentor");
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
@@ -930,12 +1034,9 @@ const AdminCoordinators = () => {
           selectedCoordinator={selectedCoordinator}
           newMentor={newMentor}
           editingMentor={editingMentor}
-          students={allStudents}
+          students={students}
           onViewDetailsClose={() => { }}
-          onAddClose={() => {
-            console.log("Closing add mentor dialog");
-            setIsAddingMentor(false);
-          }}
+          onAddClose={() => setIsAddingMentor(false)}
           onEditClose={() => setIsEditingMentor(false)}
           onDeleteClose={() => setIsDeletingMentor(false)}
           onViewStudentsClose={() => { }}
@@ -944,6 +1045,18 @@ const AdminCoordinators = () => {
           onDeleteMentor={confirmDeleteMentor}
           setNewMentor={setNewMentor}
           setEditingMentor={setEditingMentor}
+          isAssigningStudents={isAssigningStudents}
+          isAddingStudent={isAddingStudent}
+          setIsAssigningStudents={setIsAssigningStudents}
+          setIsAddingStudent={setIsAddingStudent}
+          handleEditStudent={handleEditStudent}
+          handleDeleteStudent={handleDeleteStudent}
+          handleAddStudent={handleAddStudent}
+          handleAssignStudents={handleAssignStudents}
+          selectedStudentsToAssign={selectedStudentsToAssign}
+          setSelectedStudentsToAssign={setSelectedStudentsToAssign}
+          newStudent={newStudent}
+          setNewStudent={setNewStudent}
         />
 
         <Dialog open={isAssigningMentor} onOpenChange={setIsAssigningMentor}>
