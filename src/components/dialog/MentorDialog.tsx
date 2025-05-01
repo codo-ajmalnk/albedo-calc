@@ -680,7 +680,20 @@ export function MentorDialog({
                             <Button
                               variant="destructive"
                               size="sm"
-                              onClick={() => handleDeleteStudent(student)}
+                              onClick={() => {
+                                try {
+                                  // Update both local state and allStudents array
+                                  handleDeleteStudent(student);
+                                  // Update the allStudents array directly
+                                  const index = students.findIndex(s => s.id === student.id);
+                                  if (index !== -1) {
+                                    students.splice(index, 1);
+                                  }
+                                  crudToasts.delete.success("Student");
+                                } catch (error) {
+                                  crudToasts.delete.error("Student");
+                                }
+                              }}
                               className="h-8 w-8 p-0"
                             >
                               <Trash2 className="h-4 w-4" />

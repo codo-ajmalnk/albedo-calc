@@ -173,6 +173,7 @@ const AdminCoordinators = () => {
     const stats = generateDashboardStats(coordinatorStudents);
 
     return {
+      ...stats,
       mentorCount: mentors.length,
       studentCount: coordinatorStudents.length,
       totalSessions,
@@ -181,7 +182,6 @@ const AdminCoordinators = () => {
       completedHours: Math.round(completedHours),
       sessionProgress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0,
       hoursProgress: totalHours > 0 ? Math.floor((completedHours / totalHours) * 100) : 0,
-      overallProgress: stats.overallProgress,
       activeStudents: coordinatorStudents.filter(s => s.status === 'active').length,
       completedPayments: stats.completedPayments,
       pendingPayments: stats.pendingPayments,
@@ -913,6 +913,8 @@ const AdminCoordinators = () => {
           selectedCoordinator={asCoordinator(selectedCoordinator?.user)}
           newCoordinator={newCoordinator}
           editingCoordinator={editingCoordinator}
+          stats={selectedCoordinator?.stats}
+          allStudents={allStudents}
           onViewDetailsClose={closeAllDialogs}
           onAddClose={closeAllDialogs}
           onEditClose={closeAllDialogs}
@@ -994,7 +996,7 @@ const AdminCoordinators = () => {
                           <Edit className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                         </Button>
-                        <Button
+                        {/* <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDeleteMentor(mentor)}
@@ -1002,7 +1004,7 @@ const AdminCoordinators = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Delete</span>
-                        </Button>
+                        </Button> */}
                         </div>
                       </TableCell>
                     </TableRow>

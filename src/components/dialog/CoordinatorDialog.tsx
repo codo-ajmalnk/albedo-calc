@@ -58,6 +58,7 @@ interface CoordinatorDialogProps {
     hoursProgress: number;
     paymentsProgress: number;
   };
+  allStudents: any[];
   onViewDetailsClose: () => void;
   onAddClose: () => void;
   onEditClose: () => void;
@@ -86,6 +87,7 @@ export function CoordinatorDialog({
   newCoordinator,
   editingCoordinator,
   stats,
+  allStudents,
   onViewDetailsClose,
   onAddClose,
   onEditClose,
@@ -540,7 +542,27 @@ export function CoordinatorDialog({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={onDeleteCoordinator}
+              onClick={() => {
+                try {
+                  // Check if coordinator has any assigned students
+                  const coordinatorStudents = allStudents.filter(student => student.mentorId === selectedCoordinator?.id);
+                  if (coordinatorStudents.length > 0) {
+                    crudToasts.validation.error("Cannot delete coordinator with assigned students. Please reassign or remove all students first.");
+                    return;
+                  }
+
+                  // Update both local state and users array
+                  onDeleteCoordinator();
+                  // Update the users array directly
+                  const index = users.findIndex(u => u.id === selectedCoordinator?.id);
+                  if (index !== -1) {
+                    users.splice(index, 1);
+                  }
+                  crudToasts.delete.success("Coordinator");
+                } catch (error) {
+                  crudToasts.delete.error("Coordinator");
+                }
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
