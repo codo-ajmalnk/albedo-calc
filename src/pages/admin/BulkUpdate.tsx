@@ -84,6 +84,7 @@ export default function BulkUpdate() {
   const [filterMentor, setFilterMentor] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [editableStudents, setEditableStudents] = useState<Record<string, Partial<Student>>>({});
 
   // Get available mentors
   const mentors = users.filter(user => user.role === "mentor");
@@ -128,6 +129,24 @@ export default function BulkUpdate() {
     setFilteredStudents(result);
   }, [searchTerm, filterMentor, filterStatus, students]);
 
+  // Initialize editable students
+  useEffect(() => {
+    const newEditableStudents: Record<string, Partial<Student>> = {};
+    students.forEach(student => {
+      newEditableStudents[student.id] = {
+        status: student.status,
+        mentorId: student.mentorId,
+        totalSessions: student.totalSessions,
+        totalHours: student.totalHours,
+        totalPayment: student.totalPayment,
+        sessionDuration: student.sessionDuration,
+        startDate: student.startDate,
+        endDate: student.endDate
+      };
+    });
+    setEditableStudents(newEditableStudents);
+  }, [students]);
+
   // Handle select all checkbox
   const handleSelectAll = () => {
     if (selectedStudents.length === filteredStudents.length) {
@@ -153,6 +172,88 @@ export default function BulkUpdate() {
     setFilterStatus(null);
   };
 
+  // Handle field change for an individual student
+  const handleFieldChange = (studentId: string, field: keyof Student, value: any) => {
+    setEditableStudents(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [field]: value,
+      }
+    }));
+  };
+
+  // Save changes for all edited students
+  const saveChanges = () => {
+    setIsUpdating(true);
+    
+    try {
+      // Create updated student objects
+      const updatedStudents = students.map(student => {
+        const editedFields = editableStudents[student.id];
+        if (!editedFields) return student;
+        
+        const updatedStudent = { ...student };
+        
+        if (editedFields.status) {
+          updatedStudent.status = editedFields.status as "active" | "inactive";
+        }
+        
+        if (editedFields.mentorId) {
+          updatedStudent.mentorId = editedFields.mentorId;
+        }
+        
+        if (editedFields.totalSessions) {
+          updatedStudent.totalSessions = Number(editedFields.totalSessions);
+          // Update related fields
+          updatedStudent.sessionsRemaining = updatedStudent.totalSessions - updatedStudent.sessionsCompleted;
+          updatedStudent.progressPercentage = Math.round((updatedStudent.sessionsCompleted / updatedStudent.totalSessions) * 100);
+        }
+        
+        if (editedFields.totalHours) {
+          updatedStudent.totalHours = Number(editedFields.totalHours);
+        }
+        
+        if (editedFields.totalPayment) {
+          updatedStudent.totalPayment = Number(editedFields.totalPayment);
+        }
+        
+        if (editedFields.sessionDuration) {
+          updatedStudent.sessionDuration = Number(editedFields.sessionDuration);
+        }
+        
+        if (editedFields.startDate) {
+          updatedStudent.startDate = editedFields.startDate;
+        }
+        
+        if (editedFields.endDate) {
+          updatedStudent.endDate = editedFields.endDate;
+        }
+        
+        return updatedStudent;
+      });
+      
+      // Update the student state
+      setStudents(updatedStudents);
+      
+      // Show success notification
+      addNotification(
+        "Update Successful", 
+        "Updated student data successfully.", 
+        "success"
+      );
+      
+    } catch (error) {
+      addNotification(
+        "Update Failed", 
+        "There was an error updating the students. Please try again.", 
+        "error"
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
   // Handle bulk update submission
   const handleBulkUpdate = (values: BulkUpdateFormValues) => {
     if (selectedStudents.length === 0) {
@@ -186,10 +287,13 @@ export default function BulkUpdate() {
         
         if (values.selectedFields.includes("status") && values.status) {
           updatedStudent.status = values.status as "active" | "inactive";
+          // Also update the editable state
+          handleFieldChange(student.id, "status", values.status);
         }
         
         if (values.selectedFields.includes("mentorId") && values.mentorId) {
           updatedStudent.mentorId = values.mentorId;
+          handleFieldChange(student.id, "mentorId", values.mentorId);
         }
         
         if (values.selectedFields.includes("totalSessions") && values.totalSessions) {
@@ -197,26 +301,32 @@ export default function BulkUpdate() {
           // Update related fields
           updatedStudent.sessionsRemaining = values.totalSessions - updatedStudent.sessionsCompleted;
           updatedStudent.progressPercentage = Math.round((updatedStudent.sessionsCompleted / values.totalSessions) * 100);
+          handleFieldChange(student.id, "totalSessions", values.totalSessions);
         }
         
         if (values.selectedFields.includes("totalHours") && values.totalHours) {
           updatedStudent.totalHours = values.totalHours;
+          handleFieldChange(student.id, "totalHours", values.totalHours);
         }
         
         if (values.selectedFields.includes("totalPayment") && values.totalPayment) {
           updatedStudent.totalPayment = values.totalPayment;
+          handleFieldChange(student.id, "totalPayment", values.totalPayment);
         }
         
         if (values.selectedFields.includes("sessionDuration") && values.sessionDuration) {
           updatedStudent.sessionDuration = values.sessionDuration;
+          handleFieldChange(student.id, "sessionDuration", values.sessionDuration);
         }
         
         if (values.selectedFields.includes("startDate") && values.startDate) {
           updatedStudent.startDate = values.startDate.toISOString();
+          handleFieldChange(student.id, "startDate", values.startDate.toISOString());
         }
         
         if (values.selectedFields.includes("endDate") && values.endDate) {
           updatedStudent.endDate = values.endDate.toISOString();
+          handleFieldChange(student.id, "endDate", values.endDate.toISOString());
         }
         
         return updatedStudent;
@@ -267,6 +377,10 @@ export default function BulkUpdate() {
               Update multiple students simultaneously
             </p>
           </div>
+          <Button onClick={saveChanges} disabled={isUpdating} className="gap-2">
+            <Save className="h-4 w-4" />
+            Save All Changes
+          </Button>
         </div>
         
         {/* Filters */}
@@ -337,9 +451,9 @@ export default function BulkUpdate() {
           </CardContent>
         </Card>
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Student Table */}
-          <Card className="w-full lg:col-span-8">
+          <Card className="w-full">
             <CardHeader className="p-3 sm:p-4 md:p-6">
               <div className="flex justify-between items-center">
                 <CardTitle>Students ({filteredStudents.length})</CardTitle>
@@ -366,23 +480,27 @@ export default function BulkUpdate() {
                     </TableHead>
                     <TableHead>Student</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Mentor</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Mentor</TableHead>
                     <TableHead>Total Sessions</TableHead>
+                    <TableHead>Total Hours</TableHead>
+                    <TableHead>Total Payment (₹)</TableHead>
+                    <TableHead>Session Duration</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredStudents.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
+                      <TableCell colSpan={11} className="h-24 text-center">
                         No students match your filters
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredStudents.map((student) => {
                       const isSelected = selectedStudents.includes(student.id);
-                      const mentor = mentors.find(m => m.id === student.mentorId);
+                      const editable = editableStudents[student.id] || {};
                       
                       return (
                         <TableRow 
@@ -400,14 +518,129 @@ export default function BulkUpdate() {
                             {student.name}
                           </TableCell>
                           <TableCell>{student.email}</TableCell>
-                          <TableCell>{student.phone}</TableCell>
-                          <TableCell>{mentor ? mentor.name : "Unassigned"}</TableCell>
                           <TableCell>
-                            <Badge variant={student.status === "active" ? "default" : "secondary"}>
-                              {student.status}
-                            </Badge>
+                            <Select
+                              value={editable.status || student.status}
+                              onValueChange={(value) => handleFieldChange(student.id, "status", value)}
+                            >
+                              <SelectTrigger className="w-full h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </TableCell>
-                          <TableCell>{student.totalSessions}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={editable.mentorId || student.mentorId}
+                              onValueChange={(value) => handleFieldChange(student.id, "mentorId", value)}
+                            >
+                              <SelectTrigger className="w-full h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {mentors.map((mentor) => (
+                                  <SelectItem key={mentor.id} value={mentor.id}>
+                                    {mentor.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              className="h-8 text-xs"
+                              value={editable.totalSessions || student.totalSessions}
+                              onChange={(e) => handleFieldChange(student.id, "totalSessions", parseInt(e.target.value) || 0)}
+                              min={1}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              className="h-8 text-xs"
+                              value={editable.totalHours || student.totalHours}
+                              onChange={(e) => handleFieldChange(student.id, "totalHours", parseInt(e.target.value) || 0)}
+                              min={1}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              className="h-8 text-xs"
+                              value={editable.totalPayment || student.totalPayment}
+                              onChange={(e) => handleFieldChange(student.id, "totalPayment", parseInt(e.target.value) || 0)}
+                              min={0}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={(editable.sessionDuration || student.sessionDuration).toString()}
+                              onValueChange={(value) => handleFieldChange(student.id, "sessionDuration", parseInt(value))}
+                            >
+                              <SelectTrigger className="w-full h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="30">30 Minutes</SelectItem>
+                                <SelectItem value="45">45 Minutes</SelectItem>
+                                <SelectItem value="60">60 Minutes</SelectItem>
+                                <SelectItem value="90">90 Minutes</SelectItem>
+                                <SelectItem value="120">120 Minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant={"outline"}
+                                  className="w-full h-8 text-xs font-normal"
+                                >
+                                  {editable.startDate ? format(new Date(editable.startDate), "dd/MM/yy") : 
+                                   student.startDate ? format(new Date(student.startDate), "dd/MM/yy") : 
+                                   "Pick date"}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={editable.startDate ? new Date(editable.startDate) : 
+                                            student.startDate ? new Date(student.startDate) : undefined}
+                                  onSelect={(date) => handleFieldChange(student.id, "startDate", date ? date.toISOString() : '')}
+                                  initialFocus
+                                  className="p-3 pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </TableCell>
+                          <TableCell>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant={"outline"}
+                                  className="w-full h-8 text-xs font-normal"
+                                >
+                                  {editable.endDate ? format(new Date(editable.endDate), "dd/MM/yy") : 
+                                   student.endDate ? format(new Date(student.endDate), "dd/MM/yy") : 
+                                   "Pick date"}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={editable.endDate ? new Date(editable.endDate) : 
+                                            student.endDate ? new Date(student.endDate) : undefined}
+                                  onSelect={(date) => handleFieldChange(student.id, "endDate", date ? date.toISOString() : '')}
+                                  initialFocus
+                                  className="p-3 pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -418,16 +651,16 @@ export default function BulkUpdate() {
           </Card>
           
           {/* Bulk Update Form */}
-          <Card className="w-full lg:col-span-4">
+          <Card className="w-full">
             <CardHeader className="p-3 sm:p-4 md:p-6">
-              <CardTitle>Bulk Update</CardTitle>
+              <CardTitle>Bulk Update Selected Students</CardTitle>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 md:p-6 pt-0 space-y-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleBulkUpdate)} className="space-y-6">
                   <div className="space-y-3">
                     <FormLabel>Select fields to update</FormLabel>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {["status", "mentorId", "totalSessions", "totalHours", "totalPayment", "sessionDuration", "startDate", "endDate"].map((field) => (
                         <div key={field} className="flex items-center space-x-2">
                           <Checkbox
@@ -458,239 +691,241 @@ export default function BulkUpdate() {
                     </div>
                   </div>
 
-                  {form.watch("selectedFields").includes("status") && (
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Status</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="active">Active</SelectItem>
-                              <SelectItem value="inactive">Inactive</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {form.watch("selectedFields").includes("mentorId") && (
-                    <FormField
-                      control={form.control}
-                      name="mentorId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Assigned Mentor</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select mentor" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {mentors.map((mentor) => (
-                                <SelectItem key={mentor.id} value={mentor.id}>
-                                  {mentor.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {form.watch("selectedFields").includes("totalSessions") && (
-                    <FormField
-                      control={form.control}
-                      name="totalSessions"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Total Sessions</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="1"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {form.watch("selectedFields").includes("totalHours") && (
-                    <FormField
-                      control={form.control}
-                      name="totalHours"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Total Hours</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="1"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {form.watch("selectedFields").includes("totalPayment") && (
-                    <FormField
-                      control={form.control}
-                      name="totalPayment"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Total Payment (₹)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="0"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {form.watch("selectedFields").includes("sessionDuration") && (
-                    <FormField
-                      control={form.control}
-                      name="sessionDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Session Duration (minutes)</FormLabel>
-                          <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
-                            defaultValue={field.value?.toString()}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select duration" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="30">30 Minutes</SelectItem>
-                              <SelectItem value="45">45 Minutes</SelectItem>
-                              <SelectItem value="60">60 Minutes</SelectItem>
-                              <SelectItem value="90">90 Minutes</SelectItem>
-                              <SelectItem value="120">120 Minutes</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {form.watch("selectedFields").includes("startDate") && (
-                    <FormField
-                      control={form.control}
-                      name="startDate"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Session Starting Date</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {form.watch("selectedFields").includes("status") && (
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Status</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
                               </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                                className="p-3 pointer-events-auto"
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="inactive">Inactive</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
-                  {form.watch("selectedFields").includes("endDate") && (
-                    <FormField
-                      control={form.control}
-                      name="endDate"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Session Ending Date</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
+                    {form.watch("selectedFields").includes("mentorId") && (
+                      <FormField
+                        control={form.control}
+                        name="mentorId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Assigned Mentor</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select mentor" />
+                                </SelectTrigger>
                               </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                                className="p-3 pointer-events-auto"
+                              <SelectContent>
+                                {mentors.map((mentor) => (
+                                  <SelectItem key={mentor.id} value={mentor.id}>
+                                    {mentor.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("selectedFields").includes("totalSessions") && (
+                      <FormField
+                        control={form.control}
+                        name="totalSessions"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Total Sessions</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
                               />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("selectedFields").includes("totalHours") && (
+                      <FormField
+                        control={form.control}
+                        name="totalHours"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Total Hours</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="1"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("selectedFields").includes("totalPayment") && (
+                      <FormField
+                        control={form.control}
+                        name="totalPayment"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Total Payment (₹)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("selectedFields").includes("sessionDuration") && (
+                      <FormField
+                        control={form.control}
+                        name="sessionDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Session Duration (minutes)</FormLabel>
+                            <Select
+                              onValueChange={(value) => field.onChange(parseInt(value))}
+                              defaultValue={field.value?.toString()}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select duration" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="30">30 Minutes</SelectItem>
+                                <SelectItem value="45">45 Minutes</SelectItem>
+                                <SelectItem value="60">60 Minutes</SelectItem>
+                                <SelectItem value="90">90 Minutes</SelectItem>
+                                <SelectItem value="120">120 Minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("selectedFields").includes("startDate") && (
+                      <FormField
+                        control={form.control}
+                        name="startDate"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Session Starting Date</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  initialFocus
+                                  className="p-3 pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch("selectedFields").includes("endDate") && (
+                      <FormField
+                        control={form.control}
+                        name="endDate"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel>Session Ending Date</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  initialFocus
+                                  className="p-3 pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
 
                   <div className="pt-4 space-x-2 flex justify-end">
                     <Button
@@ -713,7 +948,7 @@ export default function BulkUpdate() {
                       className="gap-2"
                     >
                       <Save className="h-4 w-4" />
-                      Save Changes
+                      Update Selected
                     </Button>
                   </div>
                 </form>
@@ -725,4 +960,3 @@ export default function BulkUpdate() {
     </DashboardLayout>
   );
 }
-
