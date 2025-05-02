@@ -301,14 +301,14 @@ export default function BulkUpdate() {
               <div className="space-y-2">
                 <Label>Filter by Mentor</Label>
                 <Select
-                  value={filterMentor || ""}
-                  onValueChange={(value) => setFilterMentor(value || null)}
+                  value={filterMentor || "all"}
+                  onValueChange={(value) => setFilterMentor(value === "all" ? null : value)}
                 >
                   <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="Select Mentor" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Mentors</SelectItem>
+                    <SelectItem value="all">All Mentors</SelectItem>
                     {mentors.map((mentor) => (
                       <SelectItem key={mentor.id} value={mentor.id}>
                         {mentor.name}
@@ -320,14 +320,14 @@ export default function BulkUpdate() {
               <div className="space-y-2">
                 <Label>Filter by Status</Label>
                 <Select
-                  value={filterStatus || ""}
-                  onValueChange={(value) => setFilterStatus(value || null)}
+                  value={filterStatus || "all"}
+                  onValueChange={(value) => setFilterStatus(value === "all" ? null : value)}
                 >
                   <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
@@ -725,3 +725,4 @@ export default function BulkUpdate() {
     </DashboardLayout>
   );
 }
+

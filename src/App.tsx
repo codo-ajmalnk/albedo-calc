@@ -87,6 +87,14 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route
+                path="/admin/batches"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "coordinator"]}>
+                    <AdminBulkUpdate />
+                  </ProtectedRoute>
+                }
+              />
               
               {/* Coordinator Routes */}
               <Route 
