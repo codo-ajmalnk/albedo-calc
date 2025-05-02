@@ -288,18 +288,8 @@ const AdminCoordinators = () => {
   };
 
   const handleDeleteCoordinator = (coordinator: User) => {
-    // Check if coordinator has any assigned mentors
-    const coordinatorMentors = users.filter(user => 
-      user.role === "mentor" && 
-      user.supervisorId === coordinator.id
-    );
-
-    if (coordinatorMentors.length > 0) {
-      crudToasts.validation.error("Cannot delete coordinator with assigned mentors. Please reassign or remove all mentors first.");
-      return;
-    }
-
-    setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
+    const stats = getCoordinatorStats(coordinator.id);
+    setSelectedCoordinator({ user: coordinator, stats });
     setActiveDialog("delete");
   };
 
@@ -307,28 +297,14 @@ const AdminCoordinators = () => {
     if (!selectedCoordinator) return;
 
     try {
-      // Check if coordinator has any assigned mentors one more time
-      const coordinatorMentors = users.filter(user => 
-        user.role === "mentor" && 
-        user.supervisorId === selectedCoordinator.user.id
-      );
-
-      if (coordinatorMentors.length > 0) {
-        crudToasts.validation.error("Cannot delete coordinator. Please reassign or remove all assigned mentors first.");
-        return;
-      }
-
-      // Remove from users array
+      // Remove from users array first
       const userIndex = users.findIndex((u) => u.id === selectedCoordinator.user.id);
       if (userIndex !== -1) {
         users.splice(userIndex, 1);
       }
 
       // Update local coordinators state
-      const updatedCoordinators = coordinators.filter(
-        (c) => c.id !== selectedCoordinator.user.id
-      );
-      setCoordinators(updatedCoordinators);
+      setCoordinators(prev => prev.filter(c => c.id !== selectedCoordinator.user.id));
 
       // Close dialog and reset selected coordinator
       setActiveDialog(null);
@@ -880,11 +856,8 @@ const AdminCoordinators = () => {
                         variant="destructive"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
-                        onClick={() => {
-                          handleDeleteCoordinator(coordinator);
-                          setSelectedCoordinator(null);
-                        }}
-                        disabled={users.filter(user => user.role === "mentor" && user.supervisorId === coordinator.id).length > 0}
+                        onClick={() => handleDeleteCoordinator(coordinator)}
+                        disabled={getCoordinatorStats(coordinator.id).mentorCount > 0}
                       >
                         <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                         Delete
