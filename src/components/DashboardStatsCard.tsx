@@ -13,11 +13,13 @@ const DashboardStatsCard = ({ stats, title }: DashboardStatsCardProps) => {
   const formatCurrency = (num: number) => `₹${num.toLocaleString()}`;
   
   const calculateProgress = (completed: number, total: number) => {
-    return total > 0 ? Math.round((completed / total) * 100) : 0;
+    if (total <= 0) return 0;
+    const progress = Math.round((completed / total) * 100);
+    return Math.min(Math.max(progress, 0), 100); // Clamp between 0 and 100
   };
 
   const sessionsProgress = calculateProgress(stats.completedSessions, stats.totalSessions);
-  const hoursProgress = calculateProgress(stats.completedHours, stats.totalHours);
+  const hoursProgress = calculateProgress(stats.completedHours, Math.max(stats.totalHours, stats.completedHours)); // Ensure total is at least completed
   const paymentsProgress = calculateProgress(stats.completedPayments, stats.totalPayments);
 
   return (
