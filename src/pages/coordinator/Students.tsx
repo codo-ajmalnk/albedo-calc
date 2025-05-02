@@ -51,17 +51,21 @@ const CoordinatorStudents = () => {
     email: "",
     phone: "",
     mentorId: "",
-    status: "active" as const,
+    status: "active",
     totalSessions: 12,
     sessionsCompleted: 0,
     totalHours: 24,
+    completedHours: 0,
     totalPayment: 12000,
     paidAmount: 0,
+    teachersPayment: 0,
+    hourlyPayment: 0,
+    sessionDuration: 60,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+    sessionAddedOn: new Date().toISOString(),
     sessionsRemaining: 12,
-    progressPercentage: 0,
-    startDate: "",
-    endDate: "",
-    sessionDuration: 60
+    progressPercentage: 0
   });
 
   if (!user) return null;
