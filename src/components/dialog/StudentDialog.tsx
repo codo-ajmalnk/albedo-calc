@@ -158,7 +158,7 @@ export function StudentDialog({
                     <p className="text-xs sm:text-sm text-muted-foreground">hours</p>
                   </div>
                 </div>
-                <div>
+                  <div>
                   <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Session Details</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
                     <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
@@ -169,11 +169,11 @@ export function StudentDialog({
                             <div>{format(new Date(selectedStudent.createdAt), "PPP")}</div>
                             <div className="text-sm text-muted-foreground">
                               {format(new Date(selectedStudent.createdAt), "p")}
-                            </div>
-                          </div>
+                      </div>
+                      </div>
                         ) : "Not available"}
                       </p>
-                    </div>
+                      </div>
                     <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
                       <span className="text-xs sm:text-sm">Session Start</span>
                       <p className="text-base sm:text-lg font-medium mt-1">
@@ -464,12 +464,12 @@ export function StudentDialog({
                     const sessions = parseInt(e.target.value);
                     const duration = newStudent.sessionDuration || 60;
                     const hours = Math.round((sessions * duration) / 60);
-
+                    
                     let endDate = newStudent.startDate ? new Date(newStudent.startDate) : null;
                     if (endDate) {
                       endDate.setDate(endDate.getDate() + ((sessions - 1) * 7)); // Weekly sessions
                     }
-
+                    
                     setNewStudent({
                       ...newStudent,
                       totalSessions: sessions,
@@ -515,7 +515,7 @@ export function StudentDialog({
                     const duration = parseInt(value);
                     const sessions = newStudent.totalSessions || 0;
                     const hours = Math.round((sessions * duration) / 60);
-
+                    
                     setNewStudent({
                       ...newStudent,
                       sessionDuration: duration,
@@ -561,7 +561,7 @@ export function StudentDialog({
                           // Calculate end date based on total sessions (assuming weekly sessions)
                           const endDate = new Date(date);
                           endDate.setDate(endDate.getDate() + ((newStudent.totalSessions - 1) * 7));
-
+                          
                           setNewStudent({
                             ...newStudent,
                             startDate: date.toISOString(),
@@ -784,11 +784,17 @@ export function StudentDialog({
                       id="edit-total-hours"
                       type="number"
                       min="0"
-                      value={editingStudent.totalHours}
-                      onChange={e => setEditingStudent({
+                      step="any"
+                      value={editingStudent.totalHours === undefined || editingStudent.totalHours === null ? '' : editingStudent.totalHours}
+                      placeholder={((editingStudent.totalSessions || 0) * (editingStudent.sessionDuration || 0) / 60).toFixed(2)}
+                      onChange={e => {
+                        let value = parseFloat(e.target.value);
+                        if (isNaN(value)) value = undefined;
+                        setEditingStudent({
                         ...editingStudent,
-                        totalHours: parseInt(e.target.value) || 0
-                      })}
+                          totalHours: value
+                        });
+                      }}
                       className="w-full"
                     />
                   </div>
@@ -798,10 +804,19 @@ export function StudentDialog({
                       id="edit-completed-hours"
                       type="number"
                       min="0"
-                      value={editingStudent.completedHours || Math.round((editingStudent.sessionsCompleted * editingStudent.sessionDuration) / 60)}
+                      step="any"
+                      value={
+                        editingStudent.completedHours === undefined || editingStudent.completedHours === null || editingStudent.completedHours === ''
+                          ? ((editingStudent.sessionsCompleted || 0) * (editingStudent.sessionDuration || 0) / 60).toFixed(2)
+                          : editingStudent.completedHours
+                      }
                       onChange={e => {
-                        let value = parseInt(e.target.value) || 0;
-                        if (value > editingStudent.totalHours) value = editingStudent.totalHours;
+                        let value = parseFloat(e.target.value);
+                        let total = editingStudent.totalHours !== undefined && editingStudent.totalHours !== null
+                          ? editingStudent.totalHours
+                          : (editingStudent.totalSessions || 0) * (editingStudent.sessionDuration || 0) / 60;
+                        if (isNaN(value)) value = undefined;
+                        if (value > total) value = total;
                         setEditingStudent({
                           ...editingStudent,
                           completedHours: value
@@ -813,7 +828,15 @@ export function StudentDialog({
                   <div className="space-y-2">
                     <Label>Pending Hours</Label>
                     <Input
-                      value={(editingStudent.totalHours - (editingStudent.completedHours ?? Math.round((editingStudent.sessionsCompleted * editingStudent.sessionDuration) / 60)))}
+                      value={
+                        ((editingStudent.totalHours !== undefined && editingStudent.totalHours !== null
+                          ? editingStudent.totalHours
+                          : (editingStudent.totalSessions || 0) * (editingStudent.sessionDuration || 0) / 60)
+                        - (editingStudent.completedHours !== undefined && editingStudent.completedHours !== null
+                          ? editingStudent.completedHours
+                          : (editingStudent.sessionsCompleted || 0) * (editingStudent.sessionDuration || 0) / 60)
+                        ).toFixed(2)
+                      }
                       disabled
                       className="w-full bg-muted"
                     />
@@ -874,7 +897,7 @@ export function StudentDialog({
                         const sessions = editingStudent.totalSessions || 0;
                         // Calculate total hours based on sessions and duration
                         const hours = Math.round((sessions * duration) / 60);
-
+                        
                         setEditingStudent({
                           ...editingStudent,
                           sessionDuration: duration,
@@ -913,7 +936,9 @@ export function StudentDialog({
                   <div className="space-y-2">
                     <Label>Class Taken Amount (₹)</Label>
                     <Input
-                      value={((editingStudent.hourlyPayment || 0) * (editingStudent.completedHours || Math.round((editingStudent.sessionsCompleted * editingStudent.sessionDuration) / 60)))}
+                      value={((editingStudent.hourlyPayment || 0) * (editingStudent.completedHours !== undefined && editingStudent.completedHours !== null
+                        ? editingStudent.completedHours
+                        : (editingStudent.sessionsCompleted || 0) * (editingStudent.sessionDuration || 0) / 60)).toFixed(2)}
                       disabled
                       className="w-full bg-muted"
                     />
