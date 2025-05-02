@@ -73,6 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/admin/coordinators">Coordinators</NavLink>
             <NavLink to="/admin/mentors">Mentors</NavLink>
             <NavLink to="/admin/students">Students</NavLink>
+            <NavLink to="/admin/bulk-update">Bulk Update</NavLink>
             <NavLink to="/admin/notification-settings">Notifications</NavLink>
           </>
         );
@@ -82,6 +83,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/coordinator">Dashboard</NavLink>
             <NavLink to="/coordinator/mentors">My Mentors</NavLink>
             <NavLink to="/coordinator/students">All Students</NavLink>
+            <NavLink to="/admin/bulk-update">Bulk Update</NavLink>
           </>
         );
       case "mentor":
