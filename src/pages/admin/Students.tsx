@@ -27,7 +27,7 @@ const currentUser: User = {
 
 export default function Students() {
   const navigate = useNavigate();
-  
+
   // Filter mentors based on coordinator access
   const mentors = users.filter(user => {
     if (currentUser.role === "admin") return user.role === "mentor";
@@ -39,16 +39,16 @@ export default function Students() {
   // Filter students based on access control
   const getAccessibleStudents = () => {
     if (currentUser.role === "admin") return allStudents;
-    
+
     if (currentUser.role === "coordinator") {
       const mentorIds = mentors.map(mentor => mentor.id);
       return allStudents.filter(student => mentorIds.includes(student.mentorId));
     }
-    
+
     if (currentUser.role === "mentor") {
       return allStudents.filter(student => student.mentorId === currentUser.id);
     }
-    
+
     return [];
   };
 
@@ -91,12 +91,12 @@ export default function Students() {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMentor = !selectedMentor || student.mentorId === selectedMentor.id;
-    
+
     // Additional access control check
     if (currentUser.role === "mentor") {
       return student.mentorId === currentUser.id && matchesSearch;
     }
-    
+
     return matchesSearch && matchesMentor;
   });
 
@@ -157,7 +157,7 @@ export default function Students() {
 
     try {
       setStudents(students.map(student =>
-        selectedStudentsToAssign.includes(student.id) 
+        selectedStudentsToAssign.includes(student.id)
           ? { ...student, mentorId: selectedMentor.id }
           : student
       ));
@@ -250,11 +250,11 @@ export default function Students() {
           <div>
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Students Management</h1>
             <p className="text-muted-foreground">
-              {currentUser.role === "mentor" 
+              {currentUser.role === "mentor"
                 ? "Manage and track your students' progress"
                 : currentUser.role === "coordinator"
-                ? "Manage and track your team's students"
-                : "Manage and track all students"}
+                  ? "Manage and track your team's students"
+                  : "Manage and track all students"}
             </p>
           </div>
           {(currentUser.role === "admin" || currentUser.role === "coordinator") && (
@@ -341,9 +341,9 @@ export default function Students() {
               </TableRow>
             </TableHeader>
             <TableBody>
-          {filteredStudents.map((student) => {
+              {filteredStudents.map((student) => {
                 const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-            return (
+                return (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.id}</TableCell>
                     <TableCell>
@@ -360,7 +360,7 @@ export default function Students() {
                       <Badge
                         variant={student.status === "active" ? "default" : "secondary"}
                       >
-                          {student.status}
+                        {student.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -374,33 +374,33 @@ export default function Students() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                      <Button
+                        <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleViewDetails(student)}
                         >
                           <Users className="h-4 w-4" />
-                      </Button>
-                      <Button
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEdit(student)}
                         >
                           <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDelete(student)}
                         >
                           <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
-            );
-          })}
-          {filteredStudents.length === 0 && (
+                );
+              })}
+              {filteredStudents.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center gap-1">
@@ -413,7 +413,7 @@ export default function Students() {
               )}
             </TableBody>
           </Table>
-            </div>
+        </div>
 
         <StudentDialog
           isViewDetailsOpen={isViewDetailsOpen}
@@ -450,7 +450,7 @@ export default function Students() {
           onEditStudent={handleEdit}
           currentUser={currentUser}
         />
-                </div>
+      </div>
     </DashboardLayout>
   );
 }

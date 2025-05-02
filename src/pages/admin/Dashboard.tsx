@@ -27,7 +27,7 @@ const COLORS = {
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(generateDashboardStats());
-  
+
   // Prepare pie chart data
   const sessionsPieData = [
     { name: "Completed", value: stats.completedSessions, color: COLORS.completed },
@@ -45,7 +45,7 @@ const AdminDashboard = () => {
     { name: "Completed", value: stats.completedPayments, color: COLORS.completed },
     { name: "Pending", value: stats.pendingPayments, color: COLORS.pending },
   ];
-  
+
   // Generate data for mentor charts
   const mentorData = users
     .filter(user => user.role === "mentor")
@@ -69,7 +69,7 @@ const AdminDashboard = () => {
         (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
         0
       );
-      
+
       return {
         name: mentor.name,
         students: mentorStudents.length,
@@ -88,12 +88,12 @@ const AdminDashboard = () => {
       const coordinatorMentors = users.filter(
         user => user.role === "mentor" && user.supervisorId === coordinator.id
       );
-      
+
       const mentorIds = coordinatorMentors.map(mentor => mentor.id);
       const coordinatorStudents = students.filter(
         student => mentorIds.includes(student.mentorId)
       );
-      
+
       const totalSessions = coordinatorStudents.reduce(
         (sum, student) => sum + student.totalSessions,
         0
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
         (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
         0
       );
-      
+
       return {
         name: coordinator.name,
         mentors: coordinatorMentors.length,
@@ -122,33 +122,33 @@ const AdminDashboard = () => {
         progress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0
       };
     });
-  
+
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  
+
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="white" 
-        textAnchor={x > cx ? 'start' : 'end'} 
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
-  
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* <h1 className="text-2xl font-bold">Admin Dashboard</h1> */}
-        
+
         <DashboardStatsCard stats={stats} title="System Overview" />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -261,7 +261,7 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Hours Overview</CardTitle>
@@ -311,7 +311,7 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Payments Overview</CardTitle>
@@ -334,13 +334,13 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <Tabs defaultValue="mentors">
           <TabsList>
             <TabsTrigger value="mentors">Mentor Performance</TabsTrigger>
             <TabsTrigger value="coordinators">Coordinator Performance</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="mentors" className="mt-4">
             <Card>
               <CardHeader>
@@ -360,7 +360,7 @@ const AdminDashboard = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            
+
             <div className="mt-6">
               <Card>
                 <CardHeader>
@@ -383,7 +383,7 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="w-full bg-gray-200 h-2.5 rounded-full">
-                          <div 
+                          <div
                             className="bg-primary h-2.5 rounded-full"
                             style={{ width: `${mentor.progress}%` }}
                           />
@@ -398,7 +398,7 @@ const AdminDashboard = () => {
               </Card>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="coordinators" className="mt-4">
             <Card>
               <CardHeader>
@@ -418,7 +418,7 @@ const AdminDashboard = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            
+
             <div className="mt-6">
               <Card>
                 <CardHeader>
@@ -441,7 +441,7 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="w-full bg-gray-200 h-2.5 rounded-full">
-                          <div 
+                          <div
                             className="bg-primary h-2.5 rounded-full"
                             style={{ width: `${coordinator.progress}%` }}
                           />

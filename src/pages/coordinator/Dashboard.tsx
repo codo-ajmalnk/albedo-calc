@@ -28,21 +28,21 @@ const COLORS = {
 
 const CoordinatorDashboard = () => {
   const { user } = useAuth();
-  
+
   if (!user) return null;
-  
+
   // Get mentors under this coordinator
   const mentors = users.filter(
     (u) => u.role === "mentor" && u.supervisorId === user.id
   );
-  
+
   const mentorIds = mentors.map((mentor) => mentor.id);
-  
+
   // Get students under those mentors
   const myStudents = allStudents.filter((student) =>
     mentorIds.includes(student.mentorId)
   );
-  
+
   // Generate stats for these students
   const stats = generateDashboardStats(myStudents);
 
@@ -63,13 +63,13 @@ const CoordinatorDashboard = () => {
     { name: "Completed", value: stats.completedPayments, color: COLORS.completed },
     { name: "Pending", value: stats.pendingPayments, color: COLORS.pending },
   ];
-  
+
   // Generate performance data for mentors
   const mentorPerformanceData = mentors.map(mentor => {
     const mentorStudents = myStudents.filter(
       student => student.mentorId === mentor.id
     );
-    
+
     const totalSessions = mentorStudents.reduce(
       (sum, student) => sum + student.totalSessions,
       0
@@ -86,7 +86,7 @@ const CoordinatorDashboard = () => {
       (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
       0
     );
-    
+
     return {
       name: mentor.name,
       students: mentorStudents.length,
@@ -104,25 +104,25 @@ const CoordinatorDashboard = () => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  
+
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="white" 
-        textAnchor={x > cx ? 'start' : 'end'} 
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
-  
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <DashboardStatsCard stats={stats} title="My Team Overview" />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -235,7 +235,7 @@ const CoordinatorDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Hours Overview</CardTitle>
@@ -289,7 +289,7 @@ const CoordinatorDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Payments Overview</CardTitle>
@@ -318,13 +318,13 @@ const CoordinatorDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <Tabs defaultValue="overview">
           <TabsList>
             <TabsTrigger value="overview">Team Performance</TabsTrigger>
             <TabsTrigger value="details">Mentor Details</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="overview" className="mt-4">
             <Card>
               <CardHeader>
@@ -345,7 +345,7 @@ const CoordinatorDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="details" className="mt-4">
             <Card>
               <CardHeader>
@@ -368,7 +368,7 @@ const CoordinatorDashboard = () => {
                         </div>
                       </div>
                       <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="bg-primary h-2.5 rounded-full transition-all duration-300"
                           style={{ width: `${mentor.progress}%` }}
                         />

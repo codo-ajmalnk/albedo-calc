@@ -63,27 +63,27 @@ const CoordinatorStudents = () => {
     endDate: "",
     sessionDuration: 60
   });
-  
+
   if (!user) return null;
-  
+
   // Get mentors under this coordinator
   const myMentors = users.filter(
     (u) => u.role === "mentor" && u.supervisorId === user.id
   );
-  
+
   const mentorIds = myMentors.map((mentor) => mentor.id);
-  
+
   // Filter students under those mentors
-  const myStudents = students.filter((student) => 
+  const myStudents = students.filter((student) =>
     mentorIds.includes(student.mentorId)
   );
-  
+
   const filteredStudents = myStudents.filter((student) => {
     const matchesSearch = student.name.toLowerCase().includes(search.toLowerCase());
     const matchesMentor = mentorFilter === "all" || student.mentorId === mentorFilter;
     return matchesSearch && matchesMentor;
   });
-  
+
   const getMentorName = (mentorId: string) => {
     const mentor = users.find((user) => user.id === mentorId);
     return mentor ? mentor.name : "Unknown Mentor";
@@ -117,7 +117,7 @@ const CoordinatorStudents = () => {
 
   const handleUpdateStudent = () => {
     if (!editingStudent) return;
-    
+
     try {
       setStudents(students.map(student =>
         student.id === editingStudent.id ? editingStudent : student
@@ -132,7 +132,7 @@ const CoordinatorStudents = () => {
 
   const confirmDeleteStudent = () => {
     if (!selectedStudent) return;
-    
+
     try {
       setStudents(students.filter(student => student.id !== selectedStudent.id));
       setIsDeletingStudent(false);
@@ -197,7 +197,7 @@ const CoordinatorStudents = () => {
       crudToasts.unassign.error("Student", "Mentor");
     }
   };
-  
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
@@ -211,7 +211,7 @@ const CoordinatorStudents = () => {
             Add Student
           </Button>
         </div>
-        
+
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
             <CardTitle>Filter Students</CardTitle>
@@ -221,12 +221,12 @@ const CoordinatorStudents = () => {
               <div className="space-y-2">
                 <Label>Search by Name</Label>
                 <div className="flex items-center gap-3">
-                <Input
-                  placeholder="Search students..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  <Input
+                    placeholder="Search students..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     className="w-full text-sm"
-                />
+                  />
                   <Button variant="outline" className="shrink-0 text-sm">
                     <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                     Search
@@ -255,7 +255,7 @@ const CoordinatorStudents = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredStudents.map((student) => {
             const stats = getStudentStats(student);
@@ -286,11 +286,10 @@ const CoordinatorStudents = () => {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Status</p>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          student.status === 'active'
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}>
+                          }`}>
                           {student.status}
                         </span>
                       </div>
@@ -304,15 +303,14 @@ const CoordinatorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.sessionProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
                         </div>
@@ -329,15 +327,14 @@ const CoordinatorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.hoursProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
                         </div>
@@ -354,15 +351,14 @@ const CoordinatorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.paymentProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.paymentProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.paymentProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.paymentProgress}%` }}
                           />
                         </div>
@@ -379,15 +375,14 @@ const CoordinatorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              stats.overallProgress === 100
+                            className={`h-2 rounded-full transition-all duration-300 ${stats.overallProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.overallProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.overallProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.overallProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.overallProgress}%` }}
                           />
                         </div>
@@ -406,8 +401,8 @@ const CoordinatorStudents = () => {
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 pt-4">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => setSelectedStudent(student)}
@@ -415,7 +410,7 @@ const CoordinatorStudents = () => {
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -439,7 +434,7 @@ const CoordinatorStudents = () => {
               </Card>
             );
           })}
-          
+
           {filteredStudents.length === 0 && (
             <div className="col-span-full text-center p-8">
               <p className="text-muted-foreground">
@@ -451,8 +446,8 @@ const CoordinatorStudents = () => {
       </div>
 
       {/* View Details Dialog */}
-      <Dialog 
-        open={!!selectedStudent && !isDeletingStudent} 
+      <Dialog
+        open={!!selectedStudent && !isDeletingStudent}
         onOpenChange={(open) => {
           if (!open) setSelectedStudent(null);
         }}
@@ -549,15 +544,14 @@ const CoordinatorStudents = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
                               ? 'bg-progress-complete'
                               : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                              ? 'bg-progress-high'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
                         />
                       </div>
@@ -570,15 +564,14 @@ const CoordinatorStudents = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
                               ? 'bg-progress-complete'
                               : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                              ? 'bg-progress-high'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
                         />
                       </div>
@@ -591,15 +584,14 @@ const CoordinatorStudents = () => {
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
                               ? 'bg-progress-complete'
                               : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
-                              ? 'bg-progress-high'
-                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}%` }}
                         />
                       </div>
@@ -608,30 +600,31 @@ const CoordinatorStudents = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>Overall Progress</span>
-                        <span>{Math.round(((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                          (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
+                        <span>{Math.round(((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                          (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
                           (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3)}%</span>
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 === 100
+                          className={`h-2 rounded-full transition-all duration-300 ${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                              (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                              (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 === 100
                               ? 'bg-progress-complete'
-                              : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                                (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
+                              : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                                (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
                                 (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 75
-                              ? 'bg-progress-high'
-                              : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                                (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                                (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
-                          style={{ width: `${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3}%` }}
+                                ? 'bg-progress-high'
+                                : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                                  (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                                  (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
+                          style={{
+                            width: `${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                              (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                              (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3}%`
+                          }}
                         />
                       </div>
                     </div>
@@ -773,7 +766,7 @@ const CoordinatorStudents = () => {
             <Button variant="outline" onClick={() => setIsAddingStudent(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleAddStudent}
               className="w-full sm:w-auto"
             >

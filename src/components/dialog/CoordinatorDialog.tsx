@@ -544,10 +544,10 @@ export function CoordinatorDialog({
             <AlertDialogAction
               onClick={() => {
                 try {
-                  // Check if coordinator has any assigned students
-                  const coordinatorStudents = allStudents.filter(student => student.mentorId === selectedCoordinator?.id);
-                  if (coordinatorStudents.length > 0) {
-                    crudToasts.validation.error("Cannot delete coordinator with assigned students. Please reassign or remove all students first.");
+                  // Check if coordinator has any assigned mentors
+                  const coordinatorMentors = users.filter(user => user.role === "mentor" && user.supervisorId === selectedCoordinator?.id);
+                  if (coordinatorMentors.length > 0) {
+                    crudToasts.validation.error("Cannot delete coordinator with assigned mentors. Please reassign or remove all mentors first.");
                     return;
                   }
 

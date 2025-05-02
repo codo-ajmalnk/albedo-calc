@@ -55,16 +55,16 @@ const MentorStudents = () => {
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     sessionDuration: 60
   });
-  
+
   if (!user) return null;
-  
+
   // Get students for this mentor
   const myStudents = students.filter((student) => student.mentorId === user.id);
-  
+
   const filteredStudents = myStudents.filter((student) =>
     student.name.toLowerCase().includes(search.toLowerCase())
   );
-  
+
   const getStudentStats = (student: Student) => {
     const sessionProgress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
     const hoursProgress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
@@ -88,7 +88,7 @@ const MentorStudents = () => {
 
   const handleUpdateStudent = () => {
     if (!editingStudent) return;
-    
+
     try {
       setStudents(students.map(student =>
         student.id === editingStudent.id ? editingStudent : student
@@ -108,7 +108,7 @@ const MentorStudents = () => {
 
   const confirmDeleteStudent = () => {
     if (!selectedStudent) return;
-    
+
     try {
       setStudents(students.filter(student => student.id !== selectedStudent.id));
       setIsDeletingStudent(false);
@@ -170,7 +170,7 @@ const MentorStudents = () => {
             Add New Student
           </Button>
         </div>
-        
+
         <Card className="w-full border-2">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -182,17 +182,17 @@ const MentorStudents = () => {
             <div className="space-y-3">
               <Label className="text-sm font-medium">Search by Name</Label>
               <div className="flex items-center gap-3">
-            <Input
+                <Input
                   placeholder="Search students..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full text-sm"
-            />
+                />
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {filteredStudents.map((student) => {
             const stats = getStudentStats(student);
@@ -211,17 +211,16 @@ const MentorStudents = () => {
                       </p>
                     </div>
                   </div>
-          </CardHeader>
+                </CardHeader>
                 <CardContent className="flex-1 p-4 sm:p-6 pt-0">
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 rounded-lg bg-muted/10">
                         <p className="text-sm text-muted-foreground mb-1">Status</p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          student.status === 'active'
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}>
+                          }`}>
                           {student.status}
                         </span>
                       </div>
@@ -239,15 +238,14 @@ const MentorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              stats.sessionProgress === 100
+                            className={`h-full rounded-full transition-all duration-500 ${stats.sessionProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
                         </div>
@@ -264,15 +262,14 @@ const MentorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              stats.hoursProgress === 100
+                            className={`h-full rounded-full transition-all duration-500 ${stats.hoursProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
                         </div>
@@ -289,15 +286,14 @@ const MentorStudents = () => {
                         </div>
                         <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              stats.paymentProgress === 100
+                            className={`h-full rounded-full transition-all duration-500 ${stats.paymentProgress === 100
                                 ? 'bg-progress-complete'
                                 : stats.paymentProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentProgress >= 40
-                                ? 'bg-progress-medium'
-                                : 'bg-progress-low'
-                            }`}
+                                  ? 'bg-progress-high'
+                                  : stats.paymentProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                              }`}
                             style={{ width: `${stats.paymentProgress}%` }}
                           />
                         </div>
@@ -320,8 +316,8 @@ const MentorStudents = () => {
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 pt-2">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm hover:bg-muted/80"
                         onClick={() => setSelectedStudent(student)}
@@ -329,7 +325,7 @@ const MentorStudents = () => {
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
                       </Button>
-                      <Button 
+                      <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm hover:bg-muted/80"
@@ -338,7 +334,7 @@ const MentorStudents = () => {
                         <Edit className="mr-1.5 h-3.5 w-3.5" />
                         Edit
                       </Button>
-                      <Button 
+                      <Button
                         variant="destructive"
                         size="sm"
                         className="w-full text-xs sm:text-sm hover:bg-destructive/90"
@@ -349,19 +345,19 @@ const MentorStudents = () => {
                       </Button>
                     </div>
                   </div>
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
             );
           })}
-          
+
           {filteredStudents.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center p-8 text-center bg-muted/10 rounded-lg border-2 border-dashed min-h-[200px]">
               <UserSearch className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground text-sm sm:text-base">
                 No students found matching your search.
               </p>
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 onClick={() => setSearch("")}
                 className="mt-2 text-sm"
               >
@@ -373,8 +369,8 @@ const MentorStudents = () => {
       </div>
 
       {/* View Details Dialog */}
-      <Dialog 
-        open={!!selectedStudent && !isDeletingStudent} 
+      <Dialog
+        open={!!selectedStudent && !isDeletingStudent}
         onOpenChange={(open) => {
           if (!open) setSelectedStudent(null);
         }}
@@ -390,11 +386,10 @@ const MentorStudents = () => {
                   {selectedStudent?.email}
                 </DialogDescription>
               </div>
-              <span className={`shrink-0 px-2.5 py-0.5 text-xs font-medium rounded-full ${
-                selectedStudent?.status === 'active'
+              <span className={`shrink-0 px-2.5 py-0.5 text-xs font-medium rounded-full ${selectedStudent?.status === 'active'
                   ? 'bg-green-100 text-green-800'
                   : 'bg-gray-100 text-gray-800'
-              }`}>
+                }`}>
                 {selectedStudent?.status}
               </span>
             </div>
@@ -421,8 +416,8 @@ const MentorStudents = () => {
                 <div className="p-4 rounded-lg bg-muted/10 text-center sm:text-left">
                   <p className="text-sm text-muted-foreground">Progress</p>
                   <p className="text-2xl font-bold mt-1">
-                    {Math.round(((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
-                      (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 + 
+                    {Math.round(((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
+                      (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
                       (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3)}%
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">overall</p>
@@ -482,15 +477,14 @@ const MentorStudents = () => {
                       </div>
                       <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
+                          className={`h-full rounded-full transition-all duration-500 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
                               ? 'bg-progress-complete'
                               : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                              ? 'bg-progress-high'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
                         />
                       </div>
@@ -503,15 +497,14 @@ const MentorStudents = () => {
                       </div>
                       <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
+                          className={`h-full rounded-full transition-all duration-500 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
                               ? 'bg-progress-complete'
                               : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                              ? 'bg-progress-high'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
                         />
                       </div>
@@ -524,15 +517,14 @@ const MentorStudents = () => {
                       </div>
                       <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
+                          className={`h-full rounded-full transition-all duration-500 ${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
                               ? 'bg-progress-complete'
                               : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
-                              ? 'bg-progress-high'
-                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
-                          }`}
+                                ? 'bg-progress-high'
+                                : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
+                            }`}
                           style={{ width: `${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}%` }}
                         />
                       </div>
@@ -649,18 +641,18 @@ const MentorStudents = () => {
             </div>
           )}
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setIsEditingStudent(false);
                 setEditingStudent(null);
-              }} 
+              }}
               className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleUpdateStudent} 
+            <Button
+              onClick={handleUpdateStudent}
               className="w-full sm:w-auto"
             >
               Save Changes
@@ -680,7 +672,7 @@ const MentorStudents = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6">
-            <AlertDialogCancel 
+            <AlertDialogCancel
               onClick={() => {
                 setIsDeletingStudent(false);
                 setSelectedStudent(null);
@@ -812,8 +804,8 @@ const MentorStudents = () => {
             }} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button 
-              onClick={handleAddStudent} 
+            <Button
+              onClick={handleAddStudent}
               className="w-full sm:w-auto"
             >
               Create Student

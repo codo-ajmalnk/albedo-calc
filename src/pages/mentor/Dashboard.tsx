@@ -31,12 +31,12 @@ const COLORS = {
 const MentorDashboard = () => {
   const { user } = useAuth();
   const [students, setStudents] = useState<Student[]>(allStudents);
-  
+
   if (!user) return null;
-  
+
   // Get students for this mentor
   const myStudents = students.filter((student) => student.mentorId === user.id);
-  
+
   // Generate stats for these students
   const stats = generateDashboardStats(myStudents);
 
@@ -64,7 +64,7 @@ const MentorDashboard = () => {
     const remainingSessions = student.totalSessions - student.sessionsCompleted;
     const completedHours = Math.round(student.totalHours * (student.sessionsCompleted / student.totalSessions));
     const remainingHours = student.totalHours - completedHours;
-    
+
     return {
       name: student.name,
       completedSessions,
@@ -74,26 +74,26 @@ const MentorDashboard = () => {
       progress: Math.floor((completedSessions / student.totalSessions) * 100)
     };
   });
-  
+
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  
+
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="white" 
-        textAnchor={x > cx ? 'start' : 'end'} 
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
-  
+
   const updateStudent = (updatedStudent: Student) => {
     setStudents((prev) =>
       prev.map((student) =>
@@ -101,12 +101,12 @@ const MentorDashboard = () => {
       )
     );
   };
-  
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <DashboardStatsCard stats={stats} title="My Students Overview" />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -219,7 +219,7 @@ const MentorDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Hours Overview</CardTitle>
@@ -271,15 +271,15 @@ const MentorDashboard = () => {
                 <div className="flex justify-between">
                   <span>Average Sessions/Student:</span>
                   <span className="font-bold">
-                    {myStudents.length > 0 
-                      ? Math.round(stats.totalSessions / myStudents.length) 
+                    {myStudents.length > 0
+                      ? Math.round(stats.totalSessions / myStudents.length)
                       : 0}
                   </span>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Payments Overview</CardTitle>
@@ -304,17 +304,17 @@ const MentorDashboard = () => {
                     {((stats.completedPayments / stats.totalPayments) * 100).toFixed(1)}%
                   </span>
                 </div>
-            </div>
+              </div>
             </CardContent>
           </Card>
         </div>
-        
+
         <Tabs defaultValue="overview">
           <TabsList>
             <TabsTrigger value="overview">Student Performance</TabsTrigger>
             <TabsTrigger value="details">Student Details</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="overview" className="mt-4">
             <Card>
               <CardHeader>
@@ -335,7 +335,7 @@ const MentorDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="details" className="mt-4">
             <Card>
               <CardHeader>
@@ -355,7 +355,7 @@ const MentorDashboard = () => {
                         </div>
                       </div>
                       <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="bg-primary h-2.5 rounded-full transition-all duration-300"
                           style={{ width: `${student.progress}%` }}
                         />

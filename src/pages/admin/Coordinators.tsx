@@ -76,7 +76,7 @@ const AdminCoordinators = () => {
 
   // Single dialog state to manage all dialogs
   const [activeDialog, setActiveDialog] = useState<"details" | "add" | "edit" | "delete" | "mentors" | "students" | null>(null);
-  
+
   const [editingCoordinator, setEditingCoordinator] = useState<EditingCoordinator | null>(null);
   const [newCoordinator, setNewCoordinator] = useState<NewCoordinator>({
     id: `coord${users.filter(u => u.role === "coordinator").length + 1}`,
@@ -288,6 +288,17 @@ const AdminCoordinators = () => {
   };
 
   const handleDeleteCoordinator = (coordinator: User) => {
+    // Check if coordinator has any assigned mentors
+    const coordinatorMentors = users.filter(user => 
+      user.role === "mentor" && 
+      user.supervisorId === coordinator.id
+    );
+
+    if (coordinatorMentors.length > 0) {
+      crudToasts.validation.error("Cannot delete coordinator with assigned mentors. Please reassign or remove all mentors first.");
+      return;
+    }
+
     setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
     setActiveDialog("delete");
   };
@@ -295,19 +306,34 @@ const AdminCoordinators = () => {
   const confirmDeleteCoordinator = () => {
     if (!selectedCoordinator) return;
 
-    // Check if coordinator has any assigned mentors
-    const assignedMentors = getAssignedMentors(selectedCoordinator.user.id);
-    if (assignedMentors.length > 0) {
-      alert(`Cannot delete coordinator. Please reassign or remove ${assignedMentors.length} assigned mentor(s) first.`);
-      return;
-    }
-
     try {
+      // Check if coordinator has any assigned mentors one more time
+      const coordinatorMentors = users.filter(user => 
+        user.role === "mentor" && 
+        user.supervisorId === selectedCoordinator.user.id
+      );
+
+      if (coordinatorMentors.length > 0) {
+        crudToasts.validation.error("Cannot delete coordinator. Please reassign or remove all assigned mentors first.");
+        return;
+      }
+
+      // Remove from users array
+      const userIndex = users.findIndex((u) => u.id === selectedCoordinator.user.id);
+      if (userIndex !== -1) {
+        users.splice(userIndex, 1);
+      }
+
+      // Update local coordinators state
       const updatedCoordinators = coordinators.filter(
         (c) => c.id !== selectedCoordinator.user.id
       );
       setCoordinators(updatedCoordinators);
+
+      // Close dialog and reset selected coordinator
       setActiveDialog(null);
+      setSelectedCoordinator(null);
+      
       crudToasts.delete.success("Coordinator");
     } catch (error) {
       crudToasts.delete.error("Coordinator");
@@ -335,7 +361,7 @@ const AdminCoordinators = () => {
 
     try {
       console.log("Attempting to create mentor:", newMentor);
-      
+
       // Validate required fields
       if (!newMentor.name || !newMentor.email || !newMentor.phone) {
         console.log("Validation failed:", newMentor);
@@ -343,31 +369,31 @@ const AdminCoordinators = () => {
         return;
       }
 
-    const mentorId = `mentor${users.filter(u => u.role === "mentor").length + 1}`;
-    const newUser: User = {
-      id: mentorId,
-      name: newMentor.name,
-      email: newMentor.email,
-      role: "mentor",
-      supervisorId: selectedCoordinator.user.id,
-      phone: newMentor.phone,
+      const mentorId = `mentor${users.filter(u => u.role === "mentor").length + 1}`;
+      const newUser: User = {
+        id: mentorId,
+        name: newMentor.name,
+        email: newMentor.email,
+        role: "mentor",
+        supervisorId: selectedCoordinator.user.id,
+        phone: newMentor.phone,
         status: newMentor.status as "active" | "inactive",
-    };
+      };
 
       console.log("Creating new mentor:", newUser);
 
       // Add the new mentor to the users array
-    users.push(newUser);
+      users.push(newUser);
       console.log("Updated users array:", users);
 
       // Close the dialog and reset form
-    setIsAddingMentor(false);
-    setNewMentor({
+      setIsAddingMentor(false);
+      setNewMentor({
         id: `mentor${users.filter(u => u.role === "mentor").length + 1}`,
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
         status: "active",
       });
 
@@ -694,6 +720,8 @@ const AdminCoordinators = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredCoordinators.map((coordinator) => {
             const stats = getCoordinatorStats(coordinator.id);
+            const coordinatorMentors = users.filter(user => user.role === "mentor" && user.supervisorId === coordinator.id);
+
             return (
               <Card key={coordinator.id} className="flex flex-col">
                 <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -729,6 +757,7 @@ const AdminCoordinators = () => {
                       </div>
                     </div>
 
+                    {coordinatorMentors.length > 0 && (
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
@@ -738,12 +767,12 @@ const AdminCoordinators = () => {
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.sessionProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.sessionProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                              ? 'bg-progress-complete'
+                              : stats.sessionProgress >= 75
+                                ? 'bg-progress-high'
+                                : stats.sessionProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
                               }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
@@ -762,12 +791,12 @@ const AdminCoordinators = () => {
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.hoursProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.hoursProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                              ? 'bg-progress-complete'
+                              : stats.hoursProgress >= 75
+                                ? 'bg-progress-high'
+                                : stats.hoursProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
                               }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
@@ -786,12 +815,12 @@ const AdminCoordinators = () => {
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.paymentsProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.paymentsProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                              ? 'bg-progress-complete'
+                              : stats.paymentsProgress >= 75
+                                ? 'bg-progress-high'
+                                : stats.paymentsProgress >= 40
+                                  ? 'bg-progress-medium'
+                                  : 'bg-progress-low'
                               }`}
                             style={{ width: `${stats.paymentsProgress}%` }}
                           />
@@ -801,38 +830,8 @@ const AdminCoordinators = () => {
                           <span>₹{stats.totalPayments.toLocaleString()} total</span>
                         </div>
                       </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Overall Progress</span>
-                          <span className="font-medium">{stats.overallProgress}%</span>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.overallProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.overallProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.overallProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.overallProgress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="p-3 bg-muted/10 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Active Students</p>
-                        <p className="text-lg font-medium mt-1">{stats.activeStudents}</p>
-                      </div>
-                      <div className="p-3 bg-muted/10 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Pending Payments</p>
-                        <p className="text-lg font-medium mt-1">₹{stats.pendingPayments.toLocaleString()}</p>
-                      </div>
-                    </div>
+                    )}
 
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
                       <Button
@@ -885,6 +884,7 @@ const AdminCoordinators = () => {
                           handleDeleteCoordinator(coordinator);
                           setSelectedCoordinator(null);
                         }}
+                        disabled={users.filter(user => user.role === "mentor" && user.supervisorId === coordinator.id).length > 0}
                       >
                         <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                         Delete
@@ -954,19 +954,19 @@ const AdminCoordinators = () => {
             </div>
 
             <div className="relative overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
+              <Table>
+                <TableHeader>
+                  <TableRow>
                     <TableHead className="w-[100px]">ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Students Count</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {selectedCoordinator?.user.id && getAssignedMentors(selectedCoordinator.user.id).map((mentor) => (
                     <TableRow key={mentor.id}>
                       <TableCell className="font-medium">{mentor.id}</TableCell>
@@ -974,11 +974,10 @@ const AdminCoordinators = () => {
                       <TableCell>{mentor.email}</TableCell>
                       <TableCell>{mentor.phone || "No phone number"}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          mentor.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${mentor.status === 'active'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}>
+                          }`}>
                           {mentor.status || 'active'}
                         </span>
                       </TableCell>
@@ -987,16 +986,16 @@ const AdminCoordinators = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleEditMentor(mentor)}
                             className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
+                          >
+                            <Edit className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
-                        </Button>
-                        {/* <Button
+                          </Button>
+                          {/* <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => handleDeleteMentor(mentor)}
@@ -1020,9 +1019,9 @@ const AdminCoordinators = () => {
                       </TableCell>
                     </TableRow>
                   )}
-              </TableBody>
-            </Table>
-              </div>
+                </TableBody>
+              </Table>
+            </div>
           </DialogContent>
         </Dialog>
 
@@ -1085,7 +1084,7 @@ const AdminCoordinators = () => {
                         <div className="flex flex-col">
                           <span className="font-medium">{mentor.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {mentor.isAssigned 
+                            {mentor.isAssigned
                               ? `Currently assigned to: ${mentor.currentCoordinator}`
                               : 'Not assigned to any coordinator'}
                           </span>
@@ -1165,8 +1164,7 @@ const AdminCoordinators = () => {
                           </TableCell>
                           <TableCell className="hidden sm:table-cell">{mentor?.name || 'Not Assigned'}</TableCell>
                           <TableCell>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              student.status === 'active'
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-gray-100 text-gray-800'
                               }`}>
@@ -1207,8 +1205,7 @@ const AdminCoordinators = () => {
                             <div className="flex items-center gap-2">
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full transition-all duration-300 ${
-                                    progress === 100
+                                  className={`h-full rounded-full transition-all duration-300 ${progress === 100
                                       ? 'bg-progress-complete'
                                       : progress >= 75
                                         ? 'bg-progress-high'

@@ -59,15 +59,15 @@ const AdminMentors = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [coordinatorFilter, setCoordinatorFilter] = useState("all");
-  
+
   // Single dialog state to manage all dialogs
   const [activeDialog, setActiveDialog] = useState<"details" | "students" | "edit" | "delete" | "add" | null>(null);
-  
+
   const [selectedMentor, setSelectedMentor] = useState<{
     user: User;
     stats: ReturnType<typeof getMentorStats>;
   } | null>(null);
-  
+
   const [mentors, setMentors] = useState(users.filter((user) => user.role === "mentor"));
   const [students, setStudents] = useState<Student[]>(allStudents);
   const [newMentor, setNewMentor] = useState({
@@ -180,7 +180,7 @@ const AdminMentors = () => {
 
   const handleDeleteMentor = (mentor: User) => {
     const mentorStudents = students.filter(student => student.mentorId === mentor.id);
-    
+
     if (mentorStudents.length > 0) {
       crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
       return;
@@ -195,7 +195,7 @@ const AdminMentors = () => {
 
     try {
       const mentorStudents = students.filter(student => student.mentorId === selectedMentor.user.id);
-      
+
       if (mentorStudents.length > 0) {
         crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
         return;
@@ -289,7 +289,7 @@ const AdminMentors = () => {
 
   const handleUpdateStudent = () => {
     if (!editingStudent) return;
-    
+
     try {
       setStudents(students.map(student =>
         student.id === editingStudent.id ? editingStudent : student
@@ -323,23 +323,23 @@ const AdminMentors = () => {
       allStudents.push(studentToAdd);
       setIsAddingStudent(false);
       setNewStudent({
-      id: `student${students.length + 2}`,
-      name: "",
-      email: "",
-      phone: "",
+        id: `student${students.length + 2}`,
+        name: "",
+        email: "",
+        phone: "",
         mentorId: "",
         status: "active",
-      totalSessions: 12,
-      sessionsCompleted: 0,
-      totalHours: 24,
-      totalPayment: 12000,
-      paidAmount: 0,
-      sessionsRemaining: 12,
-      progressPercentage: 0,
+        totalSessions: 12,
+        sessionsCompleted: 0,
+        totalHours: 24,
+        totalPayment: 12000,
+        paidAmount: 0,
+        sessionsRemaining: 12,
+        progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-      sessionDuration: 60
-    });
+        sessionDuration: 60
+      });
       crudToasts.create.success("Student");
     } catch (error) {
       crudToasts.create.error("Student");
@@ -351,8 +351,8 @@ const AdminMentors = () => {
 
     try {
       setStudents(students.filter(student => student.id !== selectedStudent.id));
-    setIsDeletingStudent(false);
-    setSelectedStudent(null);
+      setIsDeletingStudent(false);
+      setSelectedStudent(null);
       crudToasts.delete.success("Student");
     } catch (error) {
       crudToasts.delete.error("Student");
@@ -386,8 +386,8 @@ const AdminMentors = () => {
         }
       });
 
-    setIsAssigningStudents(false);
-    setSelectedStudentsToAssign([]);
+      setIsAssigningStudents(false);
+      setSelectedStudentsToAssign([]);
       crudToasts.assign.success("Students", "mentor");
     } catch (error) {
       crudToasts.assign.error("Students", "mentor");
@@ -457,7 +457,7 @@ const AdminMentors = () => {
           {filteredMentors.map((mentor) => {
             const stats = getMentorStats(mentor.id);
             const mentorStudents = students.filter(student => student.mentorId === mentor.id);
-            
+
             return (
               <Card key={mentor.id} className="flex flex-col">
                 <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -491,77 +491,77 @@ const AdminMentors = () => {
                     </div>
 
                     {mentorStudents.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Sessions Progress</span>
-                          <span className="font-medium">{stats.sessionProgress}%</span>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Sessions Progress</span>
+                            <span className="font-medium">{stats.sessionProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.sessionProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.sessionProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedSessions} completed</span>
+                            <span>{stats.totalSessions} total</span>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.sessionProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedSessions} completed</span>
-                          <span>{stats.totalSessions} total</span>
-                        </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Hours Progress</span>
-                          <span className="font-medium">{stats.hoursProgress}%</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Hours Progress</span>
+                            <span className="font-medium">{stats.hoursProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.hoursProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.hoursProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedHours} completed</span>
+                            <span>{stats.totalHours} total</span>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.hoursProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedHours} completed</span>
-                          <span>{stats.totalHours} total</span>
-                        </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Payment Progress</span>
-                          <span className="font-medium">{stats.paymentsProgress}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.paymentsProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentsProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.paymentsProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>₹{stats.completedPayments.toLocaleString()} completed</span>
-                          <span>₹{stats.totalPayments.toLocaleString()} total</span>
-                        </div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Payment Progress</span>
+                            <span className="font-medium">{stats.paymentsProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.paymentsProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.paymentsProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.paymentsProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>₹{stats.completedPayments.toLocaleString()} completed</span>
+                            <span>₹{stats.totalPayments.toLocaleString()} total</span>
+                          </div>
                         </div>
                       </div>
                     )}
