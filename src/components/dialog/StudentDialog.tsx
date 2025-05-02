@@ -757,10 +757,14 @@ export function StudentDialog({
                       type="number"
                       min="0"
                       value={editingStudent.sessionsCompleted}
-                      onChange={(e) => setEditingStudent({
-                        ...editingStudent,
-                        sessionsCompleted: parseInt(e.target.value)
-                      })}
+                      onChange={e => {
+                        let value = parseInt(e.target.value) || 0;
+                        if (value > editingStudent.totalSessions) value = editingStudent.totalSessions;
+                        setEditingStudent({
+                          ...editingStudent,
+                          sessionsCompleted: value
+                        });
+                      }}
                       className="w-full"
                     />
                   </div>
@@ -795,10 +799,14 @@ export function StudentDialog({
                       type="number"
                       min="0"
                       value={editingStudent.completedHours || Math.round((editingStudent.sessionsCompleted * editingStudent.sessionDuration) / 60)}
-                      onChange={e => setEditingStudent({
-                        ...editingStudent,
-                        completedHours: parseInt(e.target.value) || 0
-                      })}
+                      onChange={e => {
+                        let value = parseInt(e.target.value) || 0;
+                        if (value > editingStudent.totalHours) value = editingStudent.totalHours;
+                        setEditingStudent({
+                          ...editingStudent,
+                          completedHours: value
+                        });
+                      }}
                       className="w-full"
                     />
                   </div>
@@ -833,10 +841,14 @@ export function StudentDialog({
                       type="number"
                       min="0"
                       value={editingStudent.paidAmount}
-                      onChange={(e) => setEditingStudent({
-                        ...editingStudent,
-                        paidAmount: parseInt(e.target.value)
-                      })}
+                      onChange={e => {
+                        let value = parseInt(e.target.value) || 0;
+                        if (value > editingStudent.totalPayment) value = editingStudent.totalPayment;
+                        setEditingStudent({
+                          ...editingStudent,
+                          paidAmount: value
+                        });
+                      }}
                       className="w-full"
                     />
                   </div>
