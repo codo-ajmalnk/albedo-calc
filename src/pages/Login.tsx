@@ -123,7 +123,7 @@ const Login = () => {
             <div className="text-center text-sm text-muted-foreground">
               <p>Demo accounts:</p>
               <p>admin@example.com</p>
-              <p>jane@example.com</p>
+              <p>jane@example.com, john@example.com</p>
               <p>mike@example.com</p>
               <p className="mt-2">Any password will work</p>
             </div>

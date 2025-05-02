@@ -1,4 +1,3 @@
-
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
@@ -83,7 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/coordinator">Dashboard</NavLink>
             <NavLink to="/coordinator/mentors">My Mentors</NavLink>
             <NavLink to="/coordinator/students">All Students</NavLink>
-            <NavLink to="/admin/bulk-update">Bulk Update</NavLink>
+            <NavLink to="/coordinator/bulk-update">Bulk Update</NavLink>
           </>
         );
       case "mentor":
@@ -91,6 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <>
             <NavLink to="/mentor">Dashboard</NavLink>
             <NavLink to="/mentor/students">My Students</NavLink>
+            <NavLink to="/mentor/bulk-update">Bulk Update</NavLink>
           </>
         );
       default:

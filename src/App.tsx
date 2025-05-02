@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,9 +21,10 @@ import AdminNotifications from "./pages/admin/Notifications";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorMentors from "./pages/coordinator/Mentors";
 import CoordinatorStudents from "./pages/coordinator/Students";
+import CoordinatorBulkUpdate from "./pages/coordinator/BulkUpdate";
 import MentorDashboard from "./pages/mentor/Dashboard";
 import MentorStudents from "./pages/mentor/Students";
-
+import MentorBulkUpdate from "./pages/mentor/BulkUpdate";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -130,6 +130,14 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route 
+                path="/coordinator/bulk-update" 
+                element={
+                  <ProtectedRoute allowedRoles={["coordinator"]}>
+                    <CoordinatorBulkUpdate />
+                  </ProtectedRoute>
+                } 
+              />
               
               {/* Mentor Routes */}
               <Route 
@@ -148,7 +156,16 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route 
+                path="/mentor/bulk-update" 
+                element={
+                  <ProtectedRoute allowedRoles={["mentor"]}>
+                    <MentorBulkUpdate />  
+                  </ProtectedRoute>
+                } 
+              />
               
+
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
