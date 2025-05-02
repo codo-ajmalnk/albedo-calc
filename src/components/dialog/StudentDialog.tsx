@@ -462,37 +462,137 @@ export function StudentDialog({
                   value={newStudent.totalSessions}
                   onChange={(e) => {
                     const sessions = parseInt(e.target.value);
-                    const duration = newStudent.sessionDuration || 60;
-                    const hours = Math.round((sessions * duration) / 60);
-                    
-                    let endDate = newStudent.startDate ? new Date(newStudent.startDate) : null;
-                    if (endDate) {
-                      endDate.setDate(endDate.getDate() + ((sessions - 1) * 7)); // Weekly sessions
-                    }
-                    
                     setNewStudent({
                       ...newStudent,
-                      totalSessions: sessions,
-                      totalHours: hours,
-                      endDate: endDate ? endDate.toISOString() : '',
-                      sessionsCompleted: 0,
-                      paidAmount: 0
+                      totalSessions: sessions
                     });
                   }}
                   className="w-full"
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="sessions-completed">Completed Sessions *</Label>
+                <Input
+                  id="sessions-completed"
+                  type="number"
+                  min="0"
+                  value={newStudent.sessionsCompleted}
+                  onChange={e => {
+                    let value = parseInt(e.target.value) || 0;
+                    if (value > newStudent.totalSessions) value = newStudent.totalSessions;
+                    setNewStudent({
+                      ...newStudent,
+                      sessionsCompleted: value
+                    });
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Pending Sessions</Label>
+                <Input
+                  value={newStudent.totalSessions - newStudent.sessionsCompleted}
+                  disabled
+                  className="w-full bg-muted"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="total-hours">Total Hours</Label>
                 <Input
                   id="total-hours"
                   type="number"
                   min="0"
-                  value={newStudent.totalHours}
+                  step="any"
+                  value={
+                    newStudent.totalHours === undefined || newStudent.totalHours === null || newStudent.totalHours === ''
+                      ? ((newStudent.totalSessions || 0) * (newStudent.sessionDuration || 0) / 60).toFixed(2)
+                      : newStudent.totalHours
+                  }
+                  onChange={e => {
+                    let value = parseFloat(e.target.value);
+                    if (isNaN(value)) value = undefined;
+                    setNewStudent({
+                      ...newStudent,
+                      totalHours: value
+                    });
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="completed-hours">Completed Hours</Label>
+                <Input
+                  id="completed-hours"
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={
+                    newStudent.completedHours === undefined || newStudent.completedHours === null || newStudent.completedHours === ''
+                      ? ((newStudent.sessionsCompleted || 0) * (newStudent.sessionDuration || 0) / 60).toFixed(2)
+                      : newStudent.completedHours
+                  }
+                  onChange={e => {
+                    let value = parseFloat(e.target.value);
+                    let total = newStudent.totalHours !== undefined && newStudent.totalHours !== null
+                      ? newStudent.totalHours
+                      : (newStudent.totalSessions || 0) * (newStudent.sessionDuration || 0) / 60;
+                    if (isNaN(value)) value = undefined;
+                    if (value > total) value = total;
+                    setNewStudent({
+                      ...newStudent,
+                      completedHours: value
+                    });
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Pending Hours</Label>
+                <Input
+                  value={
+                    ((newStudent.totalHours !== undefined && newStudent.totalHours !== null
+                      ? newStudent.totalHours
+                      : (newStudent.totalSessions || 0) * (newStudent.sessionDuration || 0) / 60)
+                    - (newStudent.completedHours !== undefined && newStudent.completedHours !== null
+                      ? newStudent.completedHours
+                      : (newStudent.sessionsCompleted || 0) * (newStudent.sessionDuration || 0) / 60)
+                    ).toFixed(2)
+                  }
                   disabled
                   className="w-full bg-muted"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="hourly-payment">Hourly Payment (₹) *</Label>
+                <Input
+                  id="hourly-payment"
+                  type="number"
+                  min="0"
+                  value={newStudent.hourlyPayment || ''}
+                  onChange={e => setNewStudent({
+                    ...newStudent,
+                    hourlyPayment: parseInt(e.target.value) || 0
+                  })}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Class Taken Amount (₹)</Label>
+                <Input
+                  value={((newStudent.hourlyPayment || 0) * (newStudent.completedHours !== undefined && newStudent.completedHours !== null
+                    ? newStudent.completedHours
+                    : (newStudent.sessionsCompleted || 0) * (newStudent.sessionDuration || 0) / 60)).toFixed(2)}
+                  disabled
+                  className="w-full bg-muted"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="total-payment">Total Payment (₹) *</Label>
                 <Input
@@ -502,6 +602,34 @@ export function StudentDialog({
                   value={newStudent.totalPayment}
                   onChange={(e) => setNewStudent({ ...newStudent, totalPayment: parseInt(e.target.value) })}
                   className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paid-amount">Paid Amount (₹) *</Label>
+                <Input
+                  id="paid-amount"
+                  type="number"
+                  min="0"
+                  value={newStudent.paidAmount}
+                  onChange={e => {
+                    let value = parseInt(e.target.value) || 0;
+                    if (value > newStudent.totalPayment) value = newStudent.totalPayment;
+                    setNewStudent({
+                      ...newStudent,
+                      paidAmount: value
+                    });
+                  }}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pending-payment">Pending Payment (₹)</Label>
+                <Input
+                  id="pending-payment"
+                  type="number"
+                  value={newStudent.totalPayment - newStudent.paidAmount}
+                  disabled
+                  className="w-full bg-muted"
                 />
               </div>
             </div>
@@ -806,7 +934,7 @@ export function StudentDialog({
                       min="0"
                       step="any"
                       value={
-                        editingStudent.completedHours === undefined || editingStudent.completedHours === null || editingStudent.completedHours === ''
+                        editingStudent.completedHours === undefined || editingStudent.completedHours === null
                           ? ((editingStudent.sessionsCompleted || 0) * (editingStudent.sessionDuration || 0) / 60).toFixed(2)
                           : editingStudent.completedHours
                       }
