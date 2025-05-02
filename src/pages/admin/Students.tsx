@@ -77,13 +77,17 @@ export default function Students() {
     totalSessions: 12,
     sessionsCompleted: 0,
     totalHours: 12,
+    completedHours: 0,
     totalPayment: 12000,
     paidAmount: 0,
-    sessionsRemaining: 12,
-    progressPercentage: 0,
+    teachersPayment: 0,
+    hourlyPayment: 0,
+    sessionDuration: 60,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 60
+    sessionAddedOn: new Date().toISOString(),
+    sessionsRemaining: 12,
+    progressPercentage: 0
   });
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
 
@@ -201,13 +205,17 @@ export default function Students() {
         totalSessions: 12,
         sessionsCompleted: 0,
         totalHours: 12,
+        completedHours: 0,
         totalPayment: 12000,
         paidAmount: 0,
-        sessionsRemaining: 12,
-        progressPercentage: 0,
+        teachersPayment: 0,
+        hourlyPayment: 0,
+        sessionDuration: 60,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60
+        sessionAddedOn: new Date().toISOString(),
+        sessionsRemaining: 12,
+        progressPercentage: 0
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -270,13 +278,17 @@ export default function Students() {
                 totalSessions: 12,
                 sessionsCompleted: 0,
                 totalHours: 12,
+                completedHours: 0,
                 totalPayment: 12000,
                 paidAmount: 0,
-                sessionsRemaining: 12,
-                progressPercentage: 0,
+                teachersPayment: 0,
+                hourlyPayment: 0,
+                sessionDuration: 60,
                 startDate: new Date().toISOString(),
                 endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-                sessionDuration: 60
+                sessionAddedOn: new Date().toISOString(),
+                sessionsRemaining: 12,
+                progressPercentage: 0
               });
             }} className="w-full sm:w-auto text-sm">
               <UserPlus className="mr-1.5 h-3.5 w-3.5" />
@@ -354,7 +366,7 @@ export default function Students() {
                     </TableCell>
                     <TableCell>{student.email}</TableCell>
                     <TableCell>
-                      {selectedMentor ? selectedMentor.name : "Unassigned"}
+                      {getMentorName(student.mentorId)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -417,7 +429,7 @@ export default function Students() {
 
         <StudentDialog
           isViewDetailsOpen={isViewDetailsOpen}
-          isAddOpen={isAddOpen}
+          isAddOpen={isAddingStudent}
           isEditOpen={isEditOpen}
           isDeleteOpen={isDeleteOpen}
           isViewStudentsOpen={isViewStudentsOpen}
@@ -432,7 +444,7 @@ export default function Students() {
           newStudent={newStudent}
           editingStudent={editingStudent}
           onViewDetailsClose={() => setIsViewDetailsOpen(false)}
-          onAddClose={() => setIsAddOpen(false)}
+          onAddClose={() => setIsAddingStudent(false)}
           onEditClose={() => setIsEditOpen(false)}
           onDeleteClose={() => setIsDeleteOpen(false)}
           onViewStudentsClose={() => setIsViewStudentsOpen(false)}

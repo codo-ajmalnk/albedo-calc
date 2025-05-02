@@ -93,6 +93,8 @@ export const generateMockStudents = (): Student[] => {
     const sessionDuration = 60;
     const totalPayment = 12000;
     const paidAmount = Math.floor(Math.random() * 12001);
+    const teachersPayment = Math.floor(paidAmount * 0.7);
+    const hourlyPayment = Math.floor(teachersPayment / totalHours);
     
     // Calculate additional stats
     const completedHours = sessionsCompleted * sessionDuration;
@@ -115,9 +117,12 @@ export const generateMockStudents = (): Student[] => {
       totalHours,
       totalPayment,
       paidAmount,
+      teachersPayment,
+      hourlyPayment,
       sessionDuration,
       startDate: "January 1, 2024",
       endDate: "June 30, 2024",
+      sessionAddedOn: "January 1, 2024",
       sessionsRemaining,
       progressPercentage,
       // Additional stats

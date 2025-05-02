@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNotifications } from '@/context/NotificationContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { AdminNotificationCreator } from '@/components/AdminNotificationCreator';
 
 export function NotificationSettings() {
   const { settings, updateSettings, addNotification } = useNotifications();
@@ -71,22 +71,6 @@ export function NotificationSettings() {
               id="desktop-toggle" 
               checked={settings.desktopEnabled}
               onCheckedChange={() => handleToggleSetting('desktopEnabled')}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="email-toggle" className="text-base font-medium">
-                Email Notifications
-              </Label>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Receive notifications via email
-              </p>
-            </div>
-            <Switch 
-              id="email-toggle" 
-              checked={settings.emailEnabled}
-              onCheckedChange={() => handleToggleSetting('emailEnabled')}
             />
           </div>
         </div>

@@ -28,11 +28,14 @@ export interface Student {
   sessionsCompleted: number;
   totalPayment: number;
   paidAmount: number;
-  sessionsRemaining: number;
-  progressPercentage: number;
+  teachersPayment: number;
+  hourlyPayment: number;
+  sessionDuration: number;
   startDate: string;
   endDate: string;
-  sessionDuration: number;
+  sessionAddedOn: string;
+  sessionsRemaining: number;
+  progressPercentage: number;
   completedHours?: number;
   pendingHours?: number;
   activeHours?: number;

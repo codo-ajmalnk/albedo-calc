@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNotifications } from '@/context/NotificationContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +13,12 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { NotificationType } from '@/context/NotificationContext';
+import { users } from '@/lib/mock-data';
+import Select from "react-select";
 
 const notificationSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
   message: z.string().min(10, { message: "Message must be at least 10 characters." }),
-  notificationType: z.enum(['info', 'success', 'warning', 'error']).default('info'),
   targetType: z.enum(['all', 'roles', 'custom']).default('all'),
   roles: z.array(z.string()).optional(),
   customEmails: z.string().optional(),
@@ -26,17 +26,28 @@ const notificationSchema = z.object({
 
 type NotificationFormValues = z.infer<typeof notificationSchema>;
 
+type SentNotification = {
+  title: string;
+  message: string;
+  date: string;
+  recipients: string;
+};
+
 export function AdminNotificationCreator() {
   const { addNotification } = useNotifications();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
+  const [selectedCustomUsers, setSelectedCustomUsers] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<SentNotification[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const paginated = notifications.slice((page-1)*pageSize, page*pageSize);
   
   const form = useForm<NotificationFormValues>({
     resolver: zodResolver(notificationSchema),
     defaultValues: {
       title: '',
       message: '',
-      notificationType: 'info',
       targetType: 'all',
     },
   });
@@ -45,46 +56,43 @@ export function AdminNotificationCreator() {
   
   const onSubmit = (data: NotificationFormValues) => {
     setIsSubmitting(true);
-    
     try {
-      // Determine the target roles based on the selection
       let targetRoles: Role[] | 'all' = 'all';
-      
       if (data.targetType === 'roles') {
         targetRoles = selectedRoles;
       } else if (data.targetType === 'all') {
         targetRoles = 'all';
       } else {
-        // Custom emails would be handled differently in a real implementation
-        // For now, we'll just treat it as 'all'
-        targetRoles = 'all';
+        targetRoles = selectedCustomUsers.map(id => users.find(u => u.id === id)?.role as Role);
       }
-      
-      // Add the notification
       addNotification(
         data.title,
         data.message,
-        data.notificationType as NotificationType,
+        'info' as NotificationType,
         targetRoles,
-        'admin' // Hardcoded for now, would come from auth context in real impl
+        'admin'
       );
-      
-      // Reset the form
+      setNotifications(prev => [
+        {
+          title: data.title,
+          message: data.message,
+          date: new Date().toLocaleString(),
+          recipients: Array.isArray(targetRoles) ? targetRoles.map(role => role).join(', ') : 'All Users',
+        },
+        ...prev
+      ]);
       form.reset({
         title: '',
         message: '',
-        notificationType: 'info',
         targetType: 'all',
       });
       setSelectedRoles([]);
-      
-      // Show success message
+      setSelectedCustomUsers([]);
       addNotification(
         'Notification Sent',
         'Your notification has been successfully sent to the selected recipients.',
         'success'
       );
-      
     } catch (error) {
       addNotification(
         'Error',
@@ -105,6 +113,11 @@ export function AdminNotificationCreator() {
       }
     });
   };
+
+  const allUsers = users;
+  const customUserOptions = allUsers.filter(
+    u => u.role === 'mentor' || u.role === 'coordinator'
+  );
 
   return (
     <Card>
@@ -143,41 +156,6 @@ export function AdminNotificationCreator() {
                       className="min-h-[100px]" 
                       {...field} 
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="notificationType"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Notification Type</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-wrap gap-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="info" id="info" />
-                        <Label htmlFor="info">Information</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="success" id="success" />
-                        <Label htmlFor="success">Success</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="warning" id="warning" />
-                        <Label htmlFor="warning">Warning</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="error" id="error" />
-                        <Label htmlFor="error">Error</Label>
-                      </div>
-                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -240,39 +218,69 @@ export function AdminNotificationCreator() {
             )}
             
             {targetType === 'custom' && (
-              <FormField
-                control={form.control}
-                name="customEmails"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Custom Recipients</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter email addresses separated by commas..." 
-                        className="min-h-[80px]" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Enter email addresses separated by commas
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="border rounded-md p-4 space-y-2">
+                <Label>Select Users</Label>
+                <Select
+                  isMulti
+                  options={customUserOptions.map(user => ({
+                    value: user.id,
+                    label: `${user.name} (${user.role})`
+                  }))}
+                  value={selectedCustomUsers.map(id => {
+                    const user = customUserOptions.find(u => u.id === id);
+                    return user ? { value: user.id, label: `${user.name} (${user.role})` } : null;
+                  }).filter(Boolean)}
+                  onChange={(selected) => {
+                    setSelectedCustomUsers(selected.map(option => option.value));
+                  }}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                />
+              </div>
             )}
             
-            <div className="pt-2">
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="w-full sm:w-auto"
-              >
-                Send Notification
-              </Button>
-            </div>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Sending...' : 'Send Notification'}
+            </Button>
           </form>
         </Form>
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">Sent Notifications</h3>
+          <ul className="space-y-3">
+            {paginated.map((n, i) => (
+              <li key={i} className="flex items-start gap-3 p-4 rounded-lg border bg-muted/50 shadow-sm">
+                <div className="mt-1">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-base">{n.title}</span>
+                  </div>
+                  <div className="text-sm mt-1 text-muted-foreground break-words">{n.message}</div>
+                  <div className="text-xs text-muted-foreground mt-2">
+                    <span className="font-medium">Recipients:</span>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      {n.recipients === 'All Users' ? (
+                        <li className="text-blue-700 hover:text-blue-800 transition-colors duration-200">All Users</li>
+                      ) : (
+                        n.recipients.split(', ').map((role, idx) => (
+                          <li key={idx} className="text-gray-700 hover:text-gray-800 transition-colors duration-200">{role}</li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">{n.date}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="flex gap-2 mt-4 justify-end">
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => p-1)}>Prev</Button>
+            <Button variant="outline" size="sm" disabled={page*pageSize >= notifications.length} onClick={() => setPage(p => p+1)}>Next</Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
