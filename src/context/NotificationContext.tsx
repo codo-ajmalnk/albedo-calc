@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from "@/hooks/use-toast";
 import { Bell, Check } from "lucide-react";
+import { Role } from '@/lib/types';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -12,12 +13,14 @@ export interface Notification {
   type: NotificationType;
   read: boolean;
   createdAt: Date;
+  targetRoles?: Role[] | 'all'; // Add targeting by role
+  sender?: string; // For tracking who sent the notification
 }
 
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
-  addNotification: (title: string, message: string, type: NotificationType) => void;
+  addNotification: (title: string, message: string, type: NotificationType, targetRoles?: Role[] | 'all', sender?: string) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearNotifications: () => void;
@@ -86,15 +89,23 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Calculate unread count
   const unreadCount = notifications.filter(notification => !notification.read).length;
 
-  // Add a new notification
-  const addNotification = (title: string, message: string, type: NotificationType = 'info') => {
+  // Add a new notification with optional target roles
+  const addNotification = (
+    title: string, 
+    message: string, 
+    type: NotificationType = 'info',
+    targetRoles?: Role[] | 'all',
+    sender?: string
+  ) => {
     const newNotification: Notification = {
       id: Date.now().toString(),
       title,
       message,
       type,
       read: false,
-      createdAt: new Date()
+      createdAt: new Date(),
+      targetRoles,
+      sender
     };
     
     setNotifications(prev => [newNotification, ...prev]);

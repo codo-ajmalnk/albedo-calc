@@ -18,6 +18,7 @@ import AdminCoordinators from "./pages/admin/Coordinators";
 import AdminMentors from "./pages/admin/Mentors";
 import AdminNotificationSettings from "./pages/admin/NotificationSettings";
 import AdminBulkUpdate from "./pages/admin/BulkUpdate";
+import AdminNotifications from "./pages/admin/Notifications";
 import CoordinatorDashboard from "./pages/coordinator/Dashboard";
 import CoordinatorMentors from "./pages/coordinator/Mentors";
 import CoordinatorStudents from "./pages/coordinator/Students";
@@ -76,6 +77,14 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <AdminNotificationSettings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/notifications" 
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminNotifications />
                   </ProtectedRoute>
                 } 
               />
