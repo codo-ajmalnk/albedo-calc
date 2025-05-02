@@ -7,6 +7,7 @@ import { ConfirmationModal } from "./ui/confirmation-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationPanel } from "./NotificationPanel";
 
 type Role = "admin" | "coordinator" | "mentor" | "student";
 
@@ -72,6 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/admin/coordinators">Coordinators</NavLink>
             <NavLink to="/admin/mentors">Mentors</NavLink>
             <NavLink to="/admin/students">Students</NavLink>
+            <NavLink to="/admin/notification-settings">Notifications</NavLink>
           </>
         );
       case "coordinator":
@@ -170,7 +172,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {renderNavLinks(user.role)}
               </nav>
               <div className="h-6 w-px bg-white/20" />
-              <ThemeToggle />
+              <div className="flex items-center space-x-2">
+                <NotificationPanel />
+                <ThemeToggle />
+              </div>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="secondary" 
@@ -219,6 +224,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
                   <div className="flex justify-between items-center px-2">
                     <ThemeToggle />
+                    <NotificationPanel />
                   </div>
                   <nav className="flex flex-col space-y-1 px-2">
                     {renderNavLinks(user.role)}
