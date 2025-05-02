@@ -972,7 +972,14 @@ export function StudentDialog({
                       </PopoverContent>
                     </Popover>
                   </div>
-
+                  <div className="space-y-2">
+                    <Label>Added On</Label>
+                    <Input
+                      value={editingStudent.createdAt ? format(new Date(editingStudent.createdAt), "PPP p") : "Not available"}
+                      disabled
+                      className="w-full bg-muted"
+                    />
+                  </div>
                 </div>
               </div>
             )}
