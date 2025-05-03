@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -8,18 +7,58 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Student, User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus, Trash2, Users } from "lucide-react";
+import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
 import { crudToasts } from "@/lib/toast";
 import { MentorDialog } from "@/components/dialog/MentorDialog";
-import { ViewToggle } from "@/components/ViewToggle";
-import { ListCard } from "@/components/ListCard";
 
 const AdminMentors = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [coordinatorFilter, setCoordinatorFilter] = useState("all");
-  const [view, setView] = useState<"grid" | "list">("grid");
 
   // Single dialog state to manage all dialogs
   const [activeDialog, setActiveDialog] = useState<"details" | "students" | "edit" | "delete" | "add" | null>(null);
@@ -230,14 +269,11 @@ const AdminMentors = () => {
     totalHours: 24,
     totalPayment: 12000,
     paidAmount: 0,
-    teachersPayment: 0, // Added missing property
-    hourlyPayment: 500, // Added missing property
     sessionsRemaining: 12,
     progressPercentage: 0,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 60,
-    sessionAddedOn: new Date().toISOString() // Added missing property
+    sessionDuration: 60
   });
 
   // Add student management functions
@@ -280,10 +316,7 @@ const AdminMentors = () => {
 
       const studentToAdd: Student = {
         ...newStudent,
-        mentorId: selectedMentor.user.id,
-        teachersPayment: newStudent.teachersPayment,
-        hourlyPayment: newStudent.hourlyPayment,
-        sessionAddedOn: newStudent.sessionAddedOn
+        mentorId: selectedMentor.user.id
       };
 
       setStudents([...students, studentToAdd]);
@@ -301,14 +334,11 @@ const AdminMentors = () => {
         totalHours: 24,
         totalPayment: 12000,
         paidAmount: 0,
-        teachersPayment: 0, // Added missing property
-        hourlyPayment: 500, // Added missing property
         sessionsRemaining: 12,
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60,
-        sessionAddedOn: new Date().toISOString() // Added missing property
+        sessionDuration: 60
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -368,19 +398,15 @@ const AdminMentors = () => {
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-          <div className="flex items-center justify-between w-full">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Mentors Management</h1>
-            <div className="flex items-center gap-2">
-              <ViewToggle view={view} onViewChange={setView} />
-              <Button
-                className="text-sm"
-                onClick={() => setActiveDialog("add")}
-              >
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Add New Mentor
-              </Button>
-            </div>
-          </div>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Mentors Management</h1>
+
+          <Button
+            className="w-full sm:w-auto text-sm"
+            onClick={() => setActiveDialog("add")}
+          >
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            Add New Mentor
+          </Button>
         </div>
 
         <Card className="w-full">
@@ -427,216 +453,172 @@ const AdminMentors = () => {
           </CardContent>
         </Card>
 
-        {view === "grid" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
-            {filteredMentors.map((mentor) => {
-              const stats = getMentorStats(mentor.id);
-              const mentorStudents = students.filter(student => student.mentorId === mentor.id);
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+          {filteredMentors.map((mentor) => {
+            const stats = getMentorStats(mentor.id);
+            const mentorStudents = students.filter(student => student.mentorId === mentor.id);
 
-              return (
-                <Card key={mentor.id} className="flex flex-col">
-                  <CardHeader className="p-3 sm:p-4 md:p-6">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                      <div className="space-y-1">
-                        <CardTitle className="text-base sm:text-lg">{mentor.name}</CardTitle>
-                        <p className="text-xs sm:text-sm text-muted-foreground">{mentor.email}</p>
+            return (
+              <Card key={mentor.id} className="flex flex-col">
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                    <div className="space-y-1">
+                      <CardTitle className="text-base sm:text-lg">{mentor.name}</CardTitle>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{mentor.email}</p>
+                    </div>
+                    <div className="text-left sm:text-right space-y-1">
+                      <p className="text-xs sm:text-sm">ID: <span className="font-medium">{mentor.id}</span></p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {mentor.phone ? `Phone: ${mentor.phone}` : 'No phone number'}
+                      </p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Students</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-xl sm:text-2xl font-bold">{stats.studentCount}</p>
+                          <p className="text-sm text-muted-foreground">total</p>
+                        </div>
                       </div>
-                      <div className="text-left sm:text-right space-y-1">
-                        <p className="text-xs sm:text-sm">ID: <span className="font-medium">{mentor.id}</span></p>
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          {mentor.phone ? `Phone: ${mentor.phone}` : 'No phone number'}
-                        </p>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Active Students</p>
+                        <p className="text-base font-medium">{stats.activeStudents}</p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Students</p>
-                          <div className="flex items-baseline gap-2">
-                            <p className="text-xl sm:text-2xl font-bold">{stats.studentCount}</p>
-                            <p className="text-sm text-muted-foreground">total</p>
+
+                    {mentorStudents.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Sessions Progress</span>
+                            <span className="font-medium">{stats.sessionProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.sessionProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.sessionProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedSessions} completed</span>
+                            <span>{stats.totalSessions} total</span>
                           </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Active Students</p>
-                          <p className="text-base font-medium">{stats.activeStudents}</p>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Hours Progress</span>
+                            <span className="font-medium">{stats.hoursProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.hoursProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.hoursProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedHours} completed</span>
+                            <span>{stats.totalHours} total</span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Payment Progress</span>
+                            <span className="font-medium">{stats.paymentsProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.paymentsProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.paymentsProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.paymentsProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>₹{stats.completedPayments.toLocaleString()} completed</span>
+                            <span>₹{stats.totalPayments.toLocaleString()} total</span>
+                          </div>
                         </div>
                       </div>
+                    )}
 
-                      {mentorStudents.length > 0 && (
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Sessions Progress</span>
-                              <span className="font-medium">{stats.sessionProgress}%</span>
-                            </div>
-                            <div className="w-full bg-muted h-2 rounded-full">
-                              <div
-                                className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                                  ? 'bg-progress-complete'
-                                  : stats.sessionProgress >= 75
-                                    ? 'bg-progress-high'
-                                    : stats.sessionProgress >= 40
-                                      ? 'bg-progress-medium'
-                                      : 'bg-progress-low'
-                                }`}
-                                style={{ width: `${stats.sessionProgress}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                              <span>{stats.completedSessions} completed</span>
-                              <span>{stats.totalSessions} total</span>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Hours Progress</span>
-                              <span className="font-medium">{stats.hoursProgress}%</span>
-                            </div>
-                            <div className="w-full bg-muted h-2 rounded-full">
-                              <div
-                                className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                                  ? 'bg-progress-complete'
-                                  : stats.hoursProgress >= 75
-                                    ? 'bg-progress-high'
-                                    : stats.hoursProgress >= 40
-                                      ? 'bg-progress-medium'
-                                      : 'bg-progress-low'
-                                }`}
-                                style={{ width: `${stats.hoursProgress}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                              <span>{stats.completedHours} completed</span>
-                              <span>{stats.totalHours} total</span>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Payment Progress</span>
-                              <span className="font-medium">{stats.paymentsProgress}%</span>
-                            </div>
-                            <div className="w-full bg-muted h-2 rounded-full">
-                              <div
-                                className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                                  ? 'bg-progress-complete'
-                                  : stats.paymentsProgress >= 75
-                                    ? 'bg-progress-high'
-                                    : stats.paymentsProgress >= 40
-                                      ? 'bg-progress-medium'
-                                      : 'bg-progress-low'
-                                }`}
-                                style={{ width: `${stats.paymentsProgress}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                              <span>₹{stats.completedPayments.toLocaleString()} completed</span>
-                              <span>₹{stats.totalPayments.toLocaleString()} total</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs sm:text-sm"
-                          onClick={() => handleViewDetails(mentor)}
-                        >
-                          <Eye className="mr-1.5 h-3.5 w-3.5" />
-                          Details
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs sm:text-sm"
-                          onClick={() => handleViewStudents(mentor)}
-                        >
-                          <Users className="mr-1.5 h-3.5 w-3.5" />
-                          Students
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs sm:text-sm"
-                          onClick={() => handleEditProfile(mentor)}
-                        >
-                          <Edit className="mr-1.5 h-3.5 w-3.5" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full text-xs sm:text-sm"
-                          onClick={() => handleDeleteMentor(mentor)}
-                          disabled={mentorStudents.length > 0}
-                        >
-                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                          Delete
-                        </Button>
-                      </div>
+                    <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleViewDetails(mentor)}
+                      >
+                        <Eye className="mr-1.5 h-3.5 w-3.5" />
+                        Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleViewStudents(mentor)}
+                      >
+                        <Users className="mr-1.5 h-3.5 w-3.5" />
+                        Students
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleEditProfile(mentor)}
+                      >
+                        <Edit className="mr-1.5 h-3.5 w-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleDeleteMentor(mentor)}
+                        disabled={mentorStudents.length > 0}
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        Delete
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
 
-            {filteredMentors.length === 0 && (
-              <div className="col-span-full text-center p-8">
-                <p className="text-muted-foreground">
-                  No mentors found matching your filters.
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredMentors.map((mentor) => {
-              const stats = getMentorStats(mentor.id);
-              const mentorStudents = students.filter(student => student.mentorId === mentor.id);
-              
-              return (
-                <ListCard
-                  key={mentor.id}
-                  id={mentor.id}
-                  name={mentor.name}
-                  email={mentor.email}
-                  phone={mentor.phone}
-                  stats={{
-                    studentCount: stats.studentCount,
-                    activeStudents: stats.activeStudents,
-                    sessionProgress: stats.sessionProgress,
-                    completedSessions: stats.completedSessions,
-                    totalSessions: stats.totalSessions,
-                    hoursProgress: stats.hoursProgress,
-                    completedHours: stats.completedHours,
-                    totalHours: stats.totalHours,
-                    paymentsProgress: stats.paymentsProgress,
-                    completedPayments: stats.completedPayments,
-                    totalPayments: stats.totalPayments
-                  }}
-                  hasStudents={mentorStudents.length > 0}
-                  onViewDetails={() => handleViewDetails(mentor)}
-                  onViewStudents={() => handleViewStudents(mentor)}
-                  onEditProfile={() => handleEditProfile(mentor)}
-                  onDelete={() => handleDeleteMentor(mentor)}
-                />
-              );
-            })}
-            {filteredMentors.length === 0 && (
-              <div className="text-center p-8">
-                <p className="text-muted-foreground">
-                  No mentors found matching your filters.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+          {filteredMentors.length === 0 && (
+            <div className="col-span-full text-center p-8">
+              <p className="text-muted-foreground">
+                No mentors found matching your filters.
+              </p>
+            </div>
+          )}
+        </div>
 
         <MentorDialog
           isViewDetailsOpen={activeDialog === "details"}
