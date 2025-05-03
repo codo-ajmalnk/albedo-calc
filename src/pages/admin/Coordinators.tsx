@@ -6,45 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus, X } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { UserSearch, Eye, Edit, Plus, Trash2, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { crudToasts } from "@/lib/toast";
 import { CoordinatorDialog } from "@/components/dialog/CoordinatorDialog";
 import { MentorDialog } from "@/components/dialog/MentorDialog";
 import type { Coordinator, Student } from "@/lib/types";
+import { ViewToggle } from "@/components/ViewToggle";
+import { ListCard } from "@/components/ListCard";
 
 // Import coordinator-related types
 interface NewCoordinator {
@@ -73,6 +42,7 @@ const AdminCoordinators = () => {
     user: User;
     stats: ReturnType<typeof getCoordinatorStats>;
   } | null>(null);
+  const [view, setView] = useState<"grid" | "list">("grid");
 
   // Single dialog state to manage all dialogs
   const [activeDialog, setActiveDialog] = useState<"details" | "add" | "edit" | "delete" | "mentors" | "students" | null>(null);
@@ -662,15 +632,19 @@ const AdminCoordinators = () => {
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Coordinators Management</h1>
-
-          <Button
-            className="w-full sm:w-auto text-sm"
-            onClick={() => setActiveDialog("add")}
-          >
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            Add New Coordinator
-          </Button>
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Coordinators Management</h1>
+            <div className="flex items-center gap-2">
+              <ViewToggle view={view} onViewChange={setView} />
+              <Button
+                className="text-sm"
+                onClick={() => setActiveDialog("add")}
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add New Coordinator
+              </Button>
+            </div>
+          </div>
         </div>
 
         <Card className="w-full">
@@ -693,190 +667,241 @@ const AdminCoordinators = () => {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
-          {filteredCoordinators.map((coordinator) => {
-            const stats = getCoordinatorStats(coordinator.id);
-            const coordinatorMentors = users.filter(user => user.role === "mentor" && user.supervisorId === coordinator.id);
+        {view === "grid" ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+            {filteredCoordinators.map((coordinator) => {
+              const stats = getCoordinatorStats(coordinator.id);
+              const coordinatorMentors = users.filter(user => user.role === "mentor" && user.supervisorId === coordinator.id);
 
-            return (
-              <Card key={coordinator.id} className="flex flex-col">
-                <CardHeader className="p-3 sm:p-4 md:p-6">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                    <div className="space-y-1">
-                      <CardTitle className="text-base sm:text-lg">{coordinator.name}</CardTitle>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{coordinator.email}</p>
-                    </div>
-                    <div className="text-left sm:text-right space-y-1">
-                      <p className="text-xs sm:text-sm">ID: <span className="font-medium">{coordinator.id}</span></p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {coordinator.phone ? `Phone: ${coordinator.phone}` : 'No phone number'}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Team Size</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-xl sm:text-2xl font-bold">{stats.mentorCount}</p>
-                          <p className="text-sm text-muted-foreground">mentors</p>
-                        </div>
+              return (
+                <Card key={coordinator.id} className="flex flex-col">
+                  <CardHeader className="p-3 sm:p-4 md:p-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="space-y-1">
+                        <CardTitle className="text-base sm:text-lg">{coordinator.name}</CardTitle>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{coordinator.email}</p>
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Students</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-xl sm:text-2xl font-bold">{stats.studentCount}</p>
-                          <p className="text-sm text-muted-foreground">total</p>
-                        </div>
+                      <div className="text-left sm:text-right space-y-1">
+                        <p className="text-xs sm:text-sm">ID: <span className="font-medium">{coordinator.id}</span></p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
+                          {coordinator.phone ? `Phone: ${coordinator.phone}` : 'No phone number'}
+                        </p>
                       </div>
                     </div>
-
-                    {coordinatorMentors.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Sessions Progress</span>
-                          <span className="font-medium">{stats.sessionProgress}%</span>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Team Size</p>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-xl sm:text-2xl font-bold">{stats.mentorCount}</p>
+                            <p className="text-sm text-muted-foreground">mentors</p>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.sessionProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedSessions} completed</span>
-                          <span>{stats.totalSessions} total</span>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Students</p>
+                          <div className="flex items-baseline gap-2">
+                            <p className="text-xl sm:text-2xl font-bold">{stats.studentCount}</p>
+                            <p className="text-sm text-muted-foreground">total</p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Hours Progress</span>
-                          <span className="font-medium">{stats.hoursProgress}%</span>
+                      {coordinatorMentors.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Sessions Progress</span>
+                            <span className="font-medium">{stats.sessionProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.sessionProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.sessionProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedSessions} completed</span>
+                            <span>{stats.totalSessions} total</span>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.hoursProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedHours} completed</span>
-                          <span>{stats.totalHours} total</span>
-                        </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Payments Progress</span>
-                          <span className="font-medium">{stats.paymentsProgress}%</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Hours Progress</span>
+                            <span className="font-medium">{stats.hoursProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.hoursProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.hoursProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedHours} completed</span>
+                            <span>{stats.totalHours} total</span>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.paymentsProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentsProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.paymentsProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>₹{stats.completedPayments.toLocaleString()} completed</span>
-                          <span>₹{stats.totalPayments.toLocaleString()} total</span>
-                        </div>
-                      </div>
-                        </div>
-                    )}
 
-                    <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleViewDetails(coordinator)}
-                      >
-                        <Eye className="mr-1.5 h-3.5 w-3.5" />
-                        Details
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleViewMentors(coordinator)}
-                      >
-                        <Users className="mr-1.5 h-3.5 w-3.5" />
-                        Mentors
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => {
-                          const coordUser = asCoordinator(coordinator);
-                          if (coordUser) {
-                            handleViewStudents(coordUser);
-                            setActiveDialog("students");
-                          }
-                        }}
-                      >
-                        <Users className="mr-1.5 h-3.5 w-3.5" />
-                        Students
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleEditProfile(coordinator)}
-                      >
-                        <Edit className="mr-1.5 h-3.5 w-3.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleDeleteCoordinator(coordinator)}
-                        disabled={getCoordinatorStats(coordinator.id).mentorCount > 0}
-                      >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                        Delete
-                      </Button>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Payments Progress</span>
+                            <span className="font-medium">{stats.paymentsProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.paymentsProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.paymentsProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.paymentsProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>₹{stats.completedPayments.toLocaleString()} completed</span>
+                            <span>₹{stats.totalPayments.toLocaleString()} total</span>
+                          </div>
+                        </div>
+                          </div>
+                      )}
+
+                      <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs sm:text-sm"
+                          onClick={() => handleViewDetails(coordinator)}
+                        >
+                          <Eye className="mr-1.5 h-3.5 w-3.5" />
+                          Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs sm:text-sm"
+                          onClick={() => handleViewMentors(coordinator)}
+                        >
+                          <Users className="mr-1.5 h-3.5 w-3.5" />
+                          Mentors
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs sm:text-sm"
+                          onClick={() => {
+                            const coordUser = asCoordinator(coordinator);
+                            if (coordUser) {
+                              handleViewStudents(coordUser);
+                              setActiveDialog("students");
+                            }
+                          }}
+                        >
+                          <Users className="mr-1.5 h-3.5 w-3.5" />
+                          Students
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs sm:text-sm"
+                          onClick={() => handleEditProfile(coordinator)}
+                        >
+                          <Edit className="mr-1.5 h-3.5 w-3.5" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="w-full text-xs sm:text-sm"
+                          onClick={() => handleDeleteCoordinator(coordinator)}
+                          disabled={getCoordinatorStats(coordinator.id).mentorCount > 0}
+                        >
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </CardContent>
+                </Card>
+              );
+            })}
 
-          {filteredCoordinators.length === 0 && (
-            <div className="col-span-full text-center p-8">
-              <p className="text-muted-foreground">
-                No coordinators found matching your search.
-              </p>
-            </div>
-          )}
-        </div>
+            {filteredCoordinators.length === 0 && (
+              <div className="col-span-full text-center p-8">
+                <p className="text-muted-foreground">
+                  No coordinators found matching your search.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredCoordinators.map((coordinator) => {
+              const stats = getCoordinatorStats(coordinator.id);
+              const hasStudents = stats.mentorCount > 0;
+              
+              return (
+                <ListCard
+                  key={coordinator.id}
+                  id={coordinator.id}
+                  name={coordinator.name}
+                  email={coordinator.email}
+                  phone={coordinator.phone}
+                  stats={{
+                    mentorCount: stats.mentorCount,
+                    studentCount: stats.studentCount,
+                    sessionProgress: stats.sessionProgress,
+                    completedSessions: stats.completedSessions,
+                    totalSessions: stats.totalSessions,
+                    hoursProgress: stats.hoursProgress,
+                    completedHours: stats.completedHours,
+                    totalHours: stats.totalHours,
+                    paymentsProgress: stats.paymentsProgress,
+                    completedPayments: stats.completedPayments,
+                    totalPayments: stats.totalPayments
+                  }}
+                  hasStudents={hasStudents}
+                  onViewDetails={() => handleViewDetails(coordinator)}
+                  onViewMentors={() => handleViewMentors(coordinator)}
+                  onViewStudents={() => {
+                    const coordUser = asCoordinator(coordinator);
+                    if (coordUser) {
+                      handleViewStudents(coordUser);
+                      setActiveDialog("students");
+                    }
+                  }}
+                  onEditProfile={() => handleEditProfile(coordinator)}
+                  onDelete={() => handleDeleteCoordinator(coordinator)}
+                />
+              );
+            })}
+            {filteredCoordinators.length === 0 && (
+              <div className="text-center p-8">
+                <p className="text-muted-foreground">
+                  No coordinators found matching your search.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         <CoordinatorDialog
           isViewDetailsOpen={activeDialog === "details"}

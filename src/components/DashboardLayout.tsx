@@ -1,3 +1,4 @@
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
@@ -10,7 +11,19 @@ import { NotificationPanel } from "./NotificationPanel";
 
 type Role = "admin" | "coordinator" | "mentor" | "student";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export interface DashboardLayoutProps {
+  children: React.ReactNode;
+  viewToggle?: boolean;
+  view?: "grid" | "list";
+  onViewChange?: (view: "grid" | "list") => void;
+}
+
+export default function DashboardLayout({ 
+  children,
+  viewToggle = false,
+  view,
+  onViewChange
+}: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
