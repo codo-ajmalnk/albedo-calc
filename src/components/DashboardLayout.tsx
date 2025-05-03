@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/admin/coordinators">Coordinators</NavLink>
             <NavLink to="/admin/mentors">Mentors</NavLink>
             <NavLink to="/admin/students">Students</NavLink>
-            <NavLink to="/admin/bulk-update">Bulk Update</NavLink>
+            <NavLink to="/admin/bulk-update">BulkUpdate</NavLink>
             <NavLink to="/admin/notification-settings">Notifications</NavLink>
           </>
         );
@@ -100,33 +100,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-colors duration-300">
-      <header 
+      <header
         className={cn(
           "fixed w-full top-0 z-50 transition-all duration-300",
           "bg-gradient-to-r from-primary via-primary to-primary/95",
           scrolled ? "shadow-lg bg-opacity-95 backdrop-blur-lg" : "bg-opacity-98"
         )}
       >
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex justify-between items-center h-16 sm:h-18">
-            <div className="flex items-center space-x-4">
-              <motion.h1 
+        <div className="container mx-auto px-3 sm:px-4 md:px-6">
+          <div className="flex items-center h-14 sm:h-16 md:h-18 w-full">
+            {/* Left: Logo and user badge */}
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <motion.h1
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center space-x-2"
+                className="text-base sm:text-lg md:text-xl font-bold text-white tracking-tight flex items-center gap-1 sm:gap-2"
               >
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90">
                   Albedo Educator
                 </span>
-                <span className="text-primary-foreground/80 mx-1">|</span>
+                <span className="text-primary-foreground/80 mx-0.5 sm:mx-1">|</span>
                 <span className="text-primary-foreground/90 font-semibold">Calc</span>
               </motion.h1>
-              <div className="hidden md:flex items-center">
-                <motion.div 
+              <div className="hidden xs:flex items-center">
+                <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className={cn(
-                    "text-xs sm:text-sm bg-white/10 text-white/90 rounded-full px-3 py-1.5",
+                    "text-xs sm:text-sm bg-white/10 text-white/90 rounded-full px-2 sm:px-3 py-1",
                     "font-medium backdrop-blur-sm transition-all duration-200",
                     "hover:bg-white/15 hover:scale-105",
                     "border border-white/10 shadow-sm"
@@ -136,13 +137,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </motion.div>
               </div>
             </div>
-            
-            {/* Mobile menu button */}
-            <motion.button 
+
+            {/* Center: Nav links (xl+ only) */}
+            <nav className="hidden xl:flex flex-wrap justify-center items-center flex-1 gap-x-3 gap-y-1 2xl:gap-x-5 3xl:gap-x-8 px-2">
+              {renderNavLinks(user.role)}
+            </nav>
+
+            {/* Right: Controls (xl+ only) */}
+            <div className="hidden xl:flex items-center gap-2 flex-shrink-0">
+              <NotificationPanel />
+              <ThemeToggle />
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleLogoutClick}
+                  className={cn(
+                    "hover:bg-white/90 transition-all duration-200",
+                    "shadow-sm hover:shadow-md active:shadow-sm",
+                    "border border-white/10"
+                  )}
+                >
+                  Logout
+                </Button>
+              </motion.div>
+            </div>
+
+            {/* Mobile/Tablet menu button (below xl) */}
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "md:hidden p-2 rounded-lg transition-colors duration-200 text-white",
+                "xl:hidden p-2 rounded-lg transition-colors duration-200 text-white ml-auto",
                 "hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
               )}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -167,53 +193,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 )}
               </motion.div>
             </motion.button>
-            
-            {/* Desktop navigation */}
-            <div className="hidden md:flex items-center space-x-6">
-              <nav className="flex items-center space-x-2">
-                {renderNavLinks(user.role)}
-              </nav>
-              <div className="h-6 w-px bg-white/20" />
-              <div className="flex items-center space-x-2">
-                <NotificationPanel />
-                <ThemeToggle />
-              </div>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  onClick={handleLogoutClick}
-                  className={cn(
-                    "hover:bg-white/90 transition-all duration-200",
-                    "shadow-sm hover:shadow-md active:shadow-sm",
-                    "border border-white/10"
-                  )}
-                >
-                  Logout
-                </Button>
-              </motion.div>
-            </div>
           </div>
-          
-          {/* Mobile navigation */}
+
+          {/* Mobile/Tablet nav dropdown */}
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="md:hidden overflow-hidden"
+                className="xl:hidden absolute left-0 right-0 top-full bg-primary shadow-lg border-t border-white/10"
               >
-                <motion.div 
-                  initial={{ y: -10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="py-4 space-y-4 border-t border-white/10"
-                >
-                  <div className="flex items-center space-x-3 px-2">
-                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-                      <span className="text-sm text-white/90 font-medium">
+                <div className="flex flex-col gap-1 py-2 px-2">
+                  <div className="flex items-center gap-2 px-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+                      <span className="text-xs text-white/90 font-medium">
                         {user.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -224,36 +219,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center px-2">
+                  <nav className="flex flex-col gap-1">
+                    {renderNavLinks(user.role)}
+                  </nav>
+                  <div className="flex items-center gap-2 mt-2 px-2">
                     <ThemeToggle />
                     <NotificationPanel />
                   </div>
-                  <nav className="flex flex-col space-y-1 px-2">
-                    {renderNavLinks(user.role)}
-                  </nav>
-                  <div className="px-2">
-                    <Button 
-                      variant="destructive" 
-                      size="sm" 
-                      className={cn(
-                        "w-full bg-red-500/10 hover:bg-red-500/20 text-red-500",
-                        "transition-all duration-200 border border-red-500/20",
-                        "hover:scale-[1.02] active:scale-[0.98]"
-                      )}
-                      onClick={handleLogoutClick}
-                    >
-                      Logout
-                    </Button>
-                  </div>
-                </motion.div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className={cn(
+                      "w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 mt-2",
+                      "transition-all duration-200 border border-red-500/20",
+                      "hover:scale-[1.02] active:scale-[0.98]"
+                    )}
+                    onClick={handleLogoutClick}
+                  >
+                    Logout
+                  </Button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-6 sm:pb-8">
-        <motion.div 
+      <main className="container mx-auto px-3 sm:px-4 md:px-6 pt-16 sm:pt-20 md:pt-24 pb-4 sm:pb-6 md:pb-8">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
