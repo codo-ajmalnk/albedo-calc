@@ -253,10 +253,10 @@ export default function Students() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-3 sm:p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
+      <div className="space-y-6 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Students Management</h1>
+            <h1 className="text-xl font-bold">Students Management</h1>
             <p className="text-muted-foreground">
               {currentUser.role === "mentor"
                 ? "Manage and track your students' progress"
@@ -290,18 +290,18 @@ export default function Students() {
                 sessionsRemaining: 12,
                 progressPercentage: 0
               });
-            }} className="w-full sm:w-auto text-sm">
-              <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+            }} className="w-full sm:w-auto">
+              <UserPlus className="mr-2 h-4 w-4" />
               Add New Student
             </Button>
           )}
         </div>
 
         <Card className="w-full">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardHeader className="p-4 sm:p-6">
             <CardTitle>Filter Students</CardTitle>
           </CardHeader>
-          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <CardContent className="p-4 sm:p-6 pt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Search by Name</Label>
@@ -310,7 +310,7 @@ export default function Students() {
                     placeholder="Search students..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full text-sm"
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -321,7 +321,7 @@ export default function Students() {
                     value={selectedMentor?.id || "all"}
                     onValueChange={(value) => setSelectedMentor(value === "all" ? null : mentors.find(m => m.id === value) || null)}
                   >
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Mentor" />
                     </SelectTrigger>
                     <SelectContent>
@@ -343,37 +343,35 @@ export default function Students() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Mentor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead className="min-w-[200px]">Name</TableHead>
+                <TableHead className="min-w-[150px]">Mentor</TableHead>
+                <TableHead className="w-[140px]">Progress</TableHead>
+                <TableHead className="w-[120px]">Total Sessions</TableHead>
+                <TableHead className="w-[120px]">Total Hours</TableHead>
+                <TableHead className="w-[120px]">Session Duration</TableHead>
+                <TableHead className="w-[120px]">Remaining Days</TableHead>
+                <TableHead className="w-[140px]">Pending Payment</TableHead>
+                <TableHead className="w-[100px] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredStudents.map((student) => {
                 const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
+                const pendingPayment = student.totalPayment - student.paidAmount;
+                const remainingDays = student.endDate ? Math.ceil((new Date(student.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
                 return (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.id}</TableCell>
                     <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{student.name}</span>
-                        <span className="text-sm text-muted-foreground">{student.phone}</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium truncate">{student.name}</span>
+                        <span className="text-sm text-muted-foreground truncate">{student.phone}</span>
+                        <span className="text-sm text-muted-foreground truncate">{student.email}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell>
+                    <TableCell className="truncate">
                       {getMentorName(student.mentorId)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={student.status === "active" ? "default" : "secondary"}
-                      >
-                        {student.status}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="w-full">
@@ -385,27 +383,64 @@ export default function Students() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="text-sm whitespace-nowrap">
+                        <span className="font-medium">{student.sessionsCompleted}</span>
+                        <span className="text-muted-foreground">/{student.totalSessions}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm whitespace-nowrap">
+                        <span className="font-medium">{Math.round((student.sessionsCompleted * student.sessionDuration) / 60)}</span>
+                        <span className="text-muted-foreground">/{Math.round((student.totalSessions * student.sessionDuration) / 60)}</span>
+                        <span className="text-xs text-muted-foreground"> hours</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm whitespace-nowrap">
+                        <span className="font-medium">{student.sessionDuration}</span>
+                        <span className="text-xs text-muted-foreground"> mins</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm whitespace-nowrap">
+                        <span className="font-medium">{remainingDays}</span>
+                        <span className="text-xs text-muted-foreground"> days</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm whitespace-nowrap">
+                        <span className="font-medium">₹{pendingPayment.toLocaleString()}</span>
+                        <span className="text-xs text-muted-foreground">/₹{student.totalPayment.toLocaleString()}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
                         <Button
-                          variant="ghost"
-                          size="icon"
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleViewDetails(student)}
+                          className="h-8 w-8 p-0"
                         >
                           <Users className="h-4 w-4" />
+                          <span className="sr-only">View Details</span>
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="icon"
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleEdit(student)}
+                          className="h-8 w-8 p-0"
                         >
                           <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="icon"
+                          variant="destructive"
+                          size="sm"
                           onClick={() => handleDelete(student)}
+                          className="h-8 w-8 p-0"
                         >
                           <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -414,7 +449,7 @@ export default function Students() {
               })}
               {filteredStudents.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={10} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center gap-1">
                       <Users className="h-8 w-8 text-muted-foreground/60" />
                       <p className="text-sm text-muted-foreground">No students found</p>

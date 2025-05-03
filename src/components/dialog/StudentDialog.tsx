@@ -117,84 +117,79 @@ export function StudentDialog({
     <>
       {/* View Details Dialog */}
       <Dialog open={isViewDetailsOpen} onOpenChange={onViewDetailsClose}>
-        <DialogContent className="max-w-[95vw] w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
+        <DialogContent className="max-w-[95vw] sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           {selectedStudent && hasAccessToStudentData(selectedStudent) ? (
             <>
-              <DialogHeader className="space-y-2 sm:space-y-3">
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-4">
-                  <div>
-                    <DialogTitle className="text-lg sm:text-xl font-bold">
-                      {selectedStudent?.name}
-                    </DialogTitle>
-                    <DialogDescription className="text-sm">
-                      {selectedStudent?.email}
-                    </DialogDescription>
-                  </div>
-                </div>
+              <DialogHeader className="space-y-3">
+                <DialogTitle className="text-xl font-bold">{selectedStudent?.name}</DialogTitle>
+                <DialogDescription>
+                  {selectedStudent?.email}
+                </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4 sm:space-y-6 mt-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Total Sessions</p>
-                    <p className="text-xl sm:text-2xl font-bold mt-1">{selectedStudent.totalSessions}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">sessions</p>
+              <div className="space-y-6 py-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="p-4 bg-muted/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total Sessions</p>
+                    <p className="text-2xl font-bold mt-1">{selectedStudent.totalSessions}</p>
+                    <p className="text-sm text-muted-foreground">sessions</p>
                   </div>
-                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Completed Sessions</p>
-                    <p className="text-xl sm:text-2xl font-bold mt-1">{selectedStudent.sessionsCompleted}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">completed</p>
+                  <div className="p-4 bg-muted/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Completed Sessions</p>
+                    <p className="text-2xl font-bold mt-1">{selectedStudent.sessionsCompleted}</p>
+                    <p className="text-sm text-muted-foreground">completed</p>
                   </div>
-                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Total Hours</p>
-                    <p className="text-xl sm:text-2xl font-bold mt-1 truncate">{selectedStudent.totalHours}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">hours</p>
+                  <div className="p-4 bg-muted/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Total Hours</p>
+                    <p className="text-2xl font-bold mt-1 truncate">{selectedStudent.totalHours}</p>
+                    <p className="text-sm text-muted-foreground">hours</p>
                   </div>
-                  <div className="p-3 sm:p-4 bg-muted/10 rounded-lg">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Remaining Hours</p>
-                    <p className="text-xl sm:text-2xl font-bold mt-1 truncate">
+                  <div className="p-4 bg-muted/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Remaining Hours</p>
+                    <p className="text-2xl font-bold mt-1 truncate">
                       {Math.round((selectedStudent.totalHours - (selectedStudent.sessionsCompleted * selectedStudent.sessionDuration / 60)) * 100) / 100}
                     </p>
-                    <p className="text-xs sm:text-sm text-muted-foreground">hours</p>
+                    <p className="text-sm text-muted-foreground">hours</p>
                   </div>
                 </div>
-                  <div>
-                  <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Session Details</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                      <span className="text-xs sm:text-sm">Student Added On</span>
-                      <p className="text-base sm:text-lg font-medium mt-1">
+
+                <div>
+                  <h3 className="text-base font-semibold mb-4">Session Details</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Student Added On</span>
+                      <p className="text-lg font-medium mt-1">
                         {selectedStudent.createdAt ? (
                           <div className="space-y-0.5">
                             <div>{format(new Date(selectedStudent.createdAt), "PPP")}</div>
                             <div className="text-sm text-muted-foreground">
                               {format(new Date(selectedStudent.createdAt), "p")}
-                      </div>
-                      </div>
+                            </div>
+                          </div>
                         ) : "Not available"}
                       </p>
-                      </div>
-                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                      <span className="text-xs sm:text-sm">Session Start</span>
-                      <p className="text-base sm:text-lg font-medium mt-1">
+                    </div>
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Session Start</span>
+                      <p className="text-lg font-medium mt-1">
                         {selectedStudent.startDate ? format(new Date(selectedStudent.startDate), "PPP") : "Not set"}
                       </p>
                     </div>
-                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                      <span className="text-xs sm:text-sm">Session End</span>
-                      <p className="text-base sm:text-lg font-medium mt-1">
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Session End</span>
+                      <p className="text-lg font-medium mt-1">
                         {selectedStudent.endDate ? format(new Date(selectedStudent.endDate), "PPP") : "Not set"}
                       </p>
                     </div>
-                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                      <span className="text-xs sm:text-sm">Session Duration</span>
-                      <p className="text-base sm:text-lg font-medium mt-1">
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Session Duration</span>
+                      <p className="text-lg font-medium mt-1">
                         {selectedStudent.sessionDuration} Minutes
                       </p>
                     </div>
-                    <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                      <span className="text-xs sm:text-sm">Remaining Days</span>
-                      <p className="text-base sm:text-lg font-medium mt-1">
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Remaining Days</span>
+                      <p className="text-lg font-medium mt-1">
                         {(selectedStudent.startDate && selectedStudent.endDate) ?
                           Math.ceil((new Date(selectedStudent.endDate).getTime() - new Date(selectedStudent.startDate).getTime()) / (1000 * 60 * 60 * 24))
                           : "N/A"} Days
@@ -202,159 +197,131 @@ export function StudentDialog({
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4 sm:space-y-6">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Sessions & Hours</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Total Sessions</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">{selectedStudent.totalSessions}</p>
-                      </div>
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Completed Sessions</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">{selectedStudent.sessionsCompleted}</p>
-                      </div>
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Total Hours</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">{selectedStudent.totalHours}</p>
-                      </div>
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Completed Hours</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">
-                          {Math.round((selectedStudent.totalHours * selectedStudent.sessionsCompleted) / selectedStudent.totalSessions)}
-                        </p>
-                      </div>
+
+                <div>
+                  <h3 className="text-base font-semibold mb-4">Sessions & Hours</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Total Sessions</span>
+                      <p className="text-lg font-medium mt-1">{selectedStudent.totalSessions}</p>
+                    </div>
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Completed Sessions</span>
+                      <p className="text-lg font-medium mt-1">{selectedStudent.sessionsCompleted}</p>
+                    </div>
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Total Hours</span>
+                      <p className="text-lg font-medium mt-1">{selectedStudent.totalHours}</p>
+                    </div>
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Completed Hours</span>
+                      <p className="text-lg font-medium mt-1">
+                        {Math.round((selectedStudent.totalHours * selectedStudent.sessionsCompleted) / selectedStudent.totalSessions)}
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Payments</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Total Payment</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">₹{(selectedStudent?.totalPayment || 0).toLocaleString()}</p>
-                      </div>
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Paid Amount</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">₹{(selectedStudent?.paidAmount || 0).toLocaleString()}</p>
-                      </div>
-                      <div className="p-3 sm:p-4 bg-muted/5 rounded-lg">
-                        <span className="text-xs sm:text-sm">Pending Payment</span>
-                        <p className="text-base sm:text-lg font-medium mt-1">₹{((selectedStudent?.totalPayment || 0) - (selectedStudent?.paidAmount || 0)).toLocaleString()}</p>
-                      </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-4">Payments</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Total Payment</span>
+                      <p className="text-lg font-medium mt-1">₹{(selectedStudent?.totalPayment || 0).toLocaleString()}</p>
+                    </div>
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Paid Amount</span>
+                      <p className="text-lg font-medium mt-1">₹{(selectedStudent?.paidAmount || 0).toLocaleString()}</p>
+                    </div>
+                    <div className="p-4 bg-muted/5 rounded-lg">
+                      <span className="text-sm">Pending Payment</span>
+                      <p className="text-lg font-medium mt-1">₹{((selectedStudent?.totalPayment || 0) - (selectedStudent?.paidAmount || 0)).toLocaleString()}</p>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Available Mentors</h3>
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-xs sm:text-sm">Name</TableHead>
-                            <TableHead className="text-xs sm:text-sm">Email</TableHead>
-                            <TableHead className="text-xs sm:text-sm">Status</TableHead>
-                            <TableHead className="text-xs sm:text-sm">Students</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {mentors.map((mentor) => {
-                            const mentorStudents = students.filter(s => s.mentorId === mentor.id);
-                            return (
-                              <TableRow key={mentor.id}>
-                                <TableCell className="text-xs sm:text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{mentor.name}</span>
-                                    {mentor.id === selectedStudent.mentorId && (
-                                      <Badge variant="default" className="text-xs">Current</Badge>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-xs sm:text-sm">{mentor.email}</TableCell>
-                                <TableCell className="text-xs sm:text-sm">
-                                  <Badge variant={mentor.status === "active" ? "default" : "secondary"} className="text-xs">
-                                    {mentor.status}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-xs sm:text-sm">{mentorStudents.length} students</TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
-                    </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-4">Available Mentors</h3>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Students</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {mentors.map((mentor) => {
+                          const mentorStudents = students.filter(s => s.mentorId === mentor.id);
+                          return (
+                            <TableRow key={mentor.id}>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{mentor.name}</span>
+                                  {mentor.id === selectedStudent.mentorId && (
+                                    <Badge variant="default">Current</Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>{mentor.email}</TableCell>
+                              <TableCell>
+                                <Badge variant={mentor.status === "active" ? "default" : "secondary"}>
+                                  {mentor.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{mentorStudents.length} students</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4">Progress Overview</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-xs sm:text-sm mb-2">
-                          <span>Sessions Progress</span>
-                          <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
-                              ? 'bg-progress-complete'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                                ? 'bg-progress-high'
-                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
-                          />
-                        </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-4">Progress Overview</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Sessions Progress</span>
+                        <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
                       </div>
+                      <Progress
+                        value={(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}
+                        className="h-2"
+                      />
+                    </div>
 
-                      <div>
-                        <div className="flex justify-between text-xs sm:text-sm mb-2">
-                          <span>Hours Progress</span>
-                          <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
-                              ? 'bg-progress-complete'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                                ? 'bg-progress-high'
-                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
-                          />
-                        </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Hours Progress</span>
+                        <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
                       </div>
+                      <Progress
+                        value={(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}
+                        className="h-2"
+                      />
+                    </div>
 
-                      <div>
-                        <div className="flex justify-between text-xs sm:text-sm mb-2">
-                          <span>Payment Progress</span>
-                          <span>{Math.round((selectedStudent.paidAmount / selectedStudent.totalPayment) * 100)}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
-                              ? 'bg-progress-complete'
-                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
-                                ? 'bg-progress-high'
-                                : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}%` }}
-                          />
-                        </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Payment Progress</span>
+                        <span>{Math.round((selectedStudent.paidAmount / selectedStudent.totalPayment) * 100)}%</span>
                       </div>
+                      <Progress
+                        value={(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}
+                        className="h-2"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="p-4 sm:p-6 text-center">
-              <p className="text-sm sm:text-base text-muted-foreground">
+            <div className="p-6 text-center">
+              <p className="text-base text-muted-foreground">
                 You don't have permission to view this student's details.
               </p>
             </div>
@@ -1188,27 +1155,25 @@ export function StudentDialog({
 
       {/* View Students Dialog - Only show accessible students */}
       <Dialog open={isViewStudentsOpen} onOpenChange={onViewStudentsClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Assigned Students - {selectedMentor?.name}</DialogTitle>
+        <DialogContent className="max-w-[95vw] sm:max-w-[800px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold">Assigned Students - {selectedMentor?.name}</DialogTitle>
             <DialogDescription>
               {currentUser.role === "mentor"
                 ? "View and manage your students"
                 : `Manage students assigned to ${selectedMentor?.name}`}
             </DialogDescription>
           </DialogHeader>
-          <DialogHeader>
-            <div className="flex justify-end gap-4 mb-4">
-              <Button variant="outline" onClick={() => setIsAssigningStudents(true)}>
-                <Users className="mr-2 h-4 w-4" />
-                Assign Students
-              </Button>
-              <Button onClick={() => setIsAddingStudent(true)}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New Student
-              </Button>
-            </div>
-          </DialogHeader>
+          <div className="flex justify-end gap-4 mb-4">
+            <Button variant="outline" onClick={() => setIsAssigningStudents(true)}>
+              <Users className="mr-2 h-4 w-4" />
+              Assign Students
+            </Button>
+            <Button onClick={() => setIsAddingStudent(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add New Student
+            </Button>
+          </div>
 
           <div className="relative overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6">
             <div className="p-3 sm:p-4 md:p-6">
