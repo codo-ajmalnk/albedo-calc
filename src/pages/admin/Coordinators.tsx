@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus, Trash2, Users } from "lucide-react";
+import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { crudToasts } from "@/lib/toast";
 import { CoordinatorDialog } from "@/components/dialog/CoordinatorDialog";
@@ -14,6 +14,9 @@ import { MentorDialog } from "@/components/dialog/MentorDialog";
 import type { Coordinator, Student } from "@/lib/types";
 import { ViewToggle } from "@/components/ViewToggle";
 import { ListCard } from "@/components/ListCard";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Import coordinator-related types
 interface NewCoordinator {
@@ -105,7 +108,10 @@ const AdminCoordinators = () => {
     progressPercentage: 0,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 60
+    sessionDuration: 60,
+    teachersPayment: 8000,
+    hourlyPayment: 500,
+    sessionAddedOn: new Date().toISOString()
   });
 
   const filteredCoordinators = coordinators.filter((coordinator) =>
@@ -590,7 +596,10 @@ const AdminCoordinators = () => {
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60
+        sessionDuration: 60,
+        teachersPayment: 8000,
+        hourlyPayment: 500,
+        sessionAddedOn: new Date().toISOString()
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -781,7 +790,7 @@ const AdminCoordinators = () => {
                             <span>₹{stats.totalPayments.toLocaleString()} total</span>
                           </div>
                         </div>
-                          </div>
+                      </div>
                       )}
 
                       <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
@@ -901,346 +910,3 @@ const AdminCoordinators = () => {
               </div>
             )}
           </div>
-        )}
-
-        <CoordinatorDialog
-          isViewDetailsOpen={activeDialog === "details"}
-          isAddOpen={activeDialog === "add"}
-          isEditOpen={activeDialog === "edit"}
-          isDeleteOpen={activeDialog === "delete"}
-          selectedCoordinator={asCoordinator(selectedCoordinator?.user)}
-          newCoordinator={newCoordinator}
-          editingCoordinator={editingCoordinator}
-          stats={selectedCoordinator?.stats}
-          allStudents={allStudents}
-          onViewDetailsClose={closeAllDialogs}
-          onAddClose={closeAllDialogs}
-          onEditClose={closeAllDialogs}
-          onDeleteClose={closeAllDialogs}
-          onAddCoordinator={handleAddCoordinator}
-          onUpdateCoordinator={handleUpdateCoordinator}
-          onDeleteCoordinator={confirmDeleteCoordinator}
-          setNewCoordinator={setNewCoordinator}
-          setEditingCoordinator={setEditingCoordinator}
-        />
-
-        <Dialog
-          open={activeDialog === "mentors"}
-          onOpenChange={(open) => {
-            if (!open) {
-              closeAllDialogs();
-            }
-          }}
-        >
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Assigned Mentors - {selectedCoordinator?.user.name}</DialogTitle>
-              <DialogDescription>
-                Manage mentors assigned to this coordinator.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex justify-end gap-4 mb-4">
-              <Button variant="outline" onClick={() => setIsAssigningMentor(true)}>
-                <Users className="mr-2 h-4 w-4" />
-                Assign Mentor
-              </Button>
-              <Button onClick={() => setIsAddingMentor(true)}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New Mentor
-              </Button>
-            </div>
-
-            <div className="relative overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Students Count</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedCoordinator?.user.id && getAssignedMentors(selectedCoordinator.user.id).map((mentor) => (
-                    <TableRow key={mentor.id}>
-                      <TableCell className="font-medium">{mentor.id}</TableCell>
-                      <TableCell>{mentor.name}</TableCell>
-                      <TableCell>{mentor.email}</TableCell>
-                      <TableCell>{mentor.phone || "No phone number"}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${mentor.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                          }`}>
-                          {mentor.status || 'active'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {allStudents.filter(student => student.mentorId === mentor.id).length}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditMentor(mentor)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          {/* <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteMentor(mentor)}
-                            className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                        </Button> */}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(!selectedCoordinator?.user.id || getAssignedMentors(selectedCoordinator.user.id).length === 0) && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        <div className="flex flex-col items-center justify-center gap-1">
-                          <Users className="h-8 w-8 text-muted-foreground/60" />
-                          <p className="text-sm text-muted-foreground">No mentors found</p>
-                          <p className="text-xs text-muted-foreground">Assign or add new mentors to get started</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <MentorDialog
-          isViewDetailsOpen={false}
-          isAddOpen={isAddingMentor}
-          isEditOpen={isEditingMentor}
-          isDeleteOpen={isDeletingMentor}
-          isViewStudentsOpen={false}
-          selectedMentor={selectedMentor}
-          selectedCoordinator={selectedCoordinator}
-          newMentor={newMentor}
-          editingMentor={editingMentor}
-          students={students}
-          onViewDetailsClose={() => { }}
-          onAddClose={() => setIsAddingMentor(false)}
-          onEditClose={() => setIsEditingMentor(false)}
-          onDeleteClose={() => setIsDeletingMentor(false)}
-          onViewStudentsClose={() => { }}
-          onAddMentor={handleAddMentor}
-          onUpdateMentor={handleUpdateMentor}
-          onDeleteMentor={confirmDeleteMentor}
-          setNewMentor={setNewMentor}
-          setEditingMentor={setEditingMentor}
-          isAssigningStudents={isAssigningStudents}
-          isAddingStudent={isAddingStudent}
-          setIsAssigningStudents={setIsAssigningStudents}
-          setIsAddingStudent={setIsAddingStudent}
-          handleEditStudent={handleEditStudent}
-          handleDeleteStudent={handleDeleteStudent}
-          handleAddStudent={handleAddStudent}
-          handleAssignStudents={handleAssignStudents}
-          selectedStudentsToAssign={selectedStudentsToAssign}
-          setSelectedStudentsToAssign={setSelectedStudentsToAssign}
-          newStudent={newStudent}
-          setNewStudent={setNewStudent}
-        />
-
-        <Dialog open={isAssigningMentor} onOpenChange={setIsAssigningMentor}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Assign Mentor</DialogTitle>
-              <DialogDescription>
-                Select a mentor to assign to {selectedCoordinator?.user.name}.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="mentor-select">Select Mentor</Label>
-                <Select
-                  value={selectedMentorId}
-                  onValueChange={setSelectedMentorId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a mentor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getUnassignedMentors().map((mentor) => (
-                      <SelectItem key={mentor.id} value={mentor.id}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{mentor.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {mentor.isAssigned
-                              ? `Currently assigned to: ${mentor.currentCoordinator}`
-                              : 'Not assigned to any coordinator'}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setIsAssigningMentor(false);
-                setSelectedMentorId("");
-              }}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAssignMentor}
-                disabled={!selectedMentorId}
-              >
-                {selectedMentorId && getUnassignedMentors().find(m => m.id === selectedMentorId)?.isAssigned
-                  ? 'Reassign Mentor'
-                  : 'Assign Mentor'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={activeDialog === "students"}
-          onOpenChange={(open) => {
-            if (!open) {
-              closeAllDialogs();
-            }
-          }}
-        >
-          <DialogContent className="max-w-[95vw] w-full sm:max-w-4xl max-h-[90vh] overflow-y-auto p-2 sm:p-4 md:p-6">
-            <DialogHeader className="mb-4">
-              <DialogTitle className="text-base sm:text-lg font-semibold">Students Under {selectedCoordinator?.user.name}</DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                View all students managed by this coordinator's mentors.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="relative overflow-x-auto -mx-2 sm:mx-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[80px] font-medium hidden md:table-cell">ID</TableHead>
-                    <TableHead className="font-medium min-w-[120px]">Name</TableHead>
-                    <TableHead className="font-medium min-w-[120px] hidden sm:table-cell">Mentor</TableHead>
-                    <TableHead className="font-medium w-[100px]">Status</TableHead>
-                    <TableHead className="font-medium min-w-[100px]">Sessions</TableHead>
-                    <TableHead className="font-medium min-w-[100px] hidden sm:table-cell">Hours</TableHead>
-                    <TableHead className="font-medium min-w-[120px] hidden md:table-cell">Payments</TableHead>
-                    <TableHead className="font-medium w-[120px]">Progress</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedCoordinator &&
-                    getCoordinatorStudents(selectedCoordinator.user.id).map((student) => {
-                      const mentor = users.find(u => u.id === student.mentorId);
-                      const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-                      const paymentProgress = Math.round((student.paidAmount / student.totalPayment) * 100);
-
-                      return (
-                        <TableRow key={student.id} className="hover:bg-muted/50">
-                          <TableCell className="font-medium hidden md:table-cell">{student.id}</TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="font-medium">{student.name}</div>
-                              <div className="text-xs text-muted-foreground sm:hidden">
-                                Mentor: {mentor?.name || 'Not Assigned'}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">{mentor?.name || 'Not Assigned'}</TableCell>
-                          <TableCell>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                              }`}>
-                              {student.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm whitespace-nowrap">
-                                {student.sessionsCompleted}/{student.totalSessions}
-                              </span>
-                              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                {student.sessionsRemaining} left
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm whitespace-nowrap">
-                                {Math.round(student.sessionsCompleted * student.sessionDuration)}/{student.totalHours}
-                              </span>
-                              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                {Math.round(student.sessionsRemaining * student.sessionDuration)} left
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm whitespace-nowrap">
-                                ₹{student.paidAmount.toLocaleString()}/₹{student.totalPayment.toLocaleString()}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {paymentProgress}% paid
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-300 ${progress === 100
-                                      ? 'bg-progress-complete'
-                                      : progress >= 75
-                                        ? 'bg-progress-high'
-                                        : progress >= 40
-                                          ? 'bg-progress-medium'
-                                          : 'bg-progress-low'
-                                    }`}
-                                  style={{ width: `${progress}%` }}
-                                />
-                              </div>
-                              <span className="text-xs font-medium tabular-nums w-[3ch]">
-                                {progress}%
-                              </span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  {selectedCoordinator && getCoordinatorStudents(selectedCoordinator.user.id).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
-                        <div className="flex flex-col items-center justify-center gap-1">
-                          <Users className="h-8 w-8 text-muted-foreground/60" />
-                          <p className="text-sm text-muted-foreground">No students found</p>
-                          <p className="text-xs text-muted-foreground">This coordinator's mentors don't have any assigned students yet</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </DashboardLayout>
-  );
-};
-
-export default AdminCoordinators;
