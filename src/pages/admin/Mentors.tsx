@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -229,11 +230,14 @@ const AdminMentors = () => {
     totalHours: 24,
     totalPayment: 12000,
     paidAmount: 0,
+    teachersPayment: 0, // Added missing property
+    hourlyPayment: 500, // Added missing property
     sessionsRemaining: 12,
     progressPercentage: 0,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 60
+    sessionDuration: 60,
+    sessionAddedOn: new Date().toISOString() // Added missing property
   });
 
   // Add student management functions
@@ -276,7 +280,10 @@ const AdminMentors = () => {
 
       const studentToAdd: Student = {
         ...newStudent,
-        mentorId: selectedMentor.user.id
+        mentorId: selectedMentor.user.id,
+        teachersPayment: newStudent.teachersPayment,
+        hourlyPayment: newStudent.hourlyPayment,
+        sessionAddedOn: newStudent.sessionAddedOn
       };
 
       setStudents([...students, studentToAdd]);
@@ -294,11 +301,14 @@ const AdminMentors = () => {
         totalHours: 24,
         totalPayment: 12000,
         paidAmount: 0,
+        teachersPayment: 0, // Added missing property
+        hourlyPayment: 500, // Added missing property
         sessionsRemaining: 12,
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60
+        sessionDuration: 60,
+        sessionAddedOn: new Date().toISOString() // Added missing property
       });
       crudToasts.create.success("Student");
     } catch (error) {
