@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -910,3 +911,228 @@ const AdminCoordinators = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Dialog for assigning unassigned mentors to coordinator */}
+        <Dialog open={activeDialog === "mentors"} onOpenChange={(open) => !open && closeAllDialogs()}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Mentors for {selectedCoordinator?.user.name}</DialogTitle>
+              <DialogDescription>
+                Manage mentors assigned to this coordinator.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setIsAssigningMentor(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Assign Mentors
+              </Button>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">ID</TableHead>
+                  <TableHead className="w-[180px]">Name</TableHead>
+                  <TableHead className="w-[180px]">Email</TableHead>
+                  <TableHead className="w-[120px]">Phone</TableHead>
+                  <TableHead className="w-[80px]">Status</TableHead>
+                  <TableHead className="text-right w-[140px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedCoordinator && getAssignedMentors(selectedCoordinator.user.id).length > 0 ? (
+                  getAssignedMentors(selectedCoordinator.user.id).map((mentor) => (
+                    <TableRow key={mentor.id}>
+                      <TableCell className="font-medium">{mentor.id}</TableCell>
+                      <TableCell>{mentor.name}</TableCell>
+                      <TableCell>{mentor.email}</TableCell>
+                      <TableCell>{mentor.phone}</TableCell>
+                      <TableCell>
+                        <div
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            mentor.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {mentor.status}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditMentor(mentor)}
+                        >
+                          <Edit className="mr-1.5 h-3.5 w-3.5" />
+                          Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-4">
+                      <p className="text-muted-foreground">
+                        No mentors assigned to this coordinator yet.
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isAssigningMentor} onOpenChange={(open) => !open && setIsAssigningMentor(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Assign Mentor</DialogTitle>
+              <DialogDescription>
+                Select a mentor to assign to {selectedCoordinator?.user.name}.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <div className="grid grid-cols-1 gap-4">
+                <Select value={selectedMentorId} onValueChange={setSelectedMentorId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a mentor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getUnassignedMentors().map((mentor) => (
+                      <SelectItem 
+                        key={mentor.id} 
+                        value={mentor.id}
+                        disabled={mentor.supervisorId === selectedCoordinator?.user.id}
+                      >
+                        {mentor.name} {mentor.isAssigned && mentor.supervisorId !== selectedCoordinator?.user.id && `(Assigned to ${mentor.currentCoordinator})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAssigningMentor(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAssignMentor}
+                disabled={!selectedMentorId}
+              >
+                Assign Mentor
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={activeDialog === "students"} onOpenChange={(open) => !open && closeAllDialogs()}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Students for mentors under {selectedCoordinator?.user.name}</DialogTitle>
+              <DialogDescription>
+                View all students assigned to mentors supervised by this coordinator.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">Name</TableHead>
+                    <TableHead className="w-[180px]">Mentor</TableHead>
+                    <TableHead className="w-[100px]">Progress</TableHead>
+                    <TableHead className="w-[150px]">Sessions</TableHead>
+                    <TableHead className="w-[150px]">Payments</TableHead>
+                    <TableHead className="w-[180px] text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedCoordinator && getCoordinatorStudents(selectedCoordinator.user.id).length > 0 ? (
+                    getCoordinatorStudents(selectedCoordinator.user.id).map((student) => {
+                      const mentor = users.find(u => u.id === student.mentorId);
+                      const progress = Math.floor((student.sessionsCompleted / student.totalSessions) * 100);
+                      const paymentProgress = Math.floor((student.paidAmount / student.totalPayment) * 100);
+                      
+                      return (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">{student.name}</TableCell>
+                          <TableCell>{mentor?.name || "Unassigned"}</TableCell>
+                          <TableCell>
+                            <div className="w-full bg-muted h-2 rounded-full">
+                              <div
+                                className={`h-2 rounded-full ${
+                                  progress === 100
+                                    ? "bg-green-500"
+                                    : progress > 50
+                                    ? "bg-yellow-500"
+                                    : "bg-red-500"
+                                }`}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <span className="text-xs">{progress}%</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs">
+                              {student.sessionsCompleted}/{student.totalSessions}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs">
+                              ₹{student.paidAmount}/₹{student.totalPayment}
+                            </span>
+                            <div className="w-full bg-muted h-1 rounded-full mt-1">
+                              <div
+                                className={`h-1 rounded-full ${
+                                  paymentProgress === 100
+                                    ? "bg-green-500"
+                                    : paymentProgress > 50
+                                    ? "bg-yellow-500"
+                                    : "bg-red-500"
+                                }`}
+                                style={{ width: `${paymentProgress}%` }}
+                              />
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mr-2"
+                              onClick={() => navigate(`/admin/students/${student.id}`)}
+                            >
+                              <Eye className="mr-1 h-3.5 w-3.5" />
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4">
+                        <p className="text-muted-foreground">
+                          No students assigned to any mentors under this coordinator.
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default AdminCoordinators;
