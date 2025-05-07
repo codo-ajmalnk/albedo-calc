@@ -1,88 +1,88 @@
-import { DashboardStats, Role, Student, User } from "./types";
+import { DashboardStats, Role, Student, User, Coordinator } from "./types";
 
-// Mock users
+// Mock users with strict typing
 export const users: User[] = [
   {
     id: "admin1",
     name: "Admin User",
     email: "admin@example.com",
-    role: "admin",
+    role: "admin" as const,
     phone: "+91 98765 43210",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "coord1",
     name: "John Coordinator",
     email: "john@example.com",
-    role: "coordinator",
+    role: "coordinator" as const,
     phone: "+91 98765 43211",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "coord2",
     name: "Jane Coordinator",
     email: "jane@example.com",
-    role: "coordinator",
+    role: "coordinator" as const,
     phone: "+91 98765 43212",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "mentor1",
     name: "Mike Mentor",
     email: "mike@example.com",
-    role: "mentor",
+    role: "mentor" as const,
     supervisorId: "coord1",
     phone: "+91 98765 43213",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "mentor2",
     name: "Mary Mentor",
     email: "mary@example.com",
-    role: "mentor",
+    role: "mentor" as const,
     supervisorId: "coord1",
     phone: "+91 98765 43214",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "mentor3",
     name: "Mark Mentor",
     email: "mark@example.com",
-    role: "mentor",
+    role: "mentor" as const,
     supervisorId: "coord2",
     phone: "+91 98765 43215",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "mentor4",
     name: "Mentor Four",
     email: "mentor4@example.com",
-    role: "mentor",
+    role: "mentor" as const,
     supervisorId: "coord2",
     phone: "+91 98765 43216",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "mentor5",
     name: "Mentor Five",
     email: "mentor5@example.com",
-    role: "mentor",
+    role: "mentor" as const,
     supervisorId: "coord2",
     phone: "+91 98765 43217",
-    status: "active"
+    status: "active" as const
   },
   {
     id: "mentor6",
     name: "Mentor Six",
     email: "mentor6@example.com",
-    role: "mentor",
+    role: "mentor" as const,
     supervisorId: "coord2",
     phone: "+91 98765 43218",
-    status: "active"
+    status: "active" as const
   },
 ];
 
-// Generate mock students
+// Generate mock students with strict typing
 export const generateMockStudents = (): Student[] => {
   return Array.from({ length: 6 }, (_, i) => {
     const totalSessions = 12;
@@ -133,13 +133,13 @@ export const generateMockStudents = (): Student[] => {
       totalPayments,
       completedPayments,
       pendingPayments
-    };
+    } satisfies Student;
   });
 };
 
 export const students = generateMockStudents();
 
-// Dashboard statistics
+// Dashboard statistics with strict typing
 export const generateDashboardStats = (
   filteredStudents = students
 ): DashboardStats => {
@@ -210,5 +210,5 @@ export const generateDashboardStats = (
     totalPayments,
     completedPayments,
     pendingPayments,
-  };
+  } satisfies DashboardStats;
 };
