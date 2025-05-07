@@ -69,6 +69,14 @@ const AdminDashboard = () => {
         (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
         0
       );
+      const completedPayments = mentorStudents.reduce(
+        (sum, student) => sum + student.paidAmount,
+        0
+      );
+      const totalPayments = mentorStudents.reduce(
+        (sum, student) => sum + student.totalPayment,
+        0
+      );
 
       return {
         name: mentor.name,
@@ -77,7 +85,9 @@ const AdminDashboard = () => {
         remainingSessions: totalSessions - completedSessions,
         completedHours: Math.round(completedHours),
         remainingHours: Math.round(totalHours - completedHours),
-        progress: Math.floor((completedSessions / totalSessions) * 100)
+        progress: Math.floor((completedSessions / totalSessions) * 100),
+        completedPayments,
+        totalPayments,
       };
     });
 
@@ -110,6 +120,14 @@ const AdminDashboard = () => {
         (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
         0
       );
+      const completedPayments = coordinatorStudents.reduce(
+        (sum, student) => sum + student.paidAmount,
+        0
+      );
+      const totalPayments = coordinatorStudents.reduce(
+        (sum, student) => sum + student.totalPayment,
+        0
+      );
 
       return {
         name: coordinator.name,
@@ -119,7 +137,9 @@ const AdminDashboard = () => {
         remainingSessions: totalSessions - completedSessions,
         completedHours: Math.round(completedHours),
         remainingHours: Math.round(totalHours - completedHours),
-        progress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0
+        progress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0,
+        completedPayments,
+        totalPayments,
       };
     });
 
@@ -147,7 +167,7 @@ const AdminDashboard = () => {
       <div className="space-y-6">
         {/* <h1 className="text-2xl font-bold">Admin Dashboard</h1> */}
 
-        <DashboardStatsCard stats={stats} title="System Overview" />
+        <DashboardStatsCard stats={stats} title="System Overview" users={users} />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
@@ -354,8 +374,8 @@ const AdminDashboard = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="completedSessions" stackId="a" fill="#16a34a" name="Completed Sessions" />
-                    <Bar dataKey="remainingSessions" stackId="a" fill="#f97316" name="Remaining Sessions" />
+                    <Bar dataKey="completedHours" stackId="a" fill="#16a34a" name="Completed Hours" />
+                    <Bar dataKey="remainingHours" stackId="a" fill="#f97316" name="Remaining Hours" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -378,8 +398,10 @@ const AdminDashboard = () => {
                             </span>
                           </div>
                           <div className="text-sm space-x-4">
-                            <span>Sessions: {mentor.completedSessions}/{mentor.completedSessions + mentor.remainingSessions}</span>
                             <span>Hours: {mentor.completedHours}/{mentor.completedHours + mentor.remainingHours}</span>
+                            <span>
+                              Payments: ₹{mentor.completedPayments.toLocaleString()}/₹{mentor.totalPayments.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                         <div className="w-full bg-gray-200 h-2.5 rounded-full">
@@ -390,6 +412,12 @@ const AdminDashboard = () => {
                         </div>
                         <div className="flex justify-between text-sm text-muted-foreground">
                           <span>Progress: {mentor.progress}%</span>
+                          <span>
+                            Payment: {mentor.totalPayments > 0
+                              ? Math.round((mentor.completedPayments / mentor.totalPayments) * 100)
+                              : 0
+                            }%
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -412,8 +440,8 @@ const AdminDashboard = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="completedSessions" stackId="a" fill="#16a34a" name="Completed Sessions" />
-                    <Bar dataKey="remainingSessions" stackId="a" fill="#f97316" name="Remaining Sessions" />
+                    <Bar dataKey="completedHours" stackId="a" fill="#16a34a" name="Completed Hours" />
+                    <Bar dataKey="remainingHours" stackId="a" fill="#f97316" name="Remaining Hours" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -436,8 +464,10 @@ const AdminDashboard = () => {
                             </span>
                           </div>
                           <div className="text-sm space-x-4">
-                            <span>Sessions: {coordinator.completedSessions}/{coordinator.completedSessions + coordinator.remainingSessions}</span>
                             <span>Hours: {coordinator.completedHours}/{coordinator.completedHours + coordinator.remainingHours}</span>
+                            <span>
+                              Payments: ₹{coordinator.completedPayments.toLocaleString()}/₹{coordinator.totalPayments.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                         <div className="w-full bg-gray-200 h-2.5 rounded-full">
@@ -448,6 +478,12 @@ const AdminDashboard = () => {
                         </div>
                         <div className="flex justify-between text-sm text-muted-foreground">
                           <span>Progress: {coordinator.progress}%</span>
+                          <span>
+                            Payment: {coordinator.totalPayments > 0
+                              ? Math.round((coordinator.completedPayments / coordinator.totalPayments) * 100)
+                              : 0
+                            }%
+                          </span>
                         </div>
                       </div>
                     ))}

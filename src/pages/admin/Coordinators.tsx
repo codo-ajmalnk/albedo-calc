@@ -312,7 +312,7 @@ const AdminCoordinators = () => {
       // Close dialog and reset selected coordinator
       setActiveDialog(null);
       setSelectedCoordinator(null);
-      
+
       crudToasts.delete.success("Coordinator");
     } catch (error) {
       crudToasts.delete.error("Coordinator");
@@ -740,79 +740,79 @@ const AdminCoordinators = () => {
                     </div>
 
                     {coordinatorMentors.length > 0 && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Sessions Progress</span>
-                          <span className="font-medium">{stats.sessionProgress}%</span>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Sessions Progress</span>
+                            <span className="font-medium">{stats.sessionProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.sessionProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.sessionProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.sessionProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedSessions} completed</span>
+                            <span>{stats.totalSessions} total</span>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.sessionProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.sessionProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.sessionProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedSessions} completed</span>
-                          <span>{stats.totalSessions} total</span>
-                        </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Hours Progress</span>
-                          <span className="font-medium">{stats.hoursProgress}%</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Hours Progress</span>
+                            <span className="font-medium">{stats.hoursProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.hoursProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.hoursProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.hoursProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>{stats.completedHours} completed</span>
+                            <span>{stats.totalHours} total</span>
+                          </div>
                         </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.hoursProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.hoursProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.hoursProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedHours} completed</span>
-                          <span>{stats.totalHours} total</span>
-                        </div>
-                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Payments Progress</span>
-                          <span className="font-medium">{stats.paymentsProgress}%</span>
-                        </div>
-                        <div className="w-full bg-muted h-2 rounded-full">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                              ? 'bg-progress-complete'
-                              : stats.paymentsProgress >= 75
-                                ? 'bg-progress-high'
-                                : stats.paymentsProgress >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                              }`}
-                            style={{ width: `${stats.paymentsProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>₹{stats.completedPayments.toLocaleString()} completed</span>
-                          <span>₹{stats.totalPayments.toLocaleString()} total</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Payments Progress</span>
+                            <span className="font-medium">{stats.paymentsProgress}%</span>
+                          </div>
+                          <div className="w-full bg-muted h-2 rounded-full">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
+                                ? 'bg-progress-complete'
+                                : stats.paymentsProgress >= 75
+                                  ? 'bg-progress-high'
+                                  : stats.paymentsProgress >= 40
+                                    ? 'bg-progress-medium'
+                                    : 'bg-progress-low'
+                                }`}
+                              style={{ width: `${stats.paymentsProgress}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>₹{stats.completedPayments.toLocaleString()} completed</span>
+                            <span>₹{stats.totalPayments.toLocaleString()} total</span>
+                          </div>
                         </div>
                       </div>
-                        </div>
                     )}
 
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
@@ -954,8 +954,8 @@ const AdminCoordinators = () => {
                       <TableCell>{mentor.phone || "No phone number"}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${mentor.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
                           }`}>
                           {mentor.status || 'active'}
                         </span>
@@ -1144,8 +1144,8 @@ const AdminCoordinators = () => {
                           <TableCell className="hidden sm:table-cell">{mentor?.name || 'Not Assigned'}</TableCell>
                           <TableCell>
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
                               }`}>
                               {student.status}
                             </span>
@@ -1185,12 +1185,12 @@ const AdminCoordinators = () => {
                               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all duration-300 ${progress === 100
-                                      ? 'bg-progress-complete'
-                                      : progress >= 75
-                                        ? 'bg-progress-high'
-                                        : progress >= 40
-                                          ? 'bg-progress-medium'
-                                          : 'bg-progress-low'
+                                    ? 'bg-progress-complete'
+                                    : progress >= 75
+                                      ? 'bg-progress-high'
+                                      : progress >= 40
+                                        ? 'bg-progress-medium'
+                                        : 'bg-progress-low'
                                     }`}
                                   style={{ width: `${progress}%` }}
                                 />
