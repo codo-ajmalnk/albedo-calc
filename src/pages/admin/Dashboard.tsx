@@ -167,7 +167,14 @@ const AdminDashboard = () => {
       <div className="space-y-6">
         {/* <h1 className="text-2xl font-bold">Admin Dashboard</h1> */}
 
-        <DashboardStatsCard stats={stats} title="System Overview" users={users} />
+        <DashboardStatsCard
+          stats={stats}
+          users={users}
+          showCoordinators
+          showMentors
+          showStudents
+          title="System Overview"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-primary/5 to-transparent">

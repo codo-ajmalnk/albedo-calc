@@ -86,6 +86,15 @@ const CoordinatorDashboard = () => {
       (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
       0
     );
+    const completedPayments = mentorStudents.reduce(
+      (sum, student) => sum + student.paidAmount,
+      0
+    );
+    const totalPayments = mentorStudents.reduce(
+      (sum, student) => sum + student.totalPayment,
+      0
+    );
+    const remainingPayments = totalPayments - completedPayments;
 
     return {
       name: mentor.name,
@@ -95,7 +104,9 @@ const CoordinatorDashboard = () => {
       totalHours,
       completedHours: Math.round(completedHours),
       remainingHours: Math.round(totalHours - completedHours),
-      progress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0
+      progress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0,
+      completedPayments,
+      remainingPayments
     };
   });
 
@@ -121,7 +132,13 @@ const CoordinatorDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <DashboardStatsCard stats={stats} title="My Team Overview" users={users} />
+        <DashboardStatsCard
+          stats={stats}
+          users={users}
+          showMentors
+          showStudents
+          title="Overall Progress"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-primary/5 to-transparent">
@@ -338,8 +355,8 @@ const CoordinatorDashboard = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="completedSessions" stackId="a" fill={COLORS.completed} name="Completed Sessions" />
-                    <Bar dataKey="remainingSessions" stackId="a" fill={COLORS.pending} name="Remaining Sessions" />
+                    <Bar dataKey="completedHours" stackId="a" fill={COLORS.completed} name="Completed Hours" />
+                    <Bar dataKey="remainingHours" stackId="a" fill={COLORS.pending} name="Remaining Hours" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -365,6 +382,7 @@ const CoordinatorDashboard = () => {
                         <div className="text-sm space-x-4">
                           <span>Sessions: {mentor.completedSessions}/{mentor.completedSessions + mentor.remainingSessions}</span>
                           <span>Hours: {mentor.completedHours}/{mentor.completedHours + mentor.remainingHours}</span>
+                          <span>Payments: {mentor.completedPayments}/{mentor.completedPayments + mentor.remainingPayments}</span>
                         </div>
                       </div>
                       <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">

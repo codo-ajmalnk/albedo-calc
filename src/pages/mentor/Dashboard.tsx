@@ -64,6 +64,8 @@ const MentorDashboard = () => {
     const remainingSessions = student.totalSessions - student.sessionsCompleted;
     const completedHours = Math.round(student.totalHours * (student.sessionsCompleted / student.totalSessions));
     const remainingHours = student.totalHours - completedHours;
+    const completedPayments = student.paidAmount;
+    const remainingPayments = student.totalPayment - student.paidAmount;
 
     return {
       name: student.name,
@@ -71,7 +73,9 @@ const MentorDashboard = () => {
       remainingSessions,
       completedHours,
       remainingHours,
-      progress: Math.floor((completedSessions / student.totalSessions) * 100)
+      progress: Math.floor((completedSessions / student.totalSessions) * 100),
+      completedPayments,
+      remainingPayments
     };
   });
 
@@ -105,7 +109,12 @@ const MentorDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
-        <DashboardStatsCard stats={stats} title="My Students Overview" users={users} />
+        <DashboardStatsCard
+          stats={stats}
+          users={users}
+          showStudents
+          title="My Students Overview"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-primary/5 to-transparent">
@@ -328,8 +337,8 @@ const MentorDashboard = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="completedSessions" stackId="a" fill={COLORS.completed} name="Completed Sessions" />
-                    <Bar dataKey="remainingSessions" stackId="a" fill={COLORS.pending} name="Remaining Sessions" />
+                    <Bar dataKey="completedHours" stackId="a" fill={COLORS.completed} name="Completed Hours" />
+                    <Bar dataKey="remainingHours" stackId="a" fill={COLORS.pending} name="Remaining Hours" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -352,6 +361,7 @@ const MentorDashboard = () => {
                         <div className="text-sm space-x-4">
                           <span>Sessions: {student.completedSessions}/{student.completedSessions + student.remainingSessions}</span>
                           <span>Hours: {student.completedHours}/{student.completedHours + student.remainingHours}</span>
+                          <span>Payments: {student.completedPayments}/{student.completedPayments + student.remainingPayments}</span>
                         </div>
                       </div>
                       <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">

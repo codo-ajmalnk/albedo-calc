@@ -9,9 +9,12 @@ interface DashboardStatsCardProps {
   title: string;
   users: User[];
   loading?: boolean;
+  showCoordinators?: boolean;
+  showMentors?: boolean;
+  showStudents?: boolean;
 }
 
-const DashboardStatsCard = ({ stats, title, users, loading }: DashboardStatsCardProps) => {
+const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, showMentors, showStudents }: DashboardStatsCardProps) => {
   const formatNumber = (num: number) => num.toLocaleString();
   const formatCurrency = (num: number) => `₹${num.toLocaleString()}`;
 
@@ -27,6 +30,14 @@ const DashboardStatsCard = ({ stats, title, users, loading }: DashboardStatsCard
 
   const totalCoordinators = users.filter(u => u.role === "coordinator").length;
   const totalMentors = users.filter(u => u.role === "mentor").length;
+
+  const visibleCards = [showCoordinators, showMentors, showStudents].filter(Boolean).length;
+  const gridCols =
+    visibleCards === 1
+      ? "grid-cols-1"
+      : visibleCards === 2
+      ? "grid-cols-2"
+      : "grid-cols-3";
 
   return (
     <Card className="w-full">
@@ -211,34 +222,40 @@ const DashboardStatsCard = ({ stats, title, users, loading }: DashboardStatsCard
             <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-muted-foreground">Overall Progress</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-primary/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
-              <div className="flex flex-col gap-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Coordinators</p>
-                <p className="text-lg md:text-xl font-bold">
-                  {loading ? <Skeleton className="h-6 w-16" /> : totalCoordinators}
-                </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">managing</p>
-              </div>
-            </Card>
-            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-secondary/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
-              <div className="flex flex-col gap-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Mentors</p>
-                <p className="text-lg md:text-xl font-bold">
-                  {loading ? <Skeleton className="h-6 w-16" /> : totalMentors}
-                </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">guiding</p>
-              </div>
-            </Card>
-            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-accent/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
-              <div className="flex flex-col gap-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">Total Students</p>
-                <p className="text-lg md:text-xl font-bold">
-                  {loading ? <Skeleton className="h-6 w-16" /> : formatNumber(stats.totalStudents)}
-                </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">enrolled</p>
-              </div>
-            </Card>
+          <div className={`grid ${gridCols} gap-3`}>
+            {showCoordinators && (
+              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-primary/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Total Coordinators</p>
+                  <p className="text-lg md:text-xl font-bold">
+                    {loading ? <Skeleton className="h-6 w-16" /> : totalCoordinators}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">managing</p>
+                </div>
+              </Card>
+            )}
+            {showMentors && (
+              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-secondary/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Total Mentors</p>
+                  <p className="text-lg md:text-xl font-bold">
+                    {loading ? <Skeleton className="h-6 w-16" /> : totalMentors}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">guiding</p>
+                </div>
+              </Card>
+            )}
+            {showStudents && (
+              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-accent/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Total Students</p>
+                  <p className="text-lg md:text-xl font-bold">
+                    {loading ? <Skeleton className="h-6 w-16" /> : formatNumber(stats.totalStudents)}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">enrolled</p>
+                </div>
+              </Card>
+            )}
           </div>
           <Card className="p-3 rounded-xl border border-border/40 mt-2">
             <div className="space-y-2">
