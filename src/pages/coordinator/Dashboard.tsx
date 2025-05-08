@@ -121,10 +121,10 @@ const CoordinatorDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <DashboardStatsCard stats={stats} title="My Team Overview" />
+        <DashboardStatsCard stats={stats} title="My Team Overview" users={users} />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader>
               <CardTitle>Sessions Distribution</CardTitle>
             </CardHeader>
@@ -152,7 +152,7 @@ const CoordinatorDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-secondary/5 to-transparent">
             <CardHeader>
               <CardTitle>Hours Distribution</CardTitle>
             </CardHeader>
@@ -180,7 +180,7 @@ const CoordinatorDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-accent/5 to-transparent">
             <CardHeader>
               <CardTitle>Payments Distribution</CardTitle>
             </CardHeader>

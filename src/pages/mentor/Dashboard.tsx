@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { students as allStudents, generateDashboardStats } from "@/lib/mock-data";
+import { students as allStudents, generateDashboardStats, users } from "@/lib/mock-data";
 import { useAuth } from "@/context/AuthContext";
 import DashboardStatsCard from "@/components/DashboardStatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,10 +105,10 @@ const MentorDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
-        <DashboardStatsCard stats={stats} title="My Students Overview" />
+        <DashboardStatsCard stats={stats} title="My Students Overview" users={users} />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader>
               <CardTitle>Sessions Distribution</CardTitle>
             </CardHeader>
@@ -136,7 +136,7 @@ const MentorDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-secondary/5 to-transparent">
             <CardHeader>
               <CardTitle>Hours Distribution</CardTitle>
             </CardHeader>
@@ -164,7 +164,7 @@ const MentorDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="rounded-xl shadow-md hover:shadow-lg transition hover:scale-[1.02] bg-gradient-to-br from-accent/5 to-transparent">
             <CardHeader>
               <CardTitle>Payments Distribution</CardTitle>
             </CardHeader>
