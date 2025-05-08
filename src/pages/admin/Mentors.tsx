@@ -179,13 +179,6 @@ const AdminMentors = () => {
   };
 
   const handleDeleteMentor = (mentor: User) => {
-    const mentorStudents = students.filter(student => student.mentorId === mentor.id);
-
-    if (mentorStudents.length > 0) {
-      crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
-      return;
-    }
-
     setSelectedMentor({ user: mentor, stats: getMentorStats(mentor.id) });
     setActiveDialog("delete");
   };
@@ -193,14 +186,14 @@ const AdminMentors = () => {
   const confirmDeleteMentor = () => {
     if (!selectedMentor) return;
 
+    const mentorStudents = students.filter(student => student.mentorId === selectedMentor.user.id);
+
+    if (mentorStudents.length > 0) {
+      crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
+      return;
+    }
+
     try {
-      const mentorStudents = students.filter(student => student.mentorId === selectedMentor.user.id);
-
-      if (mentorStudents.length > 0) {
-        crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
-        return;
-      }
-
       setMentors(mentors.filter(mentor => mentor.id !== selectedMentor.user.id));
       setActiveDialog(null);
       setSelectedMentor(null);
