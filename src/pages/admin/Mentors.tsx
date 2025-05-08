@@ -273,7 +273,10 @@ const AdminMentors = () => {
     progressPercentage: 0,
     startDate: new Date().toISOString(),
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 60
+    sessionDuration: 60,
+    teachersPayment: 0,
+    hourlyPayment: 0,
+    sessionAddedOn: new Date().toISOString()
   });
 
   // Add student management functions
@@ -338,7 +341,10 @@ const AdminMentors = () => {
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60
+        sessionDuration: 60,
+        teachersPayment: 0,
+        hourlyPayment: 0,
+        sessionAddedOn: new Date().toISOString()
       });
       crudToasts.create.success("Student");
     } catch (error) {
