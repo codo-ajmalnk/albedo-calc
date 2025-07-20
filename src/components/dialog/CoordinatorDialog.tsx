@@ -293,6 +293,21 @@ export function CoordinatorDialog({
                   <p className="text-lg font-medium mt-1">₹{stats?.totalPayments?.toLocaleString() || 0}</p>
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Class Take Amount</p>
+                  <p className="text-lg font-medium mt-1">₹{stats?.classTakeAmount?.toLocaleString() || 0}</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Teacher Salary</p>
+                  <p className="text-lg font-medium mt-1">₹{stats?.teacherSalary?.toLocaleString() || 0}</p>
+                </div>
+                <div className="p-4 bg-muted/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Expense Ratio</p>
+                  <p className="text-lg font-medium mt-1">{stats?.expenseRatio || 0}%</p>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>

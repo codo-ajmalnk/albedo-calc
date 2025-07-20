@@ -265,36 +265,6 @@ export default function Students() {
                   : "Manage and track all students"}
             </p>
           </div>
-          {(currentUser.role === "admin" || currentUser.role === "coordinator") && (
-            <Button onClick={() => {
-              setIsAddingStudent(true);
-              setNewStudent({
-                id: `student${students.length + 1}`,
-                name: "",
-                email: "",
-                phone: "",
-                mentorId: selectedMentor?.id || "",
-                status: "active",
-                totalSessions: 12,
-                sessionsCompleted: 0,
-                totalHours: 12,
-                completedHours: 0,
-                totalPayment: 12000,
-                paidAmount: 0,
-                teachersPayment: 0,
-                hourlyPayment: 0,
-                sessionDuration: 60,
-                startDate: new Date().toISOString(),
-                endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-                sessionAddedOn: new Date().toISOString(),
-                sessionsRemaining: 12,
-                progressPercentage: 0
-              });
-            }} className="w-full sm:w-auto">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add New Student
-            </Button>
-          )}
         </div>
 
         <Card className="w-full">
@@ -349,7 +319,6 @@ export default function Students() {
                 <TableHead className="w-[140px]">Progress</TableHead>
                 <TableHead className="w-[120px]">Total Sessions</TableHead>
                 <TableHead className="w-[120px]">Total Hours</TableHead>
-                <TableHead className="w-[120px]">Session Duration</TableHead>
                 <TableHead className="w-[120px]">Remaining Days</TableHead>
                 <TableHead className="w-[140px]">Pending Payment</TableHead>
                 <TableHead className="w-[100px] text-right">Actions</TableHead>
@@ -397,12 +366,6 @@ export default function Students() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">{student.sessionDuration}</span>
-                        <span className="text-xs text-muted-foreground"> mins</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm whitespace-nowrap">
                         <span className="font-medium">{remainingDays}</span>
                         <span className="text-xs text-muted-foreground"> days</span>
                       </div>
@@ -423,24 +386,6 @@ export default function Students() {
                         >
                           <Users className="h-4 w-4" />
                           <span className="sr-only">View Details</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(student)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDelete(student)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
                         </Button>
                       </div>
                     </TableCell>

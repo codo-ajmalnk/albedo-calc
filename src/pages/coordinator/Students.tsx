@@ -207,13 +207,6 @@ const CoordinatorStudents = () => {
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold">My Students</h1>
-          <Button
-            onClick={() => setIsAddingStudent(true)}
-            className="w-full sm:w-auto text-xs sm:text-sm"
-          >
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            Add Student
-          </Button>
         </div>
 
         <Card className="w-full">
@@ -413,24 +406,6 @@ const CoordinatorStudents = () => {
                       >
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleEditStudent(student)}
-                      >
-                        <Edit className="mr-1.5 h-3.5 w-3.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleDeleteStudent(student)}
-                      >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                        Delete
                       </Button>
                     </div>
                   </div>

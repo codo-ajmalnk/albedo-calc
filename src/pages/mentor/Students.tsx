@@ -166,13 +166,6 @@ const MentorStudents = () => {
               {filteredStudents.length} Total
             </span>
           </div>
-          <Button
-            onClick={() => setIsAddingStudent(true)}
-            className="w-full sm:w-auto text-sm"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Student
-          </Button>
         </div>
 
         <Card className="w-full border-2">
@@ -328,24 +321,6 @@ const MentorStudents = () => {
                       >
                         <Eye className="mr-1.5 h-3.5 w-3.5" />
                         Details
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm hover:bg-muted/80"
-                        onClick={() => handleEditStudent(student)}
-                      >
-                        <Edit className="mr-1.5 h-3.5 w-3.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm hover:bg-destructive/90"
-                        onClick={() => handleDeleteStudent(student)}
-                      >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                        Delete
                       </Button>
                     </div>
                   </div>

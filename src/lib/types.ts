@@ -59,4 +59,10 @@ export interface DashboardStats {
   pendingPayments: number;
   completedPayments: number;
   activeHours: number;
+  totalExpenses?: number;
+  completedExpenses?: number;
+  pendingExpenses?: number;
+  classTakeAmount?: number;
+  expenseRatio?: number;
+  teacherSalary?: number;
 }

@@ -355,6 +355,45 @@ export function MentorDialog({
                     </div>
                   </div>
                 </div>
+
+                <div>
+                  <h3 className="font-semibold mb-4">Financial Overview</h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Class Take Amount</span>
+                      <span className="font-medium">
+                        ₹{(() => {
+                          const mentorStudents = students?.filter(s => s.mentorId === selectedMentor.id) || [];
+                          const totalSessions = mentorStudents.reduce((sum, student) => sum + student.totalSessions, 0);
+                          const totalPayments = mentorStudents.reduce((sum, student) => sum + student.totalPayment, 0);
+                          return totalSessions > 0 ? Math.round(totalPayments / totalSessions).toLocaleString() : 0;
+                        })()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Teacher Salary</span>
+                      <span className="font-medium">
+                        ₹{(() => {
+                          const mentorStudents = students?.filter(s => s.mentorId === selectedMentor.id) || [];
+                          const completedPayments = mentorStudents.reduce((sum, student) => sum + student.paidAmount, 0);
+                          return Math.round(completedPayments * 0.7).toLocaleString();
+                        })()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Expense Ratio</span>
+                      <span className="font-medium">
+                        {(() => {
+                          const mentorStudents = students?.filter(s => s.mentorId === selectedMentor.id) || [];
+                          const totalPayments = mentorStudents.reduce((sum, student) => sum + student.totalPayment, 0);
+                          const completedPayments = mentorStudents.reduce((sum, student) => sum + student.paidAmount, 0);
+                          const teacherSalary = Math.round(completedPayments * 0.7);
+                          return totalPayments > 0 ? Math.round((teacherSalary / totalPayments) * 100) : 0;
+                        })()}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -600,17 +639,6 @@ export function MentorDialog({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex justify-end gap-4 mb-4">
-            <Button variant="outline" onClick={() => setIsAssigningStudents(true)}>
-              <Users className="mr-2 h-4 w-4" />
-              Assign Students
-            </Button>
-            <Button onClick={() => setIsAddingStudent(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add New Student
-            </Button>
-          </div>
-
           <div className="relative overflow-x-auto">
             <Table>
               <TableHeader>
@@ -622,7 +650,6 @@ export function MentorDialog({
                   <TableHead>Sessions</TableHead>
                   <TableHead>Hours</TableHead>
                   <TableHead>Payment</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -663,34 +690,6 @@ export function MentorDialog({
                         </TableCell>
                         <TableCell>
                           ₹{student.paidAmount.toLocaleString()}/₹{student.totalPayment.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEditingStudent(student);
-                                setIsEditStudentOpen(true);
-                              }}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => {
-                                setDeletingStudent(student);
-                                setIsDeletingStudent(true);
-                              }}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </div>
                         </TableCell>
                       </TableRow>
                     );

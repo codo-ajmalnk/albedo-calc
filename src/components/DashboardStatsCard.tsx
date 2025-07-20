@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStats, User } from "@/lib/types";
 import { Progress } from "@/components/ui/progress";
-import { ArrowDownIcon, ArrowUpIcon, Clock, CreditCard, Users } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, Clock, CreditCard, Users, DollarSign } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardStatsCardProps {
@@ -216,11 +216,41 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
           </div>
         </div>
 
+
         {/* Overview Section */}
         <div className="space-y-2 sm:space-y-3">
           <div className="flex items-center gap-2">
             <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-muted-foreground">Overall Progress</h3>
+          </div>
+          <div className={`grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3`}>
+            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-purple-500/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs sm:text-sm text-muted-foreground">Class Take Amount</p>
+                <p className="text-lg md:text-xl font-bold">
+                  {loading ? <Skeleton className="h-6 w-16" /> : formatCurrency(stats.classTakeAmount || 0)}
+                </p>
+                {/* <p className="text-[10px] sm:text-xs text-muted-foreground">per class</p> */}
+              </div>
+            </Card>
+            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-blue-500/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs sm:text-sm text-muted-foreground">Expense Ratio</p>
+                <p className="text-lg md:text-xl font-bold">
+                  {loading ? <Skeleton className="h-6 w-16" /> : `${stats.expenseRatio || 0}%`}
+                </p>
+                {/* <p className="text-[10px] sm:text-xs text-muted-foreground">of revenue</p> */}
+              </div>
+            </Card>
+            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-indigo-500/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs sm:text-sm text-muted-foreground">Teacher Salary</p>
+                <p className="text-lg md:text-xl font-bold">
+                  {loading ? <Skeleton className="h-6 w-16" /> : formatCurrency(stats.teacherSalary || 0)}
+                </p>
+                {/* <p className="text-[10px] sm:text-xs text-muted-foreground">monthly</p> */}
+              </div>
+            </Card>
           </div>
           <div className={`grid ${gridCols} gap-3`}>
             {showCoordinators && (

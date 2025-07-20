@@ -72,8 +72,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/admin/coordinators">Coordinators</NavLink>
             <NavLink to="/admin/mentors">Mentors</NavLink>
             <NavLink to="/admin/students">Students</NavLink>
-            <NavLink to="/admin/bulk-update">BulkUpdate</NavLink>
-            <NavLink to="/admin/notification-settings">Notifications</NavLink>
           </>
         );
       case "coordinator":
@@ -82,7 +80,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/coordinator">Dashboard</NavLink>
             <NavLink to="/coordinator/mentors">My Mentors</NavLink>
             <NavLink to="/coordinator/students">All Students</NavLink>
-            <NavLink to="/coordinator/bulk-update">Bulk Update</NavLink>
           </>
         );
       case "mentor":
@@ -90,7 +87,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <>
             <NavLink to="/mentor">Dashboard</NavLink>
             <NavLink to="/mentor/students">My Students</NavLink>
-            <NavLink to="/mentor/bulk-update">Bulk Update</NavLink>
           </>
         );
       default:
@@ -153,7 +149,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   size="sm"
                   onClick={handleLogoutClick}
                   className={cn(
-                    "hover:bg-white/90 transition-all duration-200",
+                    "hover:bg-white/90 hover:text-black transition-all duration-200",
                     "shadow-sm hover:shadow-md active:shadow-sm",
                     "border border-white/10"
                   )}

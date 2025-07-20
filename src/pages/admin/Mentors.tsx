@@ -59,6 +59,9 @@ const AdminMentors = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [coordinatorFilter, setCoordinatorFilter] = useState("all");
+  
+  // Helper function to format currency
+  const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
 
   // Single dialog state to manage all dialogs
   const [activeDialog, setActiveDialog] = useState<"details" | "students" | "edit" | "delete" | "add" | null>(null);
@@ -119,6 +122,15 @@ const AdminMentors = () => {
 
     const stats = generateDashboardStats(mentorStudents);
 
+    // Calculate mentor-level expense data
+    const totalSessionsForExpense = mentorStudents.reduce((sum, student) => sum + student.totalSessions, 0);
+    const totalPaymentsForExpense = mentorStudents.reduce((sum, student) => sum + student.totalPayment, 0);
+    const completedPaymentsForExpense = mentorStudents.reduce((sum, student) => sum + student.paidAmount, 0);
+    
+    const classTakeAmount = totalSessionsForExpense > 0 ? Math.round(totalPaymentsForExpense / totalSessionsForExpense) : 0;
+    const teacherSalary = Math.round(completedPaymentsForExpense * 0.7); // 70% of completed payments
+    const expenseRatio = totalPaymentsForExpense > 0 ? Math.round((teacherSalary / totalPaymentsForExpense) * 100) : 0;
+
     return {
       studentCount: mentorStudents.length,
       totalSessions,
@@ -133,6 +145,9 @@ const AdminMentors = () => {
       pendingPayments: stats.pendingPayments,
       totalPayments: stats.totalPayments,
       paymentsProgress: stats.totalPayments > 0 ? Math.floor((stats.completedPayments / stats.totalPayments) * 100) : 0,
+      classTakeAmount,
+      teacherSalary,
+      expenseRatio,
     };
   };
 
@@ -398,16 +413,7 @@ const AdminMentors = () => {
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Mentors Management</h1>
-
-          <Button
-            className="w-full sm:w-auto text-sm"
-            onClick={() => setActiveDialog("add")}
-          >
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            Add New Mentor
-          </Button>
         </div>
-
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
             <CardTitle>Filter Mentors</CardTitle>
@@ -565,6 +571,34 @@ const AdminMentors = () => {
                       </div>
                     )}
 
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Class Take Amount</p>
+                          <div className="w-2 h-2 rounded-full"></div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{formatCurrency(stats.classTakeAmount || 0)}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 sm:p-4 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Teacher Salary</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{formatCurrency(stats.teacherSalary || 0)}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 sm:p-4 rounded-lg border border-indigo-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Expense Ratio</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{stats.expenseRatio || 0}%</p>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
                       <Button
                         variant="outline"
@@ -583,25 +617,6 @@ const AdminMentors = () => {
                       >
                         <Users className="mr-1.5 h-3.5 w-3.5" />
                         Students
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleEditProfile(mentor)}
-                      >
-                        <Edit className="mr-1.5 h-3.5 w-3.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleDeleteMentor(mentor)}
-                        disabled={mentorStudents.length > 0}
-                      >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                        Delete
                       </Button>
                     </div>
                   </div>

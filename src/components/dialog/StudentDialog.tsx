@@ -182,12 +182,6 @@ export function StudentDialog({
                       </p>
                     </div>
                     <div className="p-4 bg-muted/5 rounded-lg">
-                      <span className="text-sm">Session Duration</span>
-                      <p className="text-lg font-medium mt-1">
-                        {selectedStudent.sessionDuration} Minutes
-                      </p>
-                    </div>
-                    <div className="p-4 bg-muted/5 rounded-lg">
                       <span className="text-sm">Remaining Days</span>
                       <p className="text-lg font-medium mt-1">
                         {(selectedStudent.startDate && selectedStudent.endDate) ?

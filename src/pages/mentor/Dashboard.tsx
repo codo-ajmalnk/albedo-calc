@@ -6,8 +6,8 @@ import DashboardStatsCard from "@/components/DashboardStatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -330,17 +330,21 @@ const MentorDashboard = () => {
                 <CardTitle>Student Progress Overview</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={studentPerformanceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="completedHours" stackId="a" fill={COLORS.completed} name="Completed Hours" />
-                    <Bar dataKey="remainingHours" stackId="a" fill={COLORS.pending} name="Remaining Hours" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="overflow-x-auto">
+                  <div style={{ minWidth: Math.max(studentPerformanceData.length * 120, 800) }}>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <LineChart data={studentPerformanceData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="completedHours" stroke={COLORS.completed} name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke={COLORS.pending} name="Remaining Hours" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

@@ -5,8 +5,8 @@ import { generateDashboardStats, students, users } from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -374,17 +374,21 @@ const AdminDashboard = () => {
                 <CardTitle>Mentor Progress Overview</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={mentorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="completedHours" stackId="a" fill="#16a34a" name="Completed Hours" />
-                    <Bar dataKey="remainingHours" stackId="a" fill="#f97316" name="Remaining Hours" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="overflow-x-auto">
+                  <div style={{ minWidth: Math.max(mentorData.length * 120, 800) }}>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <LineChart data={mentorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="completedHours" stroke="#16a34a" name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke="#f97316" name="Remaining Hours" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -405,6 +409,7 @@ const AdminDashboard = () => {
                             </span>
                           </div>
                           <div className="text-sm space-x-4">
+                            <span>Sessions: {mentor.completedSessions}/{mentor.completedSessions + mentor.remainingSessions}</span>
                             <span>Hours: {mentor.completedHours}/{mentor.completedHours + mentor.remainingHours}</span>
                             <span>
                               Payments: ₹{mentor.completedPayments.toLocaleString()}/₹{mentor.totalPayments.toLocaleString()}
@@ -440,17 +445,21 @@ const AdminDashboard = () => {
                 <CardTitle>Coordinator Performance Overview</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={coordinatorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="completedHours" stackId="a" fill="#16a34a" name="Completed Hours" />
-                    <Bar dataKey="remainingHours" stackId="a" fill="#f97316" name="Remaining Hours" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="overflow-x-auto">
+                  <div style={{ minWidth: Math.max(coordinatorData.length * 120, 800) }}>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <LineChart data={coordinatorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="completedHours" stroke="#16a34a" name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke="#f97316" name="Remaining Hours" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 

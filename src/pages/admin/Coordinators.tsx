@@ -69,6 +69,9 @@ interface EditingCoordinator {
 const AdminCoordinators = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  
+  // Helper function to format currency
+  const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
   const [selectedCoordinator, setSelectedCoordinator] = useState<{
     user: User;
     stats: ReturnType<typeof getCoordinatorStats>;
@@ -117,7 +120,7 @@ const AdminCoordinators = () => {
   const [isAssigningStudents, setIsAssigningStudents] = useState(false);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
   const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<string[]>([]);
-  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [students, setStudents] = useState(allStudents);
   const [newStudent, setNewStudent] = useState<Student>({
     id: `student${allStudents.length + 1}`,
@@ -175,6 +178,15 @@ const AdminCoordinators = () => {
 
     const stats = generateDashboardStats(coordinatorStudents);
 
+    // Calculate coordinator-level expense data
+    const totalSessionsForExpense = coordinatorStudents.reduce((sum, student) => sum + student.totalSessions, 0);
+    const totalPaymentsForExpense = coordinatorStudents.reduce((sum, student) => sum + student.totalPayment, 0);
+    const completedPaymentsForExpense = coordinatorStudents.reduce((sum, student) => sum + student.paidAmount, 0);
+    
+    const classTakeAmount = totalSessionsForExpense > 0 ? Math.round(totalPaymentsForExpense / totalSessionsForExpense) : 0;
+    const teacherSalary = Math.round(completedPaymentsForExpense * 0.7); // 70% of completed payments
+    const expenseRatio = totalPaymentsForExpense > 0 ? Math.round((teacherSalary / totalPaymentsForExpense) * 100) : 0;
+
     return {
       ...stats,
       mentorCount: mentors.length,
@@ -190,6 +202,9 @@ const AdminCoordinators = () => {
       pendingPayments: stats.pendingPayments,
       totalPayments: stats.totalPayments,
       paymentsProgress: stats.totalPayments > 0 ? Math.floor((stats.completedPayments / stats.totalPayments) * 100) : 0,
+      classTakeAmount,
+      teacherSalary,
+      expenseRatio,
     };
   };
 
@@ -580,12 +595,12 @@ const AdminCoordinators = () => {
     setCoordinators(users.filter((user) => user.role === "coordinator"));
   }, []);
 
-  const handleEditStudent = (student: any) => {
+  const handleEditStudent = (student: Student) => {
     setEditingStudent(student);
     setIsEditingMentor(true);
   };
 
-  const handleDeleteStudent = (student: any) => {
+  const handleDeleteStudent = (student: Student) => {
     try {
       const updatedStudents = students.filter(s => s.id !== student.id);
       setStudents(updatedStudents);
@@ -669,14 +684,6 @@ const AdminCoordinators = () => {
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
           <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Coordinators Management</h1>
-
-          <Button
-            className="w-full sm:w-auto text-sm"
-            onClick={() => setActiveDialog("add")}
-          >
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            Add New Coordinator
-          </Button>
         </div>
 
         <Card className="w-full">
@@ -738,6 +745,7 @@ const AdminCoordinators = () => {
                         </div>
                       </div>
                     </div>
+
 
                     {coordinatorMentors.length > 0 && (
                       <div className="space-y-4">
@@ -815,6 +823,34 @@ const AdminCoordinators = () => {
                       </div>
                     )}
 
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Class Take Amount</p>
+                          <div className="w-2 h-2 rounded-full"></div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{formatCurrency(stats.classTakeAmount || 0)}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 sm:p-4 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Teacher Salary</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{formatCurrency(stats.teacherSalary || 0)}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 sm:p-4 rounded-lg border border-indigo-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Expense Ratio</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{stats.expenseRatio || 0}%</p>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
                       <Button
                         variant="outline"
@@ -848,25 +884,6 @@ const AdminCoordinators = () => {
                       >
                         <Users className="mr-1.5 h-3.5 w-3.5" />
                         Students
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleEditProfile(coordinator)}
-                      >
-                        <Edit className="mr-1.5 h-3.5 w-3.5" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleDeleteCoordinator(coordinator)}
-                        disabled={getCoordinatorStats(coordinator.id).mentorCount > 0}
-                      >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                        Delete
                       </Button>
                     </div>
                   </div>
@@ -920,18 +937,6 @@ const AdminCoordinators = () => {
                 Manage mentors assigned to this coordinator.
               </DialogDescription>
             </DialogHeader>
-
-            <div className="flex justify-end gap-4 mb-4">
-              <Button variant="outline" onClick={() => setIsAssigningMentor(true)}>
-                <Users className="mr-2 h-4 w-4" />
-                Assign Mentor
-              </Button>
-              <Button onClick={() => setIsAddingMentor(true)}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add New Mentor
-              </Button>
-            </div>
-
             <div className="relative overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -941,8 +946,7 @@ const AdminCoordinators = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Students Count</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-right">Students Count</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -960,32 +964,10 @@ const AdminCoordinators = () => {
                           {mentor.status || 'active'}
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">
                         {allStudents.filter(student => student.mentorId === mentor.id).length}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditMentor(mentor)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          {/* <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteMentor(mentor)}
-                            className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                        </Button> */}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                      </TableRow>
                   ))}
                   {(!selectedCoordinator?.user.id || getAssignedMentors(selectedCoordinator.user.id).length === 0) && (
                     <TableRow>
