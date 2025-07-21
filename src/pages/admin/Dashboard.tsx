@@ -362,11 +362,82 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="mentors">
+        <Tabs defaultValue="coordinators">
           <TabsList>
-            <TabsTrigger value="mentors">Mentor Performance</TabsTrigger>
             <TabsTrigger value="coordinators">Coordinator Performance</TabsTrigger>
+            <TabsTrigger value="mentors">Mentor Performance</TabsTrigger>
           </TabsList>
+
+
+          <TabsContent value="coordinators" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Coordinator Performance Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <div style={{ minWidth: Math.max(coordinatorData.length * 120, 800) }}>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <LineChart data={coordinatorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="completedHours" stroke="#16a34a" name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke="#f97316" name="Remaining Hours" strokeWidth={2} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Coordinator Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {coordinatorData.map((coordinator, index) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="font-medium">{coordinator.name}</span>
+                            <span className="text-sm text-muted-foreground ml-2">
+                              ({coordinator.mentors} mentors, {coordinator.students} students)
+                            </span>
+                          </div>
+                          <div className="text-sm space-x-4">
+                            <span>Hours: {coordinator.completedHours}/{coordinator.completedHours + coordinator.remainingHours}</span>
+                            <span>
+                              Payments: ₹{coordinator.completedPayments.toLocaleString()}/₹{coordinator.totalPayments.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-gray-200 h-2.5 rounded-full">
+                          <div
+                            className="bg-primary h-2.5 rounded-full"
+                            style={{ width: `${coordinator.progress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>Progress: {coordinator.progress}%</span>
+                          <span>
+                            Payment: {coordinator.totalPayments > 0
+                              ? Math.round((coordinator.completedPayments / coordinator.totalPayments) * 100)
+                              : 0
+                            }%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="mentors" className="mt-4">
             <Card>
@@ -439,75 +510,6 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="coordinators" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Coordinator Performance Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <div style={{ minWidth: Math.max(coordinatorData.length * 120, 800) }}>
-                    <ResponsiveContainer width="100%" height={400}>
-                      <LineChart data={coordinatorData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="completedHours" stroke="#16a34a" name="Completed Hours" strokeWidth={2} />
-                        <Line type="monotone" dataKey="remainingHours" stroke="#f97316" name="Remaining Hours" strokeWidth={2} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Coordinator Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {coordinatorData.map((coordinator, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="font-medium">{coordinator.name}</span>
-                            <span className="text-sm text-muted-foreground ml-2">
-                              ({coordinator.mentors} mentors, {coordinator.students} students)
-                            </span>
-                          </div>
-                          <div className="text-sm space-x-4">
-                            <span>Hours: {coordinator.completedHours}/{coordinator.completedHours + coordinator.remainingHours}</span>
-                            <span>
-                              Payments: ₹{coordinator.completedPayments.toLocaleString()}/₹{coordinator.totalPayments.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-full bg-gray-200 h-2.5 rounded-full">
-                          <div
-                            className="bg-primary h-2.5 rounded-full"
-                            style={{ width: `${coordinator.progress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-sm text-muted-foreground">
-                          <span>Progress: {coordinator.progress}%</span>
-                          <span>
-                            Payment: {coordinator.totalPayments > 0
-                              ? Math.round((coordinator.completedPayments / coordinator.totalPayments) * 100)
-                              : 0
-                            }%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
