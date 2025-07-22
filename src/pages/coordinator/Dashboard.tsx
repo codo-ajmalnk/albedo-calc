@@ -20,10 +20,10 @@ import {
 } from "recharts";
 
 const COLORS = {
-  completed: "#16a34a",
-  active: "#3b82f6",
-  pending: "#f97316",
-  remaining: "#ef4444",
+  completed: "#793078", // primary
+  active: "#058DCE",    // secondary
+  pending: "#00996B",  // neutral gray (Tailwind gray-400)
+  remaining: "#A3A3A3", // neutral gray for remaining
 };
 
 const CoordinatorDashboard = () => {
@@ -118,10 +118,10 @@ const CoordinatorDashboard = () => {
 
     return (
       <text
-        x={x}
+        x={x-11}
         y={y}
         fill="white"
-        textAnchor={x > cx ? 'start' : 'end'}
+        // textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
         {`${(percent * 100).toFixed(0)}%`}
@@ -155,8 +155,11 @@ const CoordinatorDashboard = () => {
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={80}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="none"
+                    paddingAngle={4}
                   >
                     {sessionsPieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -183,8 +186,11 @@ const CoordinatorDashboard = () => {
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={80}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="none"
+                    paddingAngle={4}
                   >
                     {hoursPieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -211,8 +217,11 @@ const CoordinatorDashboard = () => {
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={80}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="none"
+                    paddingAngle={4}
                   >
                     {paymentsPieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -357,8 +366,8 @@ const CoordinatorDashboard = () => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="completedHours" stroke={COLORS.completed} name="Completed Hours" strokeWidth={2} />
-                        <Line type="monotone" dataKey="remainingHours" stroke={COLORS.pending} name="Remaining Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="completedHours" stroke="#793078" name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke="#058DCE" name="Remaining Hours" strokeWidth={2} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -391,7 +400,7 @@ const CoordinatorDashboard = () => {
                       </div>
                       <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
                         <div
-                          className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                          className="bg-palette-accent h-2.5 rounded-full transition-all duration-300"
                           style={{ width: `${mentor.progress}%` }}
                         />
                       </div>

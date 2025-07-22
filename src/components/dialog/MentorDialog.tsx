@@ -298,14 +298,14 @@ export function MentorDialog({
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
                             students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) === 100
-                              ? 'bg-progress-complete'
+                              ? 'bg-palette-info'
                               : Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
                                 students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) >= 75
-                                ? 'bg-progress-high'
+                                ? 'bg-palette-accent'
                                 : Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
                                   students?.filter(s => s.mentorId === selectedMentor.id).length) * 100) >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
+                                  ? 'bg-palette-warning'
+                                  : 'bg-palette-danger'
                             }`}
                           style={{
                             width: `${Math.round((students?.filter(s => s.mentorId === selectedMentor.id && s.status === 'active').length /
@@ -331,18 +331,18 @@ export function MentorDialog({
                             .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
                             students?.filter(s => s.mentorId === selectedMentor.id)
                               .reduce((sum, student) => sum + student.totalSessions, 0)) * 100) === 100
-                              ? 'bg-progress-complete'
+                              ? 'bg-palette-info'
                               : Math.round((students?.filter(s => s.mentorId === selectedMentor.id)
                                 .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
                                 students?.filter(s => s.mentorId === selectedMentor.id)
                                   .reduce((sum, student) => sum + student.totalSessions, 0)) * 100) >= 75
-                                ? 'bg-progress-high'
+                                ? 'bg-palette-accent'
                                 : Math.round((students?.filter(s => s.mentorId === selectedMentor.id)
                                   .reduce((sum, student) => sum + student.sessionsCompleted, 0) /
                                   students?.filter(s => s.mentorId === selectedMentor.id)
                                     .reduce((sum, student) => sum + student.totalSessions, 0)) * 100) >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
+                                  ? 'bg-palette-warning'
+                                  : 'bg-palette-danger'
                             }`}
                           style={{
                             width: `${Math.round((students?.filter(s => s.mentorId === selectedMentor.id)

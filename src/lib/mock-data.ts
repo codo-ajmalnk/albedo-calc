@@ -90,7 +90,7 @@ export const generateMockStudents = (): Student[] => {
     const sessionsRemaining = totalSessions - sessionsCompleted;
     const progressPercentage = Math.round((sessionsCompleted / totalSessions) * 100);
     const totalHours = 24;
-    const sessionDuration = 60;
+    const sessionDuration = 1.5;
     const totalPayment = 12000;
     const paidAmount = Math.floor(Math.random() * 12001);
     const teachersPayment = Math.floor(paidAmount * 0.7);

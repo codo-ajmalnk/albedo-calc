@@ -47,15 +47,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         to={to}
         className={cn(
           "px-4 py-2 rounded-lg transition-all duration-200 relative group",
-          "hover:bg-white/10 hover:text-white",
-          isActive ? "text-white bg-white/10" : "text-white/80"
+          "dark:hover:bg-white/10 shadow-md dark:hover:text-white hover:bg-black/10 hover:text-black",
+          isActive ? "dark:text-white text-black" : "dark:text-white/80 text-black/80"
         )}
       >
         <span className="relative z-10">{children}</span>
         {isActive && (
           <motion.div
             layoutId="active-nav"
-            className="absolute inset-0 bg-white/10 rounded-lg"
+            className="absolute inset-0 dark:bg-white/10 bg-black/10 rounded-lg shadow-md"
             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
           />
         )}
@@ -99,11 +99,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header
         className={cn(
           "fixed w-full top-0 z-50 transition-all duration-300",
-          "bg-gradient-to-r from-primary via-primary to-primary/95",
+          "bg-card shadow-md",
           scrolled ? "shadow-lg bg-opacity-95 backdrop-blur-lg" : "bg-opacity-98"
         )}
       >
-        <div className="container mx-auto px-3 sm:px-4 md:px-6">
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-1">
           <div className="flex items-center h-14 sm:h-16 md:h-18 w-full">
             {/* Left: Logo and user badge */}
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
@@ -112,20 +112,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 animate={{ opacity: 1, x: 0 }}
                 className="text-base sm:text-lg md:text-xl font-bold text-white tracking-tight flex items-center gap-1 sm:gap-2"
               >
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90">
+                <span className="bg-clip-text text-palette-purple">
                   Albedo Educator
                 </span>
-                <span className="text-primary-foreground/80 mx-0.5 sm:mx-1">|</span>
-                <span className="text-primary-foreground/90 font-semibold">Calc</span>
+                <span className="text-palette-info/80 mx-0.5 sm:mx-1">|</span>
+                <span className="text-palette-info/90 font-semibold">Calc</span>
               </motion.h1>
               <div className="hidden xs:flex items-center">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className={cn(
-                    "text-xs sm:text-sm bg-white/10 text-white/90 rounded-full px-2 sm:px-3 py-1",
+                    // Use accent color for badge background
+                    "text-xs sm:text-sm bg-palette-accent text-white/90 rounded-full px-2 sm:px-3 py-1",
                     "font-medium backdrop-blur-sm transition-all duration-200",
-                    "hover:bg-white/15 hover:scale-105",
+                    "hover:bg-palette-accent/80 hover:scale-105",
                     "border border-white/10 shadow-sm"
                   )}
                 >
@@ -165,7 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               whileTap={{ scale: 0.95 }}
               className={cn(
                 "xl:hidden p-2 rounded-lg transition-colors duration-200 text-white ml-auto",
-                "hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20"
+                "hover:bg-palette-accent/80 focus:outline-none focus:ring-2 focus:ring-white/20"
               )}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
@@ -199,7 +200,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="xl:hidden absolute left-0 right-0 top-full bg-primary shadow-lg border-t border-white/10"
+                className="xl:hidden absolute left-0 right-0 top-full bg-palette-primary shadow-lg border-t border-white/10"
               >
                 <div className="flex flex-col gap-1 py-2 px-2">
                   <div className="flex items-center gap-2 px-2 mb-2">
@@ -226,8 +227,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     variant="destructive"
                     size="sm"
                     className={cn(
-                      "w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 mt-2",
-                      "transition-all duration-200 border border-red-500/20",
+                      "w-full bg-palette-danger/10 hover:bg-palette-danger/20 text-palette-danger mt-2",
+                      "transition-all duration-200 border border-palette-danger/20",
                       "hover:scale-[1.02] active:scale-[0.98]"
                     )}
                     onClick={handleLogoutClick}

@@ -5,8 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Edit, Trash2, UserPlus, Users } from "lucide-react";
@@ -22,16 +35,17 @@ const currentUser: User = {
   email: "john@example.com",
   role: "coordinator",
   phone: "+91 98765 43211",
-  status: "active"
+  status: "active",
 };
 
 export default function Students() {
   const navigate = useNavigate();
 
   // Filter mentors based on coordinator access
-  const mentors = users.filter(user => {
+  const mentors = users.filter((user) => {
     if (currentUser.role === "admin") return user.role === "mentor";
-    if (currentUser.role === "coordinator") return user.role === "mentor" && user.supervisorId === currentUser.id;
+    if (currentUser.role === "coordinator")
+      return user.role === "mentor" && user.supervisorId === currentUser.id;
     if (currentUser.role === "mentor") return user.id === currentUser.id;
     return false;
   });
@@ -41,12 +55,16 @@ export default function Students() {
     if (currentUser.role === "admin") return allStudents;
 
     if (currentUser.role === "coordinator") {
-      const mentorIds = mentors.map(mentor => mentor.id);
-      return allStudents.filter(student => mentorIds.includes(student.mentorId));
+      const mentorIds = mentors.map((mentor) => mentor.id);
+      return allStudents.filter((student) =>
+        mentorIds.includes(student.mentorId)
+      );
     }
 
     if (currentUser.role === "mentor") {
-      return allStudents.filter(student => student.mentorId === currentUser.id);
+      return allStudents.filter(
+        (student) => student.mentorId === currentUser.id
+      );
     }
 
     return [];
@@ -57,6 +75,12 @@ export default function Students() {
   const [selectedMentor, setSelectedMentor] = useState<User | null>(
     currentUser.role === "mentor" ? currentUser : null
   );
+  // Add time filter and custom date range state for student filtering
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [customDateRange, setCustomDateRange] = useState<{
+    from: string;
+    to: string;
+  }>({ from: "", to: "" });
   const [isViewStudentsOpen, setIsViewStudentsOpen] = useState(false);
   const [isAssignStudentsOpen, setIsAssignStudentsOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -66,7 +90,9 @@ export default function Students() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAssigningStudents, setIsAssigningStudents] = useState(false);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<string[]>([]);
+  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<
+    string[]
+  >([]);
   const [newStudent, setNewStudent] = useState<Student>({
     id: `student${students.length + 1}`,
     name: "",
@@ -87,14 +113,16 @@ export default function Students() {
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     sessionAddedOn: new Date().toISOString(),
     sessionsRemaining: 12,
-    progressPercentage: 0
+    progressPercentage: 0,
   });
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
 
   const filteredStudents = students.filter((student) => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesMentor = !selectedMentor || student.mentorId === selectedMentor.id;
+    const matchesMentor =
+      !selectedMentor || student.mentorId === selectedMentor.id;
 
     // Additional access control check
     if (currentUser.role === "mentor") {
@@ -106,7 +134,9 @@ export default function Students() {
 
   const handleViewDetails = (student: Student) => {
     if (!hasAccessToStudent(student)) {
-      crudToasts.validation.error("You don't have permission to view this student's details.");
+      crudToasts.validation.error(
+        "You don't have permission to view this student's details."
+      );
       return;
     }
     setSelectedStudent(student);
@@ -115,7 +145,9 @@ export default function Students() {
 
   const handleEdit = (student: Student) => {
     if (!hasAccessToStudent(student)) {
-      crudToasts.validation.error("You don't have permission to edit this student's details.");
+      crudToasts.validation.error(
+        "You don't have permission to edit this student's details."
+      );
       return;
     }
     setEditingStudent(student);
@@ -124,7 +156,9 @@ export default function Students() {
 
   const handleDelete = (student: Student) => {
     if (!hasAccessToStudent(student)) {
-      crudToasts.validation.error("You don't have permission to delete this student.");
+      crudToasts.validation.error(
+        "You don't have permission to delete this student."
+      );
       return;
     }
     setSelectedStudent(student);
@@ -134,7 +168,7 @@ export default function Students() {
   const hasAccessToStudent = (student: Student) => {
     if (currentUser.role === "admin") return true;
     if (currentUser.role === "coordinator") {
-      return mentors.some(mentor => mentor.id === student.mentorId);
+      return mentors.some((mentor) => mentor.id === student.mentorId);
     }
     if (currentUser.role === "mentor") {
       return student.mentorId === currentUser.id;
@@ -143,7 +177,7 @@ export default function Students() {
   };
 
   const getMentorName = (mentorId: string) => {
-    const mentor = mentors.find(m => m.id === mentorId);
+    const mentor = mentors.find((m) => m.id === mentorId);
     if (!mentor) return "Unassigned";
     if (!hasAccessToMentor(mentor)) return "Restricted";
     return mentor.name;
@@ -151,7 +185,8 @@ export default function Students() {
 
   const hasAccessToMentor = (mentor: User) => {
     if (currentUser.role === "admin") return true;
-    if (currentUser.role === "coordinator") return mentor.supervisorId === currentUser.id;
+    if (currentUser.role === "coordinator")
+      return mentor.supervisorId === currentUser.id;
     if (currentUser.role === "mentor") return mentor.id === currentUser.id;
     return false;
   };
@@ -160,11 +195,13 @@ export default function Students() {
     if (!selectedMentor || selectedStudentsToAssign.length === 0) return;
 
     try {
-      setStudents(students.map(student =>
-        selectedStudentsToAssign.includes(student.id)
-          ? { ...student, mentorId: selectedMentor.id }
-          : student
-      ));
+      setStudents(
+        students.map((student) =>
+          selectedStudentsToAssign.includes(student.id)
+            ? { ...student, mentorId: selectedMentor.id }
+            : student
+        )
+      );
       setIsAssignStudentsOpen(false);
       setSelectedStudentsToAssign([]);
       crudToasts.assign.success("Students", "Mentor");
@@ -175,22 +212,29 @@ export default function Students() {
 
   const handleAddStudent = () => {
     try {
-      if (!newStudent.name || !newStudent.email || !newStudent.phone || !newStudent.mentorId) {
+      if (
+        !newStudent.name ||
+        !newStudent.email ||
+        !newStudent.phone ||
+        !newStudent.mentorId
+      ) {
         crudToasts.validation.error("Please fill in all required fields.");
         return;
       }
 
       // Calculate derived values
-      const totalHours = Math.round((newStudent.totalSessions * newStudent.sessionDuration) / 60);
+      const totalHours = Math.round(
+        (newStudent.totalSessions * newStudent.sessionDuration) / 60
+      );
       const endDate = new Date(newStudent.startDate);
-      endDate.setDate(endDate.getDate() + ((newStudent.totalSessions - 1) * 7)); // Assuming one session per week
+      endDate.setDate(endDate.getDate() + (newStudent.totalSessions - 1) * 7); // Assuming one session per week
 
       const studentToAdd = {
         ...newStudent,
         totalHours,
         endDate: endDate.toISOString(),
         sessionsRemaining: newStudent.totalSessions,
-        progressPercentage: 0
+        progressPercentage: 0,
       };
 
       setStudents([...students, studentToAdd]);
@@ -215,7 +259,7 @@ export default function Students() {
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
         sessionAddedOn: new Date().toISOString(),
         sessionsRemaining: 12,
-        progressPercentage: 0
+        progressPercentage: 0,
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -227,9 +271,11 @@ export default function Students() {
     if (!editingStudent) return;
 
     try {
-      setStudents(students.map(student =>
-        student.id === editingStudent.id ? editingStudent : student
-      ));
+      setStudents(
+        students.map((student) =>
+          student.id === editingStudent.id ? editingStudent : student
+        )
+      );
       setIsEditOpen(false);
       setEditingStudent(null);
       crudToasts.update.success("Student");
@@ -242,7 +288,9 @@ export default function Students() {
     if (!selectedStudent) return;
 
     try {
-      setStudents(students.filter(student => student.id !== selectedStudent.id));
+      setStudents(
+        students.filter((student) => student.id !== selectedStudent.id)
+      );
       setIsDeleteOpen(false);
       setSelectedStudent(null);
       crudToasts.delete.success("Student");
@@ -261,8 +309,8 @@ export default function Students() {
               {currentUser.role === "mentor"
                 ? "Manage and track your students' progress"
                 : currentUser.role === "coordinator"
-                  ? "Manage and track your team's students"
-                  : "Manage and track all students"}
+                ? "Manage and track your team's students"
+                : "Manage and track all students"}
             </p>
           </div>
         </div>
@@ -289,7 +337,13 @@ export default function Students() {
                   <Label>Filter by Mentor</Label>
                   <Select
                     value={selectedMentor?.id || "all"}
-                    onValueChange={(value) => setSelectedMentor(value === "all" ? null : mentors.find(m => m.id === value) || null)}
+                    onValueChange={(value) =>
+                      setSelectedMentor(
+                        value === "all"
+                          ? null
+                          : mentors.find((m) => m.id === value) || null
+                      )
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Mentor" />
@@ -305,6 +359,48 @@ export default function Students() {
                   </Select>
                 </div>
               )}
+              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                  <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="this_year">This Year</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                {timeFilter === "custom" && (
+                  <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                    <Input
+                      type="date"
+                      value={customDateRange.from}
+                      onChange={(e) =>
+                        setCustomDateRange((r) => ({
+                          ...r,
+                          from: e.target.value,
+                        }))
+                      }
+                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                    />
+                    <span className="mx-1 text-xs">to</span>
+                    <Input
+                      type="date"
+                      value={customDateRange.to}
+                      onChange={(e) =>
+                        setCustomDateRange((r) => ({
+                          ...r,
+                          to: e.target.value,
+                        }))
+                      }
+                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -321,22 +417,37 @@ export default function Students() {
                 <TableHead className="w-[120px]">Total Hours</TableHead>
                 <TableHead className="w-[120px]">Remaining Days</TableHead>
                 <TableHead className="w-[140px]">Pending Payment</TableHead>
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                {/* <TableHead className="w-[100px] text-right">Actions</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredStudents.map((student) => {
-                const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-                const pendingPayment = student.totalPayment - student.paidAmount;
-                const remainingDays = student.endDate ? Math.ceil((new Date(student.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
+                const progress = Math.round(
+                  (student.sessionsCompleted / student.totalSessions) * 100
+                );
+                const pendingPayment =
+                  student.totalPayment - student.paidAmount;
+                const remainingDays = student.endDate
+                  ? Math.ceil(
+                      (new Date(student.endDate).getTime() -
+                        new Date().getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )
+                  : 0;
                 return (
-                  <TableRow key={student.id}>
+                  <TableRow key={student.id} className="cursor-pointer" onClick={() => handleViewDetails(student)}>
                     <TableCell className="font-medium">{student.id}</TableCell>
                     <TableCell>
                       <div className="flex flex-col min-w-0">
-                        <span className="font-medium truncate">{student.name}</span>
-                        <span className="text-sm text-muted-foreground truncate">{student.phone}</span>
-                        <span className="text-sm text-muted-foreground truncate">{student.email}</span>
+                        <span className="font-medium truncate">
+                          {student.name}
+                        </span>
+                        <span className="text-sm text-muted-foreground truncate">
+                          {student.phone}
+                        </span>
+                        <span className="text-sm text-muted-foreground truncate">
+                          {student.email}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="truncate">
@@ -353,30 +464,56 @@ export default function Students() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">{student.sessionsCompleted}</span>
-                        <span className="text-muted-foreground">/{student.totalSessions}</span>
+                        <span className="font-medium">
+                          {student.sessionsCompleted}
+                        </span>
+                        <span className="text-muted-foreground">
+                          /{student.totalSessions}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">{Math.round((student.sessionsCompleted * student.sessionDuration) / 60)}</span>
-                        <span className="text-muted-foreground">/{Math.round((student.totalSessions * student.sessionDuration) / 60)}</span>
-                        <span className="text-xs text-muted-foreground"> hours</span>
+                        <span className="font-medium">
+                          {Math.round(
+                            (student.sessionsCompleted *
+                              student.sessionDuration) /
+                              60
+                          )}
+                        </span>
+                        <span className="text-muted-foreground">
+                          /
+                          {Math.round(
+                            (student.totalSessions * student.sessionDuration) /
+                              60
+                          )}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {" "}
+                          hours
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm whitespace-nowrap">
                         <span className="font-medium">{remainingDays}</span>
-                        <span className="text-xs text-muted-foreground"> days</span>
+                        <span className="text-xs text-muted-foreground">
+                          {" "}
+                          days
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">₹{pendingPayment.toLocaleString()}</span>
-                        <span className="text-xs text-muted-foreground">/₹{student.totalPayment.toLocaleString()}</span>
+                        <span className="font-medium">
+                          ₹{pendingPayment.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          /₹{student.totalPayment.toLocaleString()}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    {/* <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="outline"
@@ -388,7 +525,7 @@ export default function Students() {
                           <span className="sr-only">View Details</span>
                         </Button>
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 );
               })}
@@ -397,8 +534,12 @@ export default function Students() {
                   <TableCell colSpan={10} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center gap-1">
                       <Users className="h-8 w-8 text-muted-foreground/60" />
-                      <p className="text-sm text-muted-foreground">No students found</p>
-                      <p className="text-xs text-muted-foreground">Add new students to get started</p>
+                      <p className="text-sm text-muted-foreground">
+                        No students found
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Add new students to get started
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>

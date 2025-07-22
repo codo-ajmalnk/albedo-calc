@@ -80,6 +80,9 @@ const CoordinatorMentors = () => {
   const [editingMentor, setEditingMentor] = useState<User | null>(null);
   const [isAddingMentor, setIsAddingMentor] = useState(false);
   const [isAssigningStudents, setIsAssigningStudents] = useState(false);
+  // Add time filter and custom date range state for mentor filtering
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({ from: "", to: "" });
   const [newMentor, setNewMentor] = useState<
     User & { useDefaultPassword: boolean }
   >({
@@ -419,6 +422,7 @@ const CoordinatorMentors = () => {
             <CardTitle>Search Mentors</CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-2 w-full sm:w-auto">
             <div className="space-y-2">
               <Label>Search by Name</Label>
               <div className="flex items-center gap-3">
@@ -430,6 +434,42 @@ const CoordinatorMentors = () => {
                 />
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Filter by Date</Label>
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                  <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="this_year">This Year</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                {timeFilter === "custom" && (
+                  <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                    <Input
+                      type="date"
+                      value={customDateRange.from}
+                      onChange={e => setCustomDateRange(r => ({ ...r, from: e.target.value }))}
+                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                    />
+                    <span className="mx-1 text-xs">to</span>
+                    <Input
+                      type="date"
+                      value={customDateRange.to}
+                      onChange={e => setCustomDateRange(r => ({ ...r, to: e.target.value }))}
+                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                    />
+                  </div>
+                )}
+                </div>
+              </div>
+              </div>
           </CardContent>
         </Card>
 
@@ -501,12 +541,12 @@ const CoordinatorMentors = () => {
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 stats.sessionProgress === 100
-                                  ? "bg-progress-complete"
+                                  ? "bg-palette-info"
                                   : stats.sessionProgress >= 75
-                                  ? "bg-progress-high"
+                                  ? "bg-palette-accent"
                                   : stats.sessionProgress >= 40
-                                  ? "bg-progress-medium"
-                                  : "bg-progress-low"
+                                  ? "bg-palette-warning"
+                                  : "bg-palette-danger"
                               }`}
                               style={{ width: `${stats.sessionProgress}%` }}
                             />
@@ -528,12 +568,12 @@ const CoordinatorMentors = () => {
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 stats.hoursProgress === 100
-                                  ? "bg-progress-complete"
+                                  ? "bg-palette-info"
                                   : stats.hoursProgress >= 75
-                                  ? "bg-progress-high"
+                                  ? "bg-palette-accent"
                                   : stats.hoursProgress >= 40
-                                  ? "bg-progress-medium"
-                                  : "bg-progress-low"
+                                  ? "bg-palette-warning"
+                                  : "bg-palette-danger"
                               }`}
                               style={{ width: `${stats.hoursProgress}%` }}
                             />
@@ -555,12 +595,12 @@ const CoordinatorMentors = () => {
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 stats.paymentsProgress === 100
-                                  ? "bg-progress-complete"
+                                  ? "bg-palette-info"
                                   : stats.paymentsProgress >= 75
-                                  ? "bg-progress-high"
+                                  ? "bg-palette-accent"
                                   : stats.paymentsProgress >= 40
-                                  ? "bg-progress-medium"
-                                  : "bg-progress-low"
+                                  ? "bg-palette-warning"
+                                  : "bg-palette-danger"
                               }`}
                               style={{ width: `${stats.paymentsProgress}%` }}
                             />
@@ -579,7 +619,7 @@ const CoordinatorMentors = () => {
                     )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                      <div className="p-3 sm:p-4 rounded-lg border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">
                             Class Take Amount
@@ -592,7 +632,7 @@ const CoordinatorMentors = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">
                             Teacher Salary
@@ -604,7 +644,7 @@ const CoordinatorMentors = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4 rounded-lg border border-indigo-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">Expense Ratio</p>
                         </div>
@@ -804,12 +844,12 @@ const CoordinatorMentors = () => {
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${
                             selectedMentor.stats.sessionProgress === 100
-                              ? "bg-progress-complete"
+                              ? "bg-palette-info"
                               : selectedMentor.stats.sessionProgress >= 75
-                              ? "bg-progress-high"
+                              ? "bg-palette-accent"
                               : selectedMentor.stats.sessionProgress >= 40
-                              ? "bg-progress-medium"
-                              : "bg-progress-low"
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
                           }`}
                           style={{
                             width: `${selectedMentor.stats.sessionProgress}%`,
@@ -827,12 +867,12 @@ const CoordinatorMentors = () => {
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${
                             selectedMentor.stats.hoursProgress === 100
-                              ? "bg-progress-complete"
+                              ? "bg-palette-info"
                               : selectedMentor.stats.hoursProgress >= 75
-                              ? "bg-progress-high"
+                              ? "bg-palette-accent"
                               : selectedMentor.stats.hoursProgress >= 40
-                              ? "bg-progress-medium"
-                              : "bg-progress-low"
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
                           }`}
                           style={{
                             width: `${selectedMentor.stats.hoursProgress}%`,
@@ -850,12 +890,12 @@ const CoordinatorMentors = () => {
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${
                             selectedMentor.stats.paymentsProgress === 100
-                              ? "bg-progress-complete"
+                              ? "bg-palette-info"
                               : selectedMentor.stats.paymentsProgress >= 75
-                              ? "bg-progress-high"
+                              ? "bg-palette-accent"
                               : selectedMentor.stats.paymentsProgress >= 40
-                              ? "bg-progress-medium"
-                              : "bg-progress-low"
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
                           }`}
                           style={{
                             width: `${selectedMentor.stats.paymentsProgress}%`,
@@ -873,12 +913,12 @@ const CoordinatorMentors = () => {
                         <div
                           className={`h-2 rounded-full transition-all duration-300 ${
                             selectedMentor.stats.overallProgress === 100
-                              ? "bg-progress-complete"
+                              ? "bg-palette-info"
                               : selectedMentor.stats.overallProgress >= 75
-                              ? "bg-progress-high"
+                              ? "bg-palette-accent"
                               : selectedMentor.stats.overallProgress >= 40
-                              ? "bg-progress-medium"
-                              : "bg-progress-low"
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
                           }`}
                           style={{
                             width: `${selectedMentor.stats.overallProgress}%`,

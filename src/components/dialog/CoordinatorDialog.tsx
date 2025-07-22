@@ -195,12 +195,12 @@ export function CoordinatorDialog({
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${
                         stats?.sessionProgress === 100
-                          ? 'bg-progress-complete'
+                          ? 'bg-palette-info'
                           : stats?.sessionProgress >= 75
-                            ? 'bg-progress-high'
+                            ? 'bg-palette-accent'
                             : stats?.sessionProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
+                              ? 'bg-palette-warning'
+                              : 'bg-palette-danger'
                       }`}
                       style={{ width: `${stats?.sessionProgress || 0}%` }}
                     />
@@ -220,12 +220,12 @@ export function CoordinatorDialog({
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${
                         stats?.hoursProgress === 100
-                          ? 'bg-progress-complete'
+                          ? 'bg-palette-info'
                           : stats?.hoursProgress >= 75
-                            ? 'bg-progress-high'
+                            ? 'bg-palette-accent'
                             : stats?.hoursProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
+                              ? 'bg-palette-warning'
+                              : 'bg-palette-danger'
                       }`}
                       style={{ width: `${stats?.hoursProgress || 0}%` }}
                     />
@@ -245,12 +245,12 @@ export function CoordinatorDialog({
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${
                         stats?.paymentsProgress === 100
-                          ? 'bg-progress-complete'
+                          ? 'bg-palette-info'
                           : stats?.paymentsProgress >= 75
-                            ? 'bg-progress-high'
+                            ? 'bg-palette-accent'
                             : stats?.paymentsProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
+                              ? 'bg-palette-warning'
+                              : 'bg-palette-danger'
                       }`}
                       style={{ width: `${stats?.paymentsProgress || 0}%` }}
                     />
@@ -270,12 +270,12 @@ export function CoordinatorDialog({
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${
                         stats?.overallProgress === 100
-                          ? 'bg-progress-complete'
+                          ? 'bg-palette-info'
                           : stats?.overallProgress >= 75
-                            ? 'bg-progress-high'
+                            ? 'bg-palette-accent'
                             : stats?.overallProgress >= 40
-                              ? 'bg-progress-medium'
-                              : 'bg-progress-low'
+                              ? 'bg-palette-warning'
+                              : 'bg-palette-danger'
                       }`}
                       style={{ width: `${stats?.overallProgress || 0}%` }}
                     />

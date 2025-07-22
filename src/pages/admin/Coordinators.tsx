@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus, X } from "lucide-react";
+import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus, X, Calendar } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,7 @@ import { crudToasts } from "@/lib/toast";
 import { CoordinatorDialog } from "@/components/dialog/CoordinatorDialog";
 import { MentorDialog } from "@/components/dialog/MentorDialog";
 import type { Coordinator, Student } from "@/lib/types";
+import { format, isToday, isThisWeek, isThisMonth, isThisYear, parseISO, isWithinInterval } from "date-fns";
 
 // Import coordinator-related types
 interface NewCoordinator {
@@ -66,9 +67,16 @@ interface EditingCoordinator {
   password: string;
 }
 
+// Extend User type locally to include createdAt for filtering
+interface UserWithCreatedAt extends User {
+  createdAt?: string;
+}
+
 const AdminCoordinators = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({ from: "", to: "" });
   
   // Helper function to format currency
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
@@ -90,8 +98,8 @@ const AdminCoordinators = () => {
     status: "active",
     useDefaultPassword: true,
   });
-  const [coordinators, setCoordinators] = useState(
-    users.filter((user) => user.role === "coordinator")
+  const [coordinators, setCoordinators] = useState<UserWithCreatedAt[]>(
+    users.filter((user) => user.role === "coordinator") as UserWithCreatedAt[]
   );
   const [isViewingMentors, setIsViewingMentors] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<User | null>(null);
@@ -144,9 +152,33 @@ const AdminCoordinators = () => {
     sessionAddedOn: new Date().toISOString(),
   });
 
-  const filteredCoordinators = coordinators.filter((coordinator) =>
-    coordinator.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredCoordinators = coordinators.filter((coordinator) => {
+    const matchesSearch = coordinator.name.toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+    const c = coordinator as UserWithCreatedAt;
+    if (!c.createdAt) return true;
+    const createdAt = parseISO(c.createdAt);
+    switch (timeFilter) {
+      case "today":
+        return isToday(createdAt);
+      case "this_week":
+        return isThisWeek(createdAt, { weekStartsOn: 1 });
+      case "this_month":
+        return isThisMonth(createdAt);
+      case "this_year":
+        return isThisYear(createdAt);
+      case "custom":
+        if (customDateRange.from && customDateRange.to) {
+          return isWithinInterval(createdAt, {
+            start: parseISO(customDateRange.from),
+            end: parseISO(customDateRange.to),
+          });
+        }
+        return true;
+      default:
+        return true;
+    }
+  });
 
   // Get coordinator performance data
   const getCoordinatorStats = (coordinatorId: string) => {
@@ -591,8 +623,17 @@ const AdminCoordinators = () => {
       }
     });
 
+    // Add mock createdAt to coordinators
+    users.forEach(user => {
+      if (user.role === "coordinator" && !(user as UserWithCreatedAt).createdAt) {
+        // Random date in the last year
+        const randomDate = new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000));
+        (user as UserWithCreatedAt).createdAt = randomDate.toISOString();
+      }
+    });
+
     // Update coordinators state
-    setCoordinators(users.filter((user) => user.role === "coordinator"));
+    setCoordinators(users.filter((user) => user.role === "coordinator") as UserWithCreatedAt[]);
   }, []);
 
   const handleEditStudent = (student: Student) => {
@@ -691,17 +732,51 @@ const AdminCoordinators = () => {
             <CardTitle>Search Coordinators</CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <Input
-                placeholder="Search by name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full sm:max-w-sm text-sm"
-              />
-              <Button variant="outline" className="w-full sm:w-auto text-sm">
-                <UserSearch className="mr-1.5 h-3.5 w-3.5" />
-                Search
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search input - half width */}
+              <div className="w-full sm:w-1/2">
+                <Input
+                  placeholder="Search by name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full text-sm"
+                />
+              </div>
+              {/* Filter - half width, but shrinks when custom */}
+              <div className="w-full sm:w-1/2 flex flex-row gap-2 items-center">
+                <div className={timeFilter === "custom" ? "flex-1" : "w-full"}>
+                  <Select value={timeFilter} onValueChange={setTimeFilter}>
+                    <SelectTrigger className="w-full text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="this_week">This Week</SelectItem>
+                      <SelectItem value="this_month">This Month</SelectItem>
+                      <SelectItem value="this_year">This Year</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {timeFilter === "custom" && (
+                  <div className="flex flex-row items-center gap-2">
+                    <Input
+                      type="date"
+                      value={customDateRange.from}
+                      onChange={e => setCustomDateRange(r => ({ ...r, from: e.target.value }))}
+                      className="text-xs px-2 py-1 w-[135px]"
+                    />
+                    <span className="mx-1 text-xs">to</span>
+                    <Input
+                      type="date"
+                      value={customDateRange.to}
+                      onChange={e => setCustomDateRange(r => ({ ...r, to: e.target.value }))}
+                      className="text-xs px-2 py-1 w-[135px]"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -757,12 +832,12 @@ const AdminCoordinators = () => {
                           <div className="w-full bg-muted h-2 rounded-full">
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                                ? 'bg-progress-complete'
+                                ? 'bg-palette-info'
                                 : stats.sessionProgress >= 75
-                                  ? 'bg-progress-high'
+                                  ? 'bg-palette-accent'
                                   : stats.sessionProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                                    ? 'bg-palette-warning'
+                                    : 'bg-palette-danger'
                                 }`}
                               style={{ width: `${stats.sessionProgress}%` }}
                             />
@@ -781,12 +856,12 @@ const AdminCoordinators = () => {
                           <div className="w-full bg-muted h-2 rounded-full">
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                                ? 'bg-progress-complete'
+                                ? 'bg-palette-info'
                                 : stats.hoursProgress >= 75
-                                  ? 'bg-progress-high'
+                                  ? 'bg-palette-accent'
                                   : stats.hoursProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                                    ? 'bg-palette-warning'
+                                    : 'bg-palette-danger'
                                 }`}
                               style={{ width: `${stats.hoursProgress}%` }}
                             />
@@ -805,12 +880,12 @@ const AdminCoordinators = () => {
                           <div className="w-full bg-muted h-2 rounded-full">
                             <div
                               className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                                ? 'bg-progress-complete'
+                                ? 'bg-palette-info'
                                 : stats.paymentsProgress >= 75
-                                  ? 'bg-progress-high'
+                                  ? 'bg-palette-accent'
                                   : stats.paymentsProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
+                                    ? 'bg-palette-warning'
+                                    : 'bg-palette-danger'
                                 }`}
                               style={{ width: `${stats.paymentsProgress}%` }}
                             />
@@ -824,7 +899,7 @@ const AdminCoordinators = () => {
                     )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                      <div className="p-3 sm:p-4 rounded-lg border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">Class Take Amount</p>
                           <div className="w-2 h-2 rounded-full"></div>
@@ -833,7 +908,7 @@ const AdminCoordinators = () => {
                           <p className="">{formatCurrency(stats.classTakeAmount || 0)}</p>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">Teacher Salary</p>
                         </div>
@@ -841,7 +916,7 @@ const AdminCoordinators = () => {
                           <p className="">{formatCurrency(stats.teacherSalary || 0)}</p>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4 rounded-lg border border-indigo-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">Expense Ratio</p>
                         </div>
@@ -958,7 +1033,7 @@ const AdminCoordinators = () => {
                       <TableCell>{mentor.phone || "No phone number"}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${mentor.status === 'active'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-green-100 text-palette-accent'
                           : 'bg-gray-100 text-gray-800'
                           }`}>
                           {mentor.status || 'active'}
@@ -1126,7 +1201,7 @@ const AdminCoordinators = () => {
                           <TableCell className="hidden sm:table-cell">{mentor?.name || 'Not Assigned'}</TableCell>
                           <TableCell>
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-green-100 text-palette-accent'
                               : 'bg-gray-100 text-gray-800'
                               }`}>
                               {student.status}
@@ -1207,3 +1282,9 @@ const AdminCoordinators = () => {
 };
 
 export default AdminCoordinators;
+
+
+              {/* <Button variant="outline" className="w-full sm:w-auto text-sm">
+                <UserSearch className="mr-1.5 h-3.5 w-3.5" />
+                Search
+              </Button> */}

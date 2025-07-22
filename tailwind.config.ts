@@ -51,7 +51,7 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(-- -foreground))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -68,7 +68,18 @@ export default {
 					medium: '#f97316',
 					high: '#16a34a',
 					complete: '#2563eb'
-				}
+				},
+				palette: {
+					primary: '#793078',
+					secondary: '#058DCE',
+					gray: '#F3F4F6',
+					accent: '#00996B',
+					warning: '#FF9900',
+					info: '#058DCE',
+					purple: '#b848b5',
+					danger: '#FF0000',
+					teal: '#0A7C6E',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

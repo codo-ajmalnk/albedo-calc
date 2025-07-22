@@ -40,6 +40,12 @@ const CoordinatorStudents = () => {
   const [students, setStudents] = useState<Student[]>(allStudents);
   const [search, setSearch] = useState("");
   const [mentorFilter, setMentorFilter] = useState("all");
+  // Add time filter and custom date range state for student filtering
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [customDateRange, setCustomDateRange] = useState<{
+    from: string;
+    to: string;
+  }>({ from: "", to: "" });
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
   const [isEditingStudent, setIsEditingStudent] = useState(false);
@@ -65,7 +71,7 @@ const CoordinatorStudents = () => {
     endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     sessionAddedOn: new Date().toISOString(),
     sessionsRemaining: 12,
-    progressPercentage: 0
+    progressPercentage: 0,
   });
 
   if (!user) return null;
@@ -83,8 +89,11 @@ const CoordinatorStudents = () => {
   );
 
   const filteredStudents = myStudents.filter((student) => {
-    const matchesSearch = student.name.toLowerCase().includes(search.toLowerCase());
-    const matchesMentor = mentorFilter === "all" || student.mentorId === mentorFilter;
+    const matchesSearch = student.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesMentor =
+      mentorFilter === "all" || student.mentorId === mentorFilter;
     return matchesSearch && matchesMentor;
   });
 
@@ -94,18 +103,28 @@ const CoordinatorStudents = () => {
   };
 
   const getStudentStats = (student: Student) => {
-    const sessionProgress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-    const hoursProgress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-    const paymentProgress = Math.round((student.paidAmount / student.totalPayment) * 100);
-    const overallProgress = Math.round((sessionProgress + hoursProgress + paymentProgress) / 3);
+    const sessionProgress = Math.round(
+      (student.sessionsCompleted / student.totalSessions) * 100
+    );
+    const hoursProgress = Math.round(
+      (student.sessionsCompleted / student.totalSessions) * 100
+    );
+    const paymentProgress = Math.round(
+      (student.paidAmount / student.totalPayment) * 100
+    );
+    const overallProgress = Math.round(
+      (sessionProgress + hoursProgress + paymentProgress) / 3
+    );
 
     return {
       sessionProgress,
       hoursProgress,
       paymentProgress,
       overallProgress,
-      completedHours: Math.round((student.totalHours * student.sessionsCompleted) / student.totalSessions),
-      pendingPayment: student.totalPayment - student.paidAmount
+      completedHours: Math.round(
+        (student.totalHours * student.sessionsCompleted) / student.totalSessions
+      ),
+      pendingPayment: student.totalPayment - student.paidAmount,
     };
   };
 
@@ -123,9 +142,11 @@ const CoordinatorStudents = () => {
     if (!editingStudent) return;
 
     try {
-      setStudents(students.map(student =>
-        student.id === editingStudent.id ? editingStudent : student
-      ));
+      setStudents(
+        students.map((student) =>
+          student.id === editingStudent.id ? editingStudent : student
+        )
+      );
       setIsEditingStudent(false);
       setEditingStudent(null);
       crudToasts.update.success("Student");
@@ -138,7 +159,9 @@ const CoordinatorStudents = () => {
     if (!selectedStudent) return;
 
     try {
-      setStudents(students.filter(student => student.id !== selectedStudent.id));
+      setStudents(
+        students.filter((student) => student.id !== selectedStudent.id)
+      );
       setIsDeletingStudent(false);
       setSelectedStudent(null);
       crudToasts.delete.success("Student");
@@ -172,7 +195,7 @@ const CoordinatorStudents = () => {
         progressPercentage: 0,
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60
+        sessionDuration: 60,
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -182,9 +205,11 @@ const CoordinatorStudents = () => {
 
   const handleAssignMentor = (studentId: string, mentorId: string) => {
     try {
-      setStudents(students.map(student =>
-        student.id === studentId ? { ...student, mentorId } : student
-      ));
+      setStudents(
+        students.map((student) =>
+          student.id === studentId ? { ...student, mentorId } : student
+        )
+      );
       crudToasts.assign.success("Student", "Mentor");
     } catch (error) {
       crudToasts.assign.error("Student", "Mentor");
@@ -193,9 +218,11 @@ const CoordinatorStudents = () => {
 
   const handleUnassignMentor = (studentId: string) => {
     try {
-      setStudents(students.map(student =>
-        student.id === studentId ? { ...student, mentorId: "" } : student
-      ));
+      setStudents(
+        students.map((student) =>
+          student.id === studentId ? { ...student, mentorId: "" } : student
+        )
+      );
       crudToasts.unassign.success("Student", "Mentor");
     } catch (error) {
       crudToasts.unassign.error("Student", "Mentor");
@@ -206,7 +233,9 @@ const CoordinatorStudents = () => {
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">My Students</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+            My Students
+          </h1>
         </div>
 
         <Card className="w-full">
@@ -232,10 +261,7 @@ const CoordinatorStudents = () => {
               </div>
               <div className="space-y-2">
                 <Label>Filter by Mentor</Label>
-                <Select
-                  value={mentorFilter}
-                  onValueChange={setMentorFilter}
-                >
+                <Select value={mentorFilter} onValueChange={setMentorFilter}>
                   <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="Select Mentor" />
                   </SelectTrigger>
@@ -249,6 +275,51 @@ const CoordinatorStudents = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label>Filter by Date</Label>
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                  <Select value={timeFilter} onValueChange={setTimeFilter}>
+                    <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="this_week">This Week</SelectItem>
+                      <SelectItem value="this_month">This Month</SelectItem>
+                      <SelectItem value="this_year">This Year</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {timeFilter === "custom" && (
+                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                      <Input
+                        type="date"
+                        value={customDateRange.from}
+                        onChange={(e) =>
+                          setCustomDateRange((r) => ({
+                            ...r,
+                            from: e.target.value,
+                          }))
+                        }
+                        className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                      />
+                      <span className="mx-1 text-xs">to</span>
+                      <Input
+                        type="date"
+                        value={customDateRange.to}
+                        onChange={(e) =>
+                          setCustomDateRange((r) => ({
+                            ...r,
+                            to: e.target.value,
+                          }))
+                        }
+                        className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -261,13 +332,21 @@ const CoordinatorStudents = () => {
                 <CardHeader className="p-3 sm:p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="space-y-1">
-                      <CardTitle className="text-base sm:text-lg">{student.name}</CardTitle>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{student.email}</p>
+                      <CardTitle className="text-base sm:text-lg">
+                        {student.name}
+                      </CardTitle>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {student.email}
+                      </p>
                     </div>
                     <div className="text-left sm:text-right space-y-1">
-                      <p className="text-xs sm:text-sm">ID: <span className="font-medium">{student.id}</span></p>
+                      <p className="text-xs sm:text-sm">
+                        ID: <span className="font-medium">{student.id}</span>
+                      </p>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        {student.phone ? `Phone: ${student.phone}` : 'No phone number'}
+                        {student.phone
+                          ? `Phone: ${student.phone}`
+                          : "No phone number"}
                       </p>
                     </div>
                   </div>
@@ -283,10 +362,13 @@ const CoordinatorStudents = () => {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Status</p>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                          }`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            student.status === "active"
+                              ? "bg-green-100 text-palette-accent"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
                           {student.status}
                         </span>
                       </div>
@@ -296,18 +378,21 @@ const CoordinatorStudents = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Sessions Progress</span>
-                          <span className="font-medium">{stats.sessionProgress}%</span>
+                          <span className="font-medium">
+                            {stats.sessionProgress}%
+                          </span>
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                                ? 'bg-progress-complete'
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.sessionProgress === 100
+                                ? "bg-palette-info"
                                 : stats.sessionProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.sessionProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                              }`}
+                                ? "bg-palette-accent"
+                                : stats.sessionProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
                             style={{ width: `${stats.sessionProgress}%` }}
                           />
                         </div>
@@ -320,18 +405,21 @@ const CoordinatorStudents = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Hours Progress</span>
-                          <span className="font-medium">{stats.hoursProgress}%</span>
+                          <span className="font-medium">
+                            {stats.hoursProgress}%
+                          </span>
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                                ? 'bg-progress-complete'
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.hoursProgress === 100
+                                ? "bg-palette-info"
                                 : stats.hoursProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.hoursProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                              }`}
+                                ? "bg-palette-accent"
+                                : stats.hoursProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
                             style={{ width: `${stats.hoursProgress}%` }}
                           />
                         </div>
@@ -344,49 +432,86 @@ const CoordinatorStudents = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Payment Progress</span>
-                          <span className="font-medium">{stats.paymentProgress}%</span>
+                          <span className="font-medium">
+                            {stats.paymentProgress}%
+                          </span>
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.paymentProgress === 100
-                                ? 'bg-progress-complete'
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.paymentProgress === 100
+                                ? "bg-palette-info"
                                 : stats.paymentProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.paymentProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                              }`}
+                                ? "bg-palette-accent"
+                                : stats.paymentProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
                             style={{ width: `${stats.paymentProgress}%` }}
                           />
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>₹{(student.paidAmount || 0).toLocaleString()} paid</span>
-                          <span>₹{(student.totalPayment || 0).toLocaleString()} total</span>
+                          <span>
+                            ₹{(student.paidAmount || 0).toLocaleString()} paid
+                          </span>
+                          <span>
+                            ₹{(student.totalPayment || 0).toLocaleString()}{" "}
+                            total
+                          </span>
                         </div>
                       </div>
 
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm mb-1">
                           <span>Overall Progress</span>
-                          <span className="font-medium">{stats.overallProgress}%</span>
+                          <span className="font-medium">
+                            {stats.overallProgress}%
+                          </span>
                         </div>
                         <div className="w-full bg-muted h-2 rounded-full">
                           <div
-                            className={`h-2 rounded-full transition-all duration-300 ${stats.overallProgress === 100
-                                ? 'bg-progress-complete'
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.overallProgress === 100
+                                ? "bg-palette-info"
                                 : stats.overallProgress >= 75
-                                  ? 'bg-progress-high'
-                                  : stats.overallProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                              }`}
+                                ? "bg-palette-accent"
+                                : stats.overallProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
                             style={{ width: `${stats.overallProgress}%` }}
                           />
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Remaining Sessions
+                          </p>
+                          <div className="w-2 h-2 rounded-full"></div>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">
+                            {student.totalSessions - student.sessionsCompleted}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Pending Payment
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">
+                            ₹{(stats.pendingPayment || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 bg-muted/10 rounded-lg">
                         <p className="text-sm text-muted-foreground">Remaining Sessions</p>
                         <p className="text-lg font-medium mt-1">{student.totalSessions - student.sessionsCompleted}</p>
@@ -395,7 +520,7 @@ const CoordinatorStudents = () => {
                         <p className="text-sm text-muted-foreground">Pending Payment</p>
                         <p className="text-lg font-medium mt-1">₹{(stats.pendingPayment || 0).toLocaleString()}</p>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="grid grid-cols-3 gap-2 pt-4">
                       <Button
@@ -449,23 +574,35 @@ const CoordinatorStudents = () => {
             <div className="space-y-6 mt-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 bg-muted/10 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Total Sessions</p>
-                  <p className="text-2xl font-bold mt-1">{selectedStudent.totalSessions}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Sessions
+                  </p>
+                  <p className="text-2xl font-bold mt-1">
+                    {selectedStudent.totalSessions}
+                  </p>
                   <p className="text-sm text-muted-foreground">sessions</p>
                 </div>
                 <div className="p-4 bg-muted/10 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Completed Sessions</p>
-                  <p className="text-2xl font-bold mt-1">{selectedStudent.sessionsCompleted}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Completed Sessions
+                  </p>
+                  <p className="text-2xl font-bold mt-1">
+                    {selectedStudent.sessionsCompleted}
+                  </p>
                   <p className="text-sm text-muted-foreground">completed</p>
                 </div>
                 <div className="p-4 bg-muted/10 rounded-lg">
                   <p className="text-sm text-muted-foreground">Mentor</p>
-                  <p className="text-2xl font-bold mt-1 truncate">{getMentorName(selectedStudent.mentorId)}</p>
+                  <p className="text-2xl font-bold mt-1 truncate">
+                    {getMentorName(selectedStudent.mentorId)}
+                  </p>
                   <p className="text-sm text-muted-foreground">assigned to</p>
                 </div>
                 <div className="p-4 bg-muted/10 rounded-lg">
                   <p className="text-sm text-muted-foreground">Status</p>
-                  <p className="text-2xl font-bold mt-1">{selectedStudent.status}</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {selectedStudent.status}
+                  </p>
                   <p className="text-sm text-muted-foreground">current</p>
                 </div>
               </div>
@@ -476,20 +613,30 @@ const CoordinatorStudents = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Total Sessions</span>
-                      <span className="font-medium">{selectedStudent.totalSessions}</span>
+                      <span className="font-medium">
+                        {selectedStudent.totalSessions}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Completed Sessions</span>
-                      <span className="font-medium">{selectedStudent.sessionsCompleted}</span>
+                      <span className="font-medium">
+                        {selectedStudent.sessionsCompleted}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Total Hours</span>
-                      <span className="font-medium">{selectedStudent.totalHours}</span>
+                      <span className="font-medium">
+                        {selectedStudent.totalHours}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Completed Hours</span>
                       <span className="font-medium">
-                        {Math.round((selectedStudent.totalHours * selectedStudent.sessionsCompleted) / selectedStudent.totalSessions)}
+                        {Math.round(
+                          (selectedStudent.totalHours *
+                            selectedStudent.sessionsCompleted) /
+                            selectedStudent.totalSessions
+                        )}
                       </span>
                     </div>
                   </div>
@@ -500,15 +647,25 @@ const CoordinatorStudents = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Total Payment</span>
-                      <span className="font-medium">₹{(selectedStudent?.totalPayment || 0).toLocaleString()}</span>
+                      <span className="font-medium">
+                        ₹{(selectedStudent?.totalPayment || 0).toLocaleString()}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Paid Amount</span>
-                      <span className="font-medium">₹{(selectedStudent?.paidAmount || 0).toLocaleString()}</span>
+                      <span className="font-medium">
+                        ₹{(selectedStudent?.paidAmount || 0).toLocaleString()}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Pending Payment</span>
-                      <span className="font-medium">₹{((selectedStudent?.totalPayment || 0) - (selectedStudent?.paidAmount || 0)).toLocaleString()}</span>
+                      <span className="font-medium">
+                        ₹
+                        {(
+                          (selectedStudent?.totalPayment || 0) -
+                          (selectedStudent?.paidAmount || 0)
+                        ).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -519,19 +676,42 @@ const CoordinatorStudents = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>Sessions Progress</span>
-                        <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
+                        <span>
+                          {Math.round(
+                            (selectedStudent.sessionsCompleted /
+                              selectedStudent.totalSessions) *
+                              100
+                          )}
+                          %
+                        </span>
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
-                              ? 'bg-progress-complete'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                                ? 'bg-progress-high'
-                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                            }`}
-                          style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            (selectedStudent.sessionsCompleted /
+                              selectedStudent.totalSessions) *
+                              100 ===
+                            100
+                              ? "bg-palette-info"
+                              : (selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 >=
+                                75
+                              ? "bg-palette-accent"
+                              : (selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 >=
+                                40
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
+                          }`}
+                          style={{
+                            width: `${
+                              (selectedStudent.sessionsCompleted /
+                                selectedStudent.totalSessions) *
+                              100
+                            }%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -539,19 +719,42 @@ const CoordinatorStudents = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>Hours Progress</span>
-                        <span>{Math.round((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100)}%</span>
+                        <span>
+                          {Math.round(
+                            (selectedStudent.sessionsCompleted /
+                              selectedStudent.totalSessions) *
+                              100
+                          )}
+                          %
+                        </span>
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 === 100
-                              ? 'bg-progress-complete'
-                              : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 75
-                                ? 'bg-progress-high'
-                                : (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                            }`}
-                          style={{ width: `${(selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100}%` }}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            (selectedStudent.sessionsCompleted /
+                              selectedStudent.totalSessions) *
+                              100 ===
+                            100
+                              ? "bg-palette-info"
+                              : (selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 >=
+                                75
+                              ? "bg-palette-accent"
+                              : (selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 >=
+                                40
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
+                          }`}
+                          style={{
+                            width: `${
+                              (selectedStudent.sessionsCompleted /
+                                selectedStudent.totalSessions) *
+                              100
+                            }%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -559,19 +762,42 @@ const CoordinatorStudents = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>Payment Progress</span>
-                        <span>{Math.round((selectedStudent.paidAmount / selectedStudent.totalPayment) * 100)}%</span>
+                        <span>
+                          {Math.round(
+                            (selectedStudent.paidAmount /
+                              selectedStudent.totalPayment) *
+                              100
+                          )}
+                          %
+                        </span>
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 === 100
-                              ? 'bg-progress-complete'
-                              : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 75
-                                ? 'bg-progress-high'
-                                : (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                            }`}
-                          style={{ width: `${(selectedStudent.paidAmount / selectedStudent.totalPayment) * 100}%` }}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            (selectedStudent.paidAmount /
+                              selectedStudent.totalPayment) *
+                              100 ===
+                            100
+                              ? "bg-palette-info"
+                              : (selectedStudent.paidAmount /
+                                  selectedStudent.totalPayment) *
+                                  100 >=
+                                75
+                              ? "bg-palette-accent"
+                              : (selectedStudent.paidAmount /
+                                  selectedStudent.totalPayment) *
+                                  100 >=
+                                40
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
+                          }`}
+                          style={{
+                            width: `${
+                              (selectedStudent.paidAmount /
+                                selectedStudent.totalPayment) *
+                              100
+                            }%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -579,30 +805,76 @@ const CoordinatorStudents = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>Overall Progress</span>
-                        <span>{Math.round(((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                          (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                          (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3)}%</span>
+                        <span>
+                          {Math.round(
+                            ((selectedStudent.sessionsCompleted /
+                              selectedStudent.totalSessions) *
+                              100 +
+                              (selectedStudent.sessionsCompleted /
+                                selectedStudent.totalSessions) *
+                                100 +
+                              (selectedStudent.paidAmount /
+                                selectedStudent.totalPayment) *
+                                100) /
+                              3
+                          )}
+                          %
+                        </span>
                       </div>
                       <div className="w-full bg-muted h-2 rounded-full">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                              (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                              (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 === 100
-                              ? 'bg-progress-complete'
-                              : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 75
-                                ? 'bg-progress-high'
-                                : ((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                  (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                                  (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3 >= 40
-                                  ? 'bg-progress-medium'
-                                  : 'bg-progress-low'
-                            }`}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            ((selectedStudent.sessionsCompleted /
+                              selectedStudent.totalSessions) *
+                              100 +
+                              (selectedStudent.sessionsCompleted /
+                                selectedStudent.totalSessions) *
+                                100 +
+                              (selectedStudent.paidAmount /
+                                selectedStudent.totalPayment) *
+                                100) /
+                              3 ===
+                            100
+                              ? "bg-palette-info"
+                              : ((selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 +
+                                  (selectedStudent.sessionsCompleted /
+                                    selectedStudent.totalSessions) *
+                                    100 +
+                                  (selectedStudent.paidAmount /
+                                    selectedStudent.totalPayment) *
+                                    100) /
+                                  3 >=
+                                75
+                              ? "bg-palette-accent"
+                              : ((selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 +
+                                  (selectedStudent.sessionsCompleted /
+                                    selectedStudent.totalSessions) *
+                                    100 +
+                                  (selectedStudent.paidAmount /
+                                    selectedStudent.totalPayment) *
+                                    100) /
+                                  3 >=
+                                40
+                              ? "bg-palette-warning"
+                              : "bg-palette-danger"
+                          }`}
                           style={{
-                            width: `${((selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                              (selectedStudent.sessionsCompleted / selectedStudent.totalSessions) * 100 +
-                              (selectedStudent.paidAmount / selectedStudent.totalPayment) * 100) / 3}%`
+                            width: `${
+                              ((selectedStudent.sessionsCompleted /
+                                selectedStudent.totalSessions) *
+                                100 +
+                                (selectedStudent.sessionsCompleted /
+                                  selectedStudent.totalSessions) *
+                                  100 +
+                                (selectedStudent.paidAmount /
+                                  selectedStudent.totalPayment) *
+                                  100) /
+                              3
+                            }%`,
                           }}
                         />
                       </div>
@@ -619,9 +891,12 @@ const CoordinatorStudents = () => {
       <Dialog open={isAddingStudent} onOpenChange={setIsAddingStudent}>
         <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader className="space-y-3">
-            <DialogTitle className="text-xl font-bold">Add New Student</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              Add New Student
+            </DialogTitle>
             <DialogDescription>
-              Fill in the student details below. All fields marked with * are required.
+              Fill in the student details below. All fields marked with * are
+              required.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-4">
@@ -640,7 +915,9 @@ const CoordinatorStudents = () => {
                 <Input
                   id="name"
                   value={newStudent.name}
-                  onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewStudent({ ...newStudent, name: e.target.value })
+                  }
                   placeholder="Enter student's full name"
                   className="w-full"
                 />
@@ -651,7 +928,9 @@ const CoordinatorStudents = () => {
                   id="email"
                   type="email"
                   value={newStudent.email}
-                  onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                  onChange={(e) =>
+                    setNewStudent({ ...newStudent, email: e.target.value })
+                  }
                   placeholder="student@example.com"
                   className="w-full"
                 />
@@ -662,7 +941,9 @@ const CoordinatorStudents = () => {
                   id="phone"
                   type="tel"
                   value={newStudent.phone}
-                  onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
+                  onChange={(e) =>
+                    setNewStudent({ ...newStudent, phone: e.target.value })
+                  }
                   placeholder="+91 98765 43210"
                   className="w-full"
                 />
@@ -674,7 +955,9 @@ const CoordinatorStudents = () => {
                 <Label htmlFor="mentor">Assigned Mentor *</Label>
                 <Select
                   value={newStudent.mentorId}
-                  onValueChange={(value) => setNewStudent({ ...newStudent, mentorId: value })}
+                  onValueChange={(value) =>
+                    setNewStudent({ ...newStudent, mentorId: value })
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a mentor" />
@@ -692,7 +975,12 @@ const CoordinatorStudents = () => {
                 <Label htmlFor="status">Status *</Label>
                 <Select
                   value={newStudent.status}
-                  onValueChange={(value) => setNewStudent({ ...newStudent, status: value as "active" | "inactive" })}
+                  onValueChange={(value) =>
+                    setNewStudent({
+                      ...newStudent,
+                      status: value as "active" | "inactive",
+                    })
+                  }
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select status" />
@@ -713,7 +1001,12 @@ const CoordinatorStudents = () => {
                   type="number"
                   min="0"
                   value={newStudent.totalSessions}
-                  onChange={(e) => setNewStudent({ ...newStudent, totalSessions: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setNewStudent({
+                      ...newStudent,
+                      totalSessions: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full"
                 />
               </div>
@@ -724,7 +1017,12 @@ const CoordinatorStudents = () => {
                   type="number"
                   min="0"
                   value={newStudent.totalHours}
-                  onChange={(e) => setNewStudent({ ...newStudent, totalHours: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setNewStudent({
+                      ...newStudent,
+                      totalHours: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full"
                 />
               </div>
@@ -735,20 +1033,26 @@ const CoordinatorStudents = () => {
                   type="number"
                   min="0"
                   value={newStudent.totalPayment}
-                  onChange={(e) => setNewStudent({ ...newStudent, totalPayment: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setNewStudent({
+                      ...newStudent,
+                      totalPayment: parseInt(e.target.value),
+                    })
+                  }
                   className="w-full"
                 />
               </div>
             </div>
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsAddingStudent(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
             <Button
-              onClick={handleAddStudent}
+              variant="outline"
+              onClick={() => setIsAddingStudent(false)}
               className="w-full sm:w-auto"
             >
+              Cancel
+            </Button>
+            <Button onClick={handleAddStudent} className="w-full sm:w-auto">
               Create Student
             </Button>
           </DialogFooter>
@@ -759,9 +1063,12 @@ const CoordinatorStudents = () => {
       <Dialog open={isEditingStudent} onOpenChange={setIsEditingStudent}>
         <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader className="space-y-3">
-            <DialogTitle className="text-xl font-bold">Edit Student</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              Edit Student
+            </DialogTitle>
             <DialogDescription>
-              Update the student's information. All fields marked with * are required.
+              Update the student's information. All fields marked with * are
+              required.
             </DialogDescription>
           </DialogHeader>
           {editingStudent && (
@@ -781,10 +1088,12 @@ const CoordinatorStudents = () => {
                   <Input
                     id="edit-name"
                     value={editingStudent.name}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      name: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        name: e.target.value,
+                      })
+                    }
                     placeholder="Enter student's full name"
                     className="w-full"
                   />
@@ -795,10 +1104,12 @@ const CoordinatorStudents = () => {
                     id="edit-email"
                     type="email"
                     value={editingStudent.email}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      email: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        email: e.target.value,
+                      })
+                    }
                     placeholder="student@example.com"
                     className="w-full"
                   />
@@ -809,10 +1120,12 @@ const CoordinatorStudents = () => {
                     id="edit-phone"
                     type="tel"
                     value={editingStudent.phone}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      phone: e.target.value
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        phone: e.target.value,
+                      })
+                    }
                     placeholder="+91 98765 43210"
                     className="w-full"
                   />
@@ -824,10 +1137,12 @@ const CoordinatorStudents = () => {
                   <Label htmlFor="edit-mentor">Assigned Mentor *</Label>
                   <Select
                     value={editingStudent.mentorId}
-                    onValueChange={(value) => setEditingStudent({
-                      ...editingStudent,
-                      mentorId: value
-                    })}
+                    onValueChange={(value) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        mentorId: value,
+                      })
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a mentor" />
@@ -845,10 +1160,12 @@ const CoordinatorStudents = () => {
                   <Label htmlFor="edit-status">Status *</Label>
                   <Select
                     value={editingStudent.status}
-                    onValueChange={(value) => setEditingStudent({
-                      ...editingStudent,
-                      status: value as "active" | "inactive"
-                    })}
+                    onValueChange={(value) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        status: value as "active" | "inactive",
+                      })
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select status" />
@@ -863,16 +1180,20 @@ const CoordinatorStudents = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-sessions-completed">Completed Sessions *</Label>
+                  <Label htmlFor="edit-sessions-completed">
+                    Completed Sessions *
+                  </Label>
                   <Input
                     id="edit-sessions-completed"
                     type="number"
                     min="0"
                     value={editingStudent.sessionsCompleted}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      sessionsCompleted: parseInt(e.target.value)
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        sessionsCompleted: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full"
                   />
                 </div>
@@ -883,10 +1204,12 @@ const CoordinatorStudents = () => {
                     type="number"
                     min="0"
                     value={editingStudent.totalSessions}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      totalSessions: parseInt(e.target.value)
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        totalSessions: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full"
                   />
                 </div>
@@ -897,10 +1220,12 @@ const CoordinatorStudents = () => {
                     type="number"
                     min="0"
                     value={editingStudent.totalHours}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      totalHours: parseInt(e.target.value)
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        totalHours: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full"
                   />
                 </div>
@@ -914,24 +1239,30 @@ const CoordinatorStudents = () => {
                     type="number"
                     min="0"
                     value={editingStudent.paidAmount}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      paidAmount: parseInt(e.target.value)
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        paidAmount: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-total-payment">Total Payment (₹) *</Label>
+                  <Label htmlFor="edit-total-payment">
+                    Total Payment (₹) *
+                  </Label>
                   <Input
                     id="edit-total-payment"
                     type="number"
                     min="0"
                     value={editingStudent.totalPayment}
-                    onChange={(e) => setEditingStudent({
-                      ...editingStudent,
-                      totalPayment: parseInt(e.target.value)
-                    })}
+                    onChange={(e) =>
+                      setEditingStudent({
+                        ...editingStudent,
+                        totalPayment: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full"
                   />
                 </div>
@@ -939,10 +1270,14 @@ const CoordinatorStudents = () => {
             </div>
           )}
           <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => {
-              setIsEditingStudent(false);
-              setEditingStudent(null);
-            }} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditingStudent(false);
+                setEditingStudent(null);
+              }}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
             <Button onClick={handleUpdateStudent} className="w-full sm:w-auto">
@@ -958,15 +1293,17 @@ const CoordinatorStudents = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedStudent?.name}'s profile and remove all associated data.
-              This action cannot be undone.
+              This will permanently delete {selectedStudent?.name}'s profile and
+              remove all associated data. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setIsDeletingStudent(false);
-              setSelectedStudent(null);
-            }}>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsDeletingStudent(false);
+                setSelectedStudent(null);
+              }}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

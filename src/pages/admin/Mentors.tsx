@@ -1,13 +1,32 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { users, students as allStudents, generateDashboardStats } from "@/lib/mock-data";
+import {
+  users,
+  students as allStudents,
+  generateDashboardStats,
+} from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Student, User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus, X } from "lucide-react";
+import {
+  UserSearch,
+  Eye,
+  Edit,
+  Plus,
+  Trash2,
+  Users,
+  UserPlus,
+  X,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -59,22 +78,30 @@ const AdminMentors = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [coordinatorFilter, setCoordinatorFilter] = useState("all");
-  
+
+  // Add time filter and custom date range state for mentor filtering
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({ from: "", to: "" });
+
   // Helper function to format currency
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
 
   // Single dialog state to manage all dialogs
-  const [activeDialog, setActiveDialog] = useState<"details" | "students" | "edit" | "delete" | "add" | null>(null);
+  const [activeDialog, setActiveDialog] = useState<
+    "details" | "students" | "edit" | "delete" | "add" | null
+  >(null);
 
   const [selectedMentor, setSelectedMentor] = useState<{
     user: User;
     stats: ReturnType<typeof getMentorStats>;
   } | null>(null);
 
-  const [mentors, setMentors] = useState(users.filter((user) => user.role === "mentor"));
+  const [mentors, setMentors] = useState(
+    users.filter((user) => user.role === "mentor")
+  );
   const [students, setStudents] = useState<Student[]>(allStudents);
   const [newMentor, setNewMentor] = useState({
-    id: `mentor${users.filter(u => u.role === "mentor").length + 1}`,
+    id: `mentor${users.filter((u) => u.role === "mentor").length + 1}`,
     name: "",
     email: "",
     phone: "",
@@ -101,7 +128,9 @@ const AdminMentors = () => {
   }, []); // Run once on component mount
 
   const getMentorStats = (mentorId: string) => {
-    const mentorStudents = students.filter(student => student.mentorId === mentorId);
+    const mentorStudents = students.filter(
+      (student) => student.mentorId === mentorId
+    );
 
     const totalSessions = mentorStudents.reduce(
       (sum, student) => sum + student.totalSessions,
@@ -116,20 +145,38 @@ const AdminMentors = () => {
       0
     );
     const completedHours = mentorStudents.reduce(
-      (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
+      (sum, student) =>
+        sum +
+        student.totalHours *
+          (student.sessionsCompleted / student.totalSessions),
       0
     );
 
     const stats = generateDashboardStats(mentorStudents);
 
     // Calculate mentor-level expense data
-    const totalSessionsForExpense = mentorStudents.reduce((sum, student) => sum + student.totalSessions, 0);
-    const totalPaymentsForExpense = mentorStudents.reduce((sum, student) => sum + student.totalPayment, 0);
-    const completedPaymentsForExpense = mentorStudents.reduce((sum, student) => sum + student.paidAmount, 0);
-    
-    const classTakeAmount = totalSessionsForExpense > 0 ? Math.round(totalPaymentsForExpense / totalSessionsForExpense) : 0;
+    const totalSessionsForExpense = mentorStudents.reduce(
+      (sum, student) => sum + student.totalSessions,
+      0
+    );
+    const totalPaymentsForExpense = mentorStudents.reduce(
+      (sum, student) => sum + student.totalPayment,
+      0
+    );
+    const completedPaymentsForExpense = mentorStudents.reduce(
+      (sum, student) => sum + student.paidAmount,
+      0
+    );
+
+    const classTakeAmount =
+      totalSessionsForExpense > 0
+        ? Math.round(totalPaymentsForExpense / totalSessionsForExpense)
+        : 0;
     const teacherSalary = Math.round(completedPaymentsForExpense * 0.7); // 70% of completed payments
-    const expenseRatio = totalPaymentsForExpense > 0 ? Math.round((teacherSalary / totalPaymentsForExpense) * 100) : 0;
+    const expenseRatio =
+      totalPaymentsForExpense > 0
+        ? Math.round((teacherSalary / totalPaymentsForExpense) * 100)
+        : 0;
 
     return {
       studentCount: mentorStudents.length,
@@ -137,14 +184,22 @@ const AdminMentors = () => {
       completedSessions,
       totalHours,
       completedHours: Math.round(completedHours),
-      sessionProgress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0,
-      hoursProgress: totalHours > 0 ? Math.floor((completedHours / totalHours) * 100) : 0,
+      sessionProgress:
+        totalSessions > 0
+          ? Math.floor((completedSessions / totalSessions) * 100)
+          : 0,
+      hoursProgress:
+        totalHours > 0 ? Math.floor((completedHours / totalHours) * 100) : 0,
       overallProgress: stats.overallProgress,
-      activeStudents: mentorStudents.filter(s => s.status === 'active').length,
+      activeStudents: mentorStudents.filter((s) => s.status === "active")
+        .length,
       completedPayments: stats.completedPayments,
       pendingPayments: stats.pendingPayments,
       totalPayments: stats.totalPayments,
-      paymentsProgress: stats.totalPayments > 0 ? Math.floor((stats.completedPayments / stats.totalPayments) * 100) : 0,
+      paymentsProgress:
+        stats.totalPayments > 0
+          ? Math.floor((stats.completedPayments / stats.totalPayments) * 100)
+          : 0,
       classTakeAmount,
       teacherSalary,
       expenseRatio,
@@ -152,8 +207,11 @@ const AdminMentors = () => {
   };
 
   const filteredMentors = mentors.filter((mentor) => {
-    const matchesSearch = mentor.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCoordinator = coordinatorFilter === "all" || mentor.supervisorId === coordinatorFilter;
+    const matchesSearch = mentor.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesCoordinator =
+      coordinatorFilter === "all" || mentor.supervisorId === coordinatorFilter;
     return matchesSearch && matchesCoordinator;
   });
 
@@ -201,15 +259,21 @@ const AdminMentors = () => {
   const confirmDeleteMentor = () => {
     if (!selectedMentor) return;
 
-    const mentorStudents = students.filter(student => student.mentorId === selectedMentor.user.id);
+    const mentorStudents = students.filter(
+      (student) => student.mentorId === selectedMentor.user.id
+    );
 
     if (mentorStudents.length > 0) {
-      crudToasts.validation.error("Cannot delete mentor with assigned students. Please reassign or remove all students first.");
+      crudToasts.validation.error(
+        "Cannot delete mentor with assigned students. Please reassign or remove all students first."
+      );
       return;
     }
 
     try {
-      setMentors(mentors.filter(mentor => mentor.id !== selectedMentor.user.id));
+      setMentors(
+        mentors.filter((mentor) => mentor.id !== selectedMentor.user.id)
+      );
       setActiveDialog(null);
       setSelectedMentor(null);
       crudToasts.delete.success("Mentor");
@@ -246,9 +310,13 @@ const AdminMentors = () => {
     if (!editingMentor) return;
 
     try {
-      setMentors(mentors.map(mentor =>
-        mentor.id === editingMentor.id ? { ...editingMentor, role: "mentor" } : mentor
-      ));
+      setMentors(
+        mentors.map((mentor) =>
+          mentor.id === editingMentor.id
+            ? { ...editingMentor, role: "mentor" }
+            : mentor
+        )
+      );
       setActiveDialog(null);
       setEditingMentor(null);
       crudToasts.update.success("Mentor");
@@ -263,7 +331,9 @@ const AdminMentors = () => {
   const [isEditingStudent, setIsEditingStudent] = useState(false);
   const [isDeletingStudent, setIsDeletingStudent] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<string[]>([]);
+  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<
+    string[]
+  >([]);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [newStudent, setNewStudent] = useState<Student>({
     id: `student${students.length + 1}`,
@@ -284,7 +354,7 @@ const AdminMentors = () => {
     sessionDuration: 60,
     teachersPayment: 0,
     hourlyPayment: 0,
-    sessionAddedOn: new Date().toISOString()
+    sessionAddedOn: new Date().toISOString(),
   });
 
   // Add student management functions
@@ -302,9 +372,11 @@ const AdminMentors = () => {
     if (!editingStudent) return;
 
     try {
-      setStudents(students.map(student =>
-        student.id === editingStudent.id ? editingStudent : student
-      ));
+      setStudents(
+        students.map((student) =>
+          student.id === editingStudent.id ? editingStudent : student
+        )
+      );
       setIsEditingStudent(false);
       setEditingStudent(null);
       crudToasts.update.success("Student");
@@ -327,7 +399,7 @@ const AdminMentors = () => {
 
       const studentToAdd: Student = {
         ...newStudent,
-        mentorId: selectedMentor.user.id
+        mentorId: selectedMentor.user.id,
       };
 
       setStudents([...students, studentToAdd]);
@@ -352,7 +424,7 @@ const AdminMentors = () => {
         sessionDuration: 60,
         teachersPayment: 0,
         hourlyPayment: 0,
-        sessionAddedOn: new Date().toISOString()
+        sessionAddedOn: new Date().toISOString(),
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -364,7 +436,9 @@ const AdminMentors = () => {
     if (!selectedStudent) return;
 
     try {
-      setStudents(students.filter(student => student.id !== selectedStudent.id));
+      setStudents(
+        students.filter((student) => student.id !== selectedStudent.id)
+      );
       setIsDeletingStudent(false);
       setSelectedStudent(null);
       crudToasts.delete.success("Student");
@@ -381,11 +455,13 @@ const AdminMentors = () => {
       }
 
       if (selectedStudentsToAssign.length === 0) {
-        crudToasts.validation.error("Please select at least one student to assign.");
+        crudToasts.validation.error(
+          "Please select at least one student to assign."
+        );
         return;
       }
 
-      const updatedStudents = students.map(student => {
+      const updatedStudents = students.map((student) => {
         if (selectedStudentsToAssign.includes(student.id)) {
           return { ...student, mentorId: selectedMentor.user.id };
         }
@@ -393,8 +469,8 @@ const AdminMentors = () => {
       });
 
       setStudents(updatedStudents);
-      selectedStudentsToAssign.forEach(studentId => {
-        const student = allStudents.find(s => s.id === studentId);
+      selectedStudentsToAssign.forEach((studentId) => {
+        const student = allStudents.find((s) => s.id === studentId);
         if (student) {
           student.mentorId = selectedMentor.user.id;
         }
@@ -412,7 +488,9 @@ const AdminMentors = () => {
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Mentors Management</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+            Mentors Management
+          </h1>
         </div>
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -429,10 +507,11 @@ const AdminMentors = () => {
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full text-sm"
                   />
-                  <Button variant="outline" className="shrink-0 text-sm">
+                  {/* <Button variant="outline" className="shrink-0 text-sm">
                     <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                     Search
-                  </Button>
+                  </Button> */}
+
                 </div>
               </div>
               <div className="space-y-2">
@@ -454,6 +533,41 @@ const AdminMentors = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+              <Label>Filter by Date</Label>
+              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                  <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="this_week">This Week</SelectItem>
+                    <SelectItem value="this_month">This Month</SelectItem>
+                    <SelectItem value="this_year">This Year</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+                {timeFilter === "custom" && (
+                  <div className="flex flex-col sm:flex-row items-center gap-2  w-full sm:w-auto mt-2 sm:mt-0">
+                    <Input
+                      type="date"
+                      value={customDateRange.from}
+                      onChange={e => setCustomDateRange(r => ({ ...r, from: e.target.value }))}
+                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                    />
+                    <span className="mx-1 text-xs">to</span>
+                    <Input
+                      type="date"
+                      value={customDateRange.to}
+                      onChange={e => setCustomDateRange(r => ({ ...r, to: e.target.value }))}
+                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                    />
+                  </div>
+                )}
+              </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -461,20 +575,30 @@ const AdminMentors = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredMentors.map((mentor) => {
             const stats = getMentorStats(mentor.id);
-            const mentorStudents = students.filter(student => student.mentorId === mentor.id);
+            const mentorStudents = students.filter(
+              (student) => student.mentorId === mentor.id
+            );
 
             return (
               <Card key={mentor.id} className="flex flex-col">
                 <CardHeader className="p-3 sm:p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="space-y-1">
-                      <CardTitle className="text-base sm:text-lg">{mentor.name}</CardTitle>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{mentor.email}</p>
+                      <CardTitle className="text-base sm:text-lg">
+                        {mentor.name}
+                      </CardTitle>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {mentor.email}
+                      </p>
                     </div>
                     <div className="text-left sm:text-right space-y-1">
-                      <p className="text-xs sm:text-sm">ID: <span className="font-medium">{mentor.id}</span></p>
+                      <p className="text-xs sm:text-sm">
+                        ID: <span className="font-medium">{mentor.id}</span>
+                      </p>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        {mentor.phone ? `Phone: ${mentor.phone}` : 'No phone number'}
+                        {mentor.phone
+                          ? `Phone: ${mentor.phone}`
+                          : "No phone number"}
                       </p>
                     </div>
                   </div>
@@ -483,15 +607,23 @@ const AdminMentors = () => {
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-muted-foreground">Students</p>
+                        <p className="text-sm text-muted-foreground">
+                          Students
+                        </p>
                         <div className="flex items-baseline gap-2">
-                          <p className="text-xl sm:text-2xl font-bold">{stats.studentCount}</p>
+                          <p className="text-xl sm:text-2xl font-bold">
+                            {stats.studentCount}
+                          </p>
                           <p className="text-sm text-muted-foreground">total</p>
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Active Students</p>
-                        <p className="text-base font-medium">{stats.activeStudents}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Active Students
+                        </p>
+                        <p className="text-base font-medium">
+                          {stats.activeStudents}
+                        </p>
                       </div>
                     </div>
 
@@ -500,18 +632,21 @@ const AdminMentors = () => {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm mb-1">
                             <span>Sessions Progress</span>
-                            <span className="font-medium">{stats.sessionProgress}%</span>
+                            <span className="font-medium">
+                              {stats.sessionProgress}%
+                            </span>
                           </div>
                           <div className="w-full bg-muted h-2 rounded-full">
                             <div
-                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.sessionProgress >= 75
-                                  ? 'bg-progress-high'
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                stats.sessionProgress === 100
+                                  ? "bg-palette-info"
+                                  : stats.sessionProgress >= 75
+                                  ? "bg-palette-accent"
                                   : stats.sessionProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                                }`}
+                                  ? "bg-palette-warning"
+                                  : "bg-palette-danger"
+                              }`}
                               style={{ width: `${stats.sessionProgress}%` }}
                             />
                           </div>
@@ -524,18 +659,21 @@ const AdminMentors = () => {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm mb-1">
                             <span>Hours Progress</span>
-                            <span className="font-medium">{stats.hoursProgress}%</span>
+                            <span className="font-medium">
+                              {stats.hoursProgress}%
+                            </span>
                           </div>
                           <div className="w-full bg-muted h-2 rounded-full">
                             <div
-                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.hoursProgress >= 75
-                                  ? 'bg-progress-high'
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                stats.hoursProgress === 100
+                                  ? "bg-palette-info"
+                                  : stats.hoursProgress >= 75
+                                  ? "bg-palette-accent"
                                   : stats.hoursProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                                }`}
+                                  ? "bg-palette-warning"
+                                  : "bg-palette-danger"
+                              }`}
                               style={{ width: `${stats.hoursProgress}%` }}
                             />
                           </div>
@@ -548,48 +686,64 @@ const AdminMentors = () => {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm mb-1">
                             <span>Payment Progress</span>
-                            <span className="font-medium">{stats.paymentsProgress}%</span>
+                            <span className="font-medium">
+                              {stats.paymentsProgress}%
+                            </span>
                           </div>
                           <div className="w-full bg-muted h-2 rounded-full">
                             <div
-                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                                ? 'bg-progress-complete'
-                                : stats.paymentsProgress >= 75
-                                  ? 'bg-progress-high'
+                              className={`h-2 rounded-full transition-all duration-300 ${
+                                stats.paymentsProgress === 100
+                                  ? "bg-palette-info"
+                                  : stats.paymentsProgress >= 75
+                                  ? "bg-palette-accent"
                                   : stats.paymentsProgress >= 40
-                                    ? 'bg-progress-medium'
-                                    : 'bg-progress-low'
-                                }`}
+                                  ? "bg-palette-warning"
+                                  : "bg-palette-danger"
+                              }`}
                               style={{ width: `${stats.paymentsProgress}%` }}
                             />
                           </div>
                           <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>₹{stats.completedPayments.toLocaleString()} completed</span>
-                            <span>₹{stats.totalPayments.toLocaleString()} total</span>
+                            <span>
+                              ₹{stats.completedPayments.toLocaleString()}{" "}
+                              completed
+                            </span>
+                            <span>
+                              ₹{stats.totalPayments.toLocaleString()} total
+                            </span>
                           </div>
                         </div>
                       </div>
                     )}
 
-<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                      <div className="p-3 sm:p-4 rounded-lg border border-purple-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-muted-foreground">Class Take Amount</p>
+                          <p className="text-muted-foreground">
+                            Class Take Amount
+                          </p>
                           <div className="w-2 h-2 rounded-full"></div>
                         </div>
                         <div className="space-y-1">
-                          <p className="">{formatCurrency(stats.classTakeAmount || 0)}</p>
+                          <p className="">
+                            {formatCurrency(stats.classTakeAmount || 0)}
+                          </p>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4 rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-muted-foreground">Teacher Salary</p>
+                          <p className="text-muted-foreground">
+                            Teacher Salary
+                          </p>
                         </div>
                         <div className="space-y-1">
-                          <p className="">{formatCurrency(stats.teacherSalary || 0)}</p>
+                          <p className="">
+                            {formatCurrency(stats.teacherSalary || 0)}
+                          </p>
                         </div>
                       </div>
-                      <div className="p-3 sm:p-4 rounded-lg border border-indigo-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <div className="p-3 sm:p-4 rounded-lg border border-indigo-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">Expense Ratio</p>
                         </div>

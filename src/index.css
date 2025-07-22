@@ -20,7 +20,7 @@
     --border-radius: 15px;
     --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
-    --card: 0 0% 100%;
+    --card: 220 13% 95%;
     --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
@@ -55,6 +55,15 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 211 100% 12%;
     --sidebar-ring: 211 100% 12%;
+
+    --color-primary: #793078;
+    --color-secondary: #058DCE;
+    --color-accent: #00996B;
+    --color-warning: #FF9900;
+    --color-info: #058DCE;
+    --color-purple: #9747FF;
+    --color-danger: #FF0000;
+    --color-teal: #0A7C6E;
   }
 
   .dark {

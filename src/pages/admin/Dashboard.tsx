@@ -19,15 +19,15 @@ import {
 } from "recharts";
 
 const COLORS = {
-  completed: "#16a34a",
-  active: "#3b82f6",
-  pending: "#f97316",
-  remaining: "#ef4444",
+  completed: "#793078", // primary
+  active: "#058DCE",    // secondary
+  pending: "#00996B",  // neutral gray (Tailwind gray-400)
+  remaining: "#A3A3A3", // neutral gray for remaining
 };
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(generateDashboardStats());
-
+  
   // Prepare pie chart data
   const sessionsPieData = [
     { name: "Completed", value: stats.completedSessions, color: COLORS.completed },
@@ -151,10 +151,10 @@ const AdminDashboard = () => {
 
     return (
       <text
-        x={x}
+        x={x-11}
         y={y}
         fill="white"
-        textAnchor={x > cx ? 'start' : 'end'}
+        // textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
       >
         {`${(percent * 100).toFixed(0)}%`}
@@ -191,8 +191,11 @@ const AdminDashboard = () => {
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={80}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="none"
+                    paddingAngle={4}
                   >
                     {sessionsPieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -219,8 +222,11 @@ const AdminDashboard = () => {
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={80}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="none"
+                    paddingAngle={4}
                   >
                     {hoursPieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -247,8 +253,11 @@ const AdminDashboard = () => {
                     labelLine={false}
                     label={renderCustomizedLabel}
                     outerRadius={80}
+                    innerRadius={50}
                     fill="#8884d8"
                     dataKey="value"
+                    stroke="none"
+                    paddingAngle={4}
                   >
                     {paymentsPieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -384,8 +393,8 @@ const AdminDashboard = () => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="completedHours" stroke="#16a34a" name="Completed Hours" strokeWidth={2} />
-                        <Line type="monotone" dataKey="remainingHours" stroke="#f97316" name="Remaining Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="completedHours" stroke="#793078" name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke="#058DCE" name="Remaining Hours" strokeWidth={2} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -418,7 +427,7 @@ const AdminDashboard = () => {
                         </div>
                         <div className="w-full bg-gray-200 h-2.5 rounded-full">
                           <div
-                            className="bg-primary h-2.5 rounded-full"
+                            className="bg-palette-accent h-2.5 rounded-full"
                             style={{ width: `${coordinator.progress}%` }}
                           />
                         </div>
@@ -454,8 +463,8 @@ const AdminDashboard = () => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="completedHours" stroke="#16a34a" name="Completed Hours" strokeWidth={2} />
-                        <Line type="monotone" dataKey="remainingHours" stroke="#f97316" name="Remaining Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="completedHours" stroke="#793078" name="Completed Hours" strokeWidth={2} />
+                        <Line type="monotone" dataKey="remainingHours" stroke="#058DCE" name="Remaining Hours" strokeWidth={2} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -489,7 +498,7 @@ const AdminDashboard = () => {
                         </div>
                         <div className="w-full bg-gray-200 h-2.5 rounded-full">
                           <div
-                            className="bg-primary h-2.5 rounded-full"
+                            className="bg-palette-accent h-2.5 rounded-full"
                             style={{ width: `${mentor.progress}%` }}
                           />
                         </div>

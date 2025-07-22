@@ -224,7 +224,7 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
             <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-muted-foreground">Overall Progress</h3>
           </div>
           <div className={`grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3`}>
-            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-purple-500/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-purple-500/5 to-transparent">
               <div className="flex flex-col gap-1">
                 <p className="text-xs sm:text-sm text-muted-foreground">Class Take Amount</p>
                 <p className="text-lg md:text-xl font-bold">
@@ -233,7 +233,7 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
                 {/* <p className="text-[10px] sm:text-xs text-muted-foreground">per class</p> */}
               </div>
             </Card>
-            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-blue-500/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-blue-500/5 to-transparent">
               <div className="flex flex-col gap-1">
                 <p className="text-xs sm:text-sm text-muted-foreground">Expense Ratio</p>
                 <p className="text-lg md:text-xl font-bold">
@@ -242,7 +242,7 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
                 {/* <p className="text-[10px] sm:text-xs text-muted-foreground">of revenue</p> */}
               </div>
             </Card>
-            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-indigo-500/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+            <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-indigo-500/5 to-transparent">
               <div className="flex flex-col gap-1">
                 <p className="text-xs sm:text-sm text-muted-foreground">Teacher Salary</p>
                 <p className="text-lg md:text-xl font-bold">
@@ -254,7 +254,7 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
           </div>
           <div className={`grid ${gridCols} gap-3`}>
             {showCoordinators && (
-              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-primary/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-primary/5 to-transparent">
                 <div className="flex flex-col gap-1">
                   <p className="text-xs sm:text-sm text-muted-foreground">Total Coordinators</p>
                   <p className="text-lg md:text-xl font-bold">
@@ -265,7 +265,7 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
               </Card>
             )}
             {showMentors && (
-              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-secondary/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-secondary/5 to-transparent">
                 <div className="flex flex-col gap-1">
                   <p className="text-xs sm:text-sm text-muted-foreground">Total Mentors</p>
                   <p className="text-lg md:text-xl font-bold">
@@ -276,7 +276,7 @@ const DashboardStatsCard = ({ stats, title, users, loading, showCoordinators, sh
               </Card>
             )}
             {showStudents && (
-              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-accent/5 to-transparent hover:scale-[1.02] hover:shadow-lg transition">
+              <Card className="p-3 rounded-xl shadow-md border border-border/40 bg-gradient-to-br from-accent/5 to-transparent">
                 <div className="flex flex-col gap-1">
                   <p className="text-xs sm:text-sm text-muted-foreground">Total Students</p>
                   <p className="text-lg md:text-xl font-bold">
