@@ -1,10 +1,15 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StudentDialog } from "@/components/dialog/StudentDialog";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -12,21 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Edit, Trash2, UserPlus, Users } from "lucide-react";
-import { StudentDialog } from "@/components/dialog/StudentDialog";
 import { students as allStudents, users } from "@/lib/mock-data";
-import { Student, User } from "@/lib/types";
 import { crudToasts } from "@/lib/toast";
+import { Student, User } from "@/lib/types";
+import { Mail, MessageCircle, Phone, Printer } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Mock current user - in real app this would come from auth context
 const currentUser: User = {
@@ -38,7 +34,7 @@ const currentUser: User = {
   status: "active",
 };
 
-export default function Students() {
+export default function AdminStudents() {
   const navigate = useNavigate();
 
   // Filter mentors based on coordinator access
@@ -114,6 +110,9 @@ export default function Students() {
     sessionAddedOn: new Date().toISOString(),
     sessionsRemaining: 12,
     progressPercentage: 0,
+    expenseRatio: 0,
+    classTakeAmount: 0,
+    teacherSalary: 0,
   });
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
 
@@ -260,6 +259,9 @@ export default function Students() {
         sessionAddedOn: new Date().toISOString(),
         sessionsRemaining: 12,
         progressPercentage: 0,
+        expenseRatio: 0,
+        classTakeAmount: 0,
+        teacherSalary: 0,
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -299,6 +301,21 @@ export default function Students() {
     }
   };
 
+  const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
+
+  const handleViewMentor = (student: Student) => {
+    // Open mentor details dialog or navigate
+  };
+  const handleViewTeachers = (student: Student) => {
+    // Open teachers dialog or navigate
+  };
+  // Show student's packages (placeholder)
+  const handleViewPackages = (student: Student) => {
+    alert(
+      `Packages for ${student.name} (ID: ${student.id}) will be shown here.`
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 sm:p-6">
@@ -320,21 +337,21 @@ export default function Students() {
             <CardTitle>Filter Students</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Search by Name</Label>
-                <div className="flex items-center gap-3">
-                  <Input
-                    placeholder="Search students..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full items-end">
+              {/* Search by Name */}
+              <div className="w-full md:flex-1 min-w-[180px]">
+                <Label className="mb-1 block">Search by Name</Label>
+                <Input
+                  placeholder="Search students..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full text-sm"
+                />
               </div>
+              {/* Filter by Mentor */}
               {currentUser.role !== "mentor" && (
-                <div className="space-y-2">
-                  <Label>Filter by Mentor</Label>
+                <div className="w-full md:flex-1 min-w-[180px]">
+                  <Label className="mb-1 block">Filter by Mentor</Label>
                   <Select
                     value={selectedMentor?.id || "all"}
                     onValueChange={(value) =>
@@ -345,207 +362,433 @@ export default function Students() {
                       )
                     }
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full text-sm">
                       <SelectValue placeholder="Select Mentor" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Mentors</SelectItem>
                       {mentors.map((mentor) => (
                         <SelectItem key={mentor.id} value={mentor.id}>
-                          {mentor.name}
+                          {mentor.name} ({mentor.id})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
               )}
-              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                <Select value={timeFilter} onValueChange={setTimeFilter}>
-                  <SelectTrigger className="w-full sm:w-[140px] text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="this_week">This Week</SelectItem>
-                    <SelectItem value="this_month">This Month</SelectItem>
-                    <SelectItem value="this_year">This Year</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
-                {timeFilter === "custom" && (
-                  <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                    <Input
-                      type="date"
-                      value={customDateRange.from}
-                      onChange={(e) =>
-                        setCustomDateRange((r) => ({
-                          ...r,
-                          from: e.target.value,
-                        }))
-                      }
-                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
-                    />
-                    <span className="mx-1 text-xs">to</span>
-                    <Input
-                      type="date"
-                      value={customDateRange.to}
-                      onChange={(e) =>
-                        setCustomDateRange((r) => ({
-                          ...r,
-                          to: e.target.value,
-                        }))
-                      }
-                      className="text-xs px-2 py-1 w-full sm:w-[120px]"
-                    />
-                  </div>
-                )}
+              {/* Filter by Date */}
+              <div className="w-full md:w-auto">
+                <Label className="mb-1 block">Filter by Date</Label>
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+                  <Select value={timeFilter} onValueChange={setTimeFilter}>
+                    <SelectTrigger className="w-full sm:w-[140px] text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="this_week">This Week</SelectItem>
+                      <SelectItem value="this_month">This Month</SelectItem>
+                      <SelectItem value="this_year">This Year</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {timeFilter === "custom" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                        >
+                          {customDateRange.from
+                            ? new Date(
+                                customDateRange.from
+                              ).toLocaleDateString()
+                            : "From"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="p-0 w-auto max-w-xs sm:max-w-sm"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={
+                            customDateRange.from
+                              ? new Date(customDateRange.from)
+                              : undefined
+                          }
+                          onSelect={(date) =>
+                            setCustomDateRange((r) => ({
+                              ...r,
+                              from: date
+                                ? date.toLocaleDateString("en-CA")
+                                : "",
+                            }))
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  {timeFilter === "custom" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                        >
+                          {customDateRange.to
+                            ? new Date(customDateRange.to).toLocaleDateString()
+                            : "To"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="p-0 w-auto max-w-xs sm:max-w-sm"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={
+                            customDateRange.to
+                              ? new Date(customDateRange.to)
+                              : undefined
+                          }
+                          onSelect={(date) => {
+                            setCustomDateRange((r) => ({
+                              ...r,
+                              to: date ? date.toLocaleDateString("en-CA") : "",
+                            }));
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead className="min-w-[200px]">Name</TableHead>
-                <TableHead className="min-w-[150px]">Mentor</TableHead>
-                <TableHead className="w-[140px]">Progress</TableHead>
-                <TableHead className="w-[120px]">Total Sessions</TableHead>
-                <TableHead className="w-[120px]">Total Hours</TableHead>
-                <TableHead className="w-[120px]">Remaining Days</TableHead>
-                <TableHead className="w-[140px]">Pending Payment</TableHead>
-                {/* <TableHead className="w-[100px] text-right">Actions</TableHead> */}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredStudents.map((student) => {
-                const progress = Math.round(
-                  (student.sessionsCompleted / student.totalSessions) * 100
-                );
-                const pendingPayment =
-                  student.totalPayment - student.paidAmount;
-                const remainingDays = student.endDate
-                  ? Math.ceil(
-                      (new Date(student.endDate).getTime() -
-                        new Date().getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )
-                  : 0;
-                return (
-                  <TableRow key={student.id} className="cursor-pointer" onClick={() => handleViewDetails(student)}>
-                    <TableCell className="font-medium">{student.id}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-medium truncate">
-                          {student.name}
-                        </span>
-                        <span className="text-sm text-muted-foreground truncate">
-                          {student.phone}
-                        </span>
-                        <span className="text-sm text-muted-foreground truncate">
-                          {student.email}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="truncate">
-                      {getMentorName(student.mentorId)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="w-full">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>Progress</span>
-                          <span>{progress}%</span>
-                        </div>
-                        <Progress value={progress} className="h-2" />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">
-                          {student.sessionsCompleted}
-                        </span>
-                        <span className="text-muted-foreground">
-                          /{student.totalSessions}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">
-                          {Math.round(
-                            (student.sessionsCompleted *
-                              student.sessionDuration) /
-                              60
-                          )}
-                        </span>
-                        <span className="text-muted-foreground">
-                          /
-                          {Math.round(
-                            (student.totalSessions * student.sessionDuration) /
-                              60
-                          )}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {" "}
-                          hours
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">{remainingDays}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {" "}
-                          days
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm whitespace-nowrap">
-                        <span className="font-medium">
-                          ₹{pendingPayment.toLocaleString()}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          /₹{student.totalPayment.toLocaleString()}
-                        </span>
-                      </div>
-                    </TableCell>
-                    {/* <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+          {filteredStudents.map((student) => {
+            const sessionsProgress = Math.round(
+              (student.sessionsCompleted / student.totalSessions) * 100
+            );
+            const completedHours = Math.round(
+              (student.sessionsCompleted * student.sessionDuration) / 60
+            );
+            const hoursProgress = Math.round(
+              (completedHours / student.totalHours) * 100
+            );
+            const paymentProgress = Math.round(
+              (student.paidAmount / student.totalPayment) * 100
+            );
+            const classTakeAmount =
+              student.totalSessions > 0
+                ? Math.round(student.totalPayment / student.totalSessions)
+                : 0;
+            const teacherSalary = Math.round(student.paidAmount * 0.7);
+            const expenseRatio =
+              student.totalPayment > 0
+                ? Math.round((teacherSalary / student.totalPayment) * 100)
+                : 0;
+
+            return (
+              <Card key={student.id} className="flex flex-col">
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                    <div className="space-y-1">
+                      <CardTitle className="text-base sm:text-lg">
+                        {student.name} ({student.id})
+                      </CardTitle>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {student.email}
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right space-y-1">
+                      <div className="flex flex-wrap gap-2 mt-1 justify-start sm:justify-end">
+                        <a
+                          href={`mailto:${student.email}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium transition"
+                          title="Send Email"
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span className="hidden xs:inline">Mail</span>
+                        </a>
+                        <a
+                          href={`tel:${student.phone || ""}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition"
+                          title="Call"
+                        >
+                          <Phone className="w-4 h-4" />
+                          <span className="hidden xs:inline">Call</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/${(student.phone || "").replace(/[^\d]/g, "")}?text=${encodeURIComponent(
+                            `Hello ${student.name} (ID: ${student.id}),\n\nThis is a message from Albedo Educator.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-green-100 text-green-900 hover:bg-green-200 text-xs font-medium transition"
+                          title="WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="hidden xs:inline">WhatsApp</span>
+                        </a>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleViewDetails(student)}
-                          className="h-8 w-8 p-0"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium"
+                          onClick={() => window.print()}
+                          title="Print"
                         >
-                          <Users className="h-4 w-4" />
-                          <span className="sr-only">View Details</span>
+                          <Printer className="w-4 h-4" />
+                          <span className="hidden xs:inline">Print</span>
                         </Button>
                       </div>
-                    </TableCell> */}
-                  </TableRow>
-                );
-              })}
-              {filteredStudents.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center">
-                    <div className="flex flex-col items-center justify-center gap-1">
-                      <Users className="h-8 w-8 text-muted-foreground/60" />
-                      <p className="text-sm text-muted-foreground">
-                        No students found
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Add new students to get started
-                      </p>
                     </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
+                  <div className="space-y-6">
+                    {/* Progress Bars - Each in its own row with motivational icon */}
+                    <div className="flex flex-col gap-4 w-full pt-4">
+                      {/* Sessions Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your sessions!"
+                        >
+                          <span role="img" aria-label="Trending Up">
+                            📈
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Sessions
+                        </p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              sessionsProgress === 100
+                                ? "bg-palette-info"
+                                : sessionsProgress >= 75
+                                ? "bg-palette-accent"
+                                : sessionsProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${sessionsProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              {student.sessionsCompleted}/
+                              {student.totalSessions} ({sessionsProgress}%)
+                            </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              {student.totalSessions -
+                                student.sessionsCompleted}{" "}
+                              ({100 - sessionsProgress}%)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Hours Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your hours!"
+                        >
+                          <span role="img" aria-label="Lightbulb">
+                            💡
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Hours
+                        </p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              hoursProgress === 100
+                                ? "bg-palette-info"
+                                : hoursProgress >= 75
+                                ? "bg-palette-accent"
+                                : hoursProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${hoursProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              {completedHours}/{student.totalHours} (
+                              {hoursProgress}%)
+                            </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              {student.totalHours - completedHours} (
+                              {100 - hoursProgress}%)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Payments Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your payments!"
+                        >
+                          <span role="img" aria-label="Trending Up">
+                            📈
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Payments
+                        </p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              paymentProgress === 100
+                                ? "bg-palette-info"
+                                : paymentProgress >= 75
+                                ? "bg-palette-accent"
+                                : paymentProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${paymentProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              ₹{student.paidAmount.toLocaleString()}/₹
+                              {student.totalPayment.toLocaleString()} (
+                              {paymentProgress}%)
+                            </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              ₹
+                              {(
+                                student.totalPayment - student.paidAmount
+                              ).toLocaleString()}{" "}
+                              ({100 - paymentProgress}%)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Refund Spot & Refund Package - like coordinators/mentors page */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                      {/* Refund Spot */}
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Refund Spot</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">0</p>
+                        </div>
+                      </div>
+                      {/* Refund Package */}
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Refund Package
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">0</p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Financial Stats - Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                      {/* Class Take Amount */}
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Class Take Amount
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p>{formatCurrency(classTakeAmount)}</p>
+                        </div>
+                      </div>
+                      {/* Teacher Salary */}
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Teacher Salary
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p>{formatCurrency(teacherSalary)}</p>
+                        </div>
+                      </div>
+                      {/* Expense Ratio */}
+                      <div
+                        className={`p-3 sm:p-4 rounded-lg border border-indigo-100/50 dark:bg-gray-900/100 bg-white shadow-sm ${
+                          expenseRatio > 100
+                            ? "bg-red-100/60 text-red-700 border-red-200"
+                            : expenseRatio > 75
+                            ? "bg-yellow-100/60 text-yellow-800 border-yellow-200"
+                            : expenseRatio > 50
+                            ? "bg-blue-100/60 text-blue-800 border-blue-200"
+                            : "bg-green-100/60 text-green-800 border-green-200"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Expense Ratio</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p>{expenseRatio}%</p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleViewPackages(student)}
+                      >
+                        Packages
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => handleViewTeachers(student)}
+                      >
+                        Teachers
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+          {filteredStudents.length === 0 && (
+            <div className="col-span-full text-center p-8">
+              <p className="text-muted-foreground">
+                No students found matching your filters.
+              </p>
+            </div>
+          )}
         </div>
 
         <StudentDialog

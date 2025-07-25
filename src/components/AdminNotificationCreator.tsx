@@ -254,8 +254,7 @@ export function AdminNotificationCreator() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                   </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0">                  <div className="flex items-center gap-2">
                     <span className="font-semibold text-base">{n.title}</span>
                   </div>
                   <div className="text-sm mt-1 text-muted-foreground break-words">{n.message}</div>

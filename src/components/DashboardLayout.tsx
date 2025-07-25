@@ -1,16 +1,20 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button } from "./ui/button";
-import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ConfirmationModal } from "./ui/confirmation-modal";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "./ThemeToggle";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { NotificationPanel } from "./NotificationPanel";
+import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "./ui/button";
+import { ConfirmationModal } from "./ui/confirmation-modal";
 
 type Role = "admin" | "coordinator" | "mentor" | "student";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,8 +27,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setScrolled(window.scrollY > 10);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -40,7 +44,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setShowLogoutConfirm(true);
   };
 
-  const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
+  const NavLink = ({
+    to,
+    children,
+  }: {
+    to: string;
+    children: React.ReactNode;
+  }) => {
     const isActive = location.pathname === to;
     return (
       <Link
@@ -48,7 +58,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className={cn(
           "px-4 py-2 rounded-lg transition-all duration-200 relative group",
           "dark:hover:bg-white/10 shadow-md dark:hover:text-white hover:bg-black/10 hover:text-black",
-          isActive ? "dark:text-white text-black" : "dark:text-white/80 text-black/80"
+          isActive
+            ? "dark:text-white text-black"
+            : "dark:text-white/80 text-black/80"
         )}
       >
         <span className="relative z-10">{children}</span>
@@ -72,6 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NavLink to="/admin/coordinators">Coordinators</NavLink>
             <NavLink to="/admin/mentors">Mentors</NavLink>
             <NavLink to="/admin/students">Students</NavLink>
+            <NavLink to="/admin/teachers">Teachers</NavLink>
           </>
         );
       case "coordinator":
@@ -100,7 +113,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className={cn(
           "fixed w-full top-0 z-50 transition-all duration-300",
           "bg-card shadow-md",
-          scrolled ? "shadow-lg bg-opacity-95 backdrop-blur-lg" : "bg-opacity-98"
+          scrolled
+            ? "shadow-lg bg-opacity-95 backdrop-blur-lg"
+            : "bg-opacity-98"
         )}
       >
         <div className="container mx-auto px-3 sm:px-4 md:px-6 py-1">
@@ -144,7 +159,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="hidden xl:flex items-center gap-2 flex-shrink-0">
               <NotificationPanel />
               <ThemeToggle />
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <Button
                   variant="secondary"
                   size="sm"
@@ -175,17 +193,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 animate={isMobileMenuOpen ? "open" : "closed"}
                 variants={{
                   open: { rotate: 180 },
-                  closed: { rotate: 0 }
+                  closed: { rotate: 0 },
                 }}
                 transition={{ duration: 0.2 }}
               >
                 {isMobileMenuOpen ? (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 )}
               </motion.div>
@@ -210,7 +248,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </span>
                     </div>
                     <div>
-                      <div className="text-sm text-white/90 font-medium">{user.name}</div>
+                      <div className="text-sm text-white/90 font-medium">
+                        {user.name}
+                      </div>
                       <div className="text-xs text-white/70">
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </div>

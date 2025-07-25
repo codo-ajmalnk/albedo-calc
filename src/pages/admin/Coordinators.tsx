@@ -1,31 +1,31 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { users, students as allStudents, generateDashboardStats } from "@/lib/mock-data";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CoordinatorDialog } from "@/components/dialog/CoordinatorDialog";
+import { MentorDialog } from "@/components/dialog/MentorDialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { User } from "@/lib/types";
-import { UserSearch, Eye, Edit, Plus, Trash2, Users, UserPlus, X, Calendar } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -35,17 +35,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  students as allStudents,
+  generateDashboardStats,
+  users,
+} from "@/lib/mock-data";
 import { crudToasts } from "@/lib/toast";
-import { CoordinatorDialog } from "@/components/dialog/CoordinatorDialog";
-import { MentorDialog } from "@/components/dialog/MentorDialog";
 import type { Coordinator, Student } from "@/lib/types";
-import { format, isToday, isThisWeek, isThisMonth, isThisYear, parseISO, isWithinInterval } from "date-fns";
+import { User } from "@/lib/types";
+import {
+  isThisMonth,
+  isThisWeek,
+  isThisYear,
+  isToday,
+  isWithinInterval,
+  parseISO,
+} from "date-fns";
+import { Lightbulb, TrendingUp, Users, Mail, Phone, MessageCircle, Printer } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Import coordinator-related types
 interface NewCoordinator {
@@ -76,8 +83,11 @@ const AdminCoordinators = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [timeFilter, setTimeFilter] = useState<string>("all");
-  const [customDateRange, setCustomDateRange] = useState<{ from: string; to: string }>({ from: "", to: "" });
-  
+  const [customDateRange, setCustomDateRange] = useState<{
+    from: string;
+    to: string;
+  }>({ from: "", to: "" });
+
   // Helper function to format currency
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
   const [selectedCoordinator, setSelectedCoordinator] = useState<{
@@ -86,11 +96,14 @@ const AdminCoordinators = () => {
   } | null>(null);
 
   // Single dialog state to manage all dialogs
-  const [activeDialog, setActiveDialog] = useState<"details" | "add" | "edit" | "delete" | "mentors" | "students" | null>(null);
+  const [activeDialog, setActiveDialog] = useState<
+    "details" | "add" | "edit" | "delete" | "mentors" | "students" | null
+  >(null);
 
-  const [editingCoordinator, setEditingCoordinator] = useState<EditingCoordinator | null>(null);
+  const [editingCoordinator, setEditingCoordinator] =
+    useState<EditingCoordinator | null>(null);
   const [newCoordinator, setNewCoordinator] = useState<NewCoordinator>({
-    id: `coord${users.filter(u => u.role === "coordinator").length + 1}`,
+    id: `coord${users.filter((u) => u.role === "coordinator").length + 1}`,
     name: "",
     email: "",
     phone: "",
@@ -107,7 +120,7 @@ const AdminCoordinators = () => {
   const [isEditingMentor, setIsEditingMentor] = useState(false);
   const [isDeletingCoordinator, setIsDeletingCoordinator] = useState(false);
   const [newMentor, setNewMentor] = useState({
-    id: `mentor${users.filter(u => u.role === "mentor").length + 1}`,
+    id: `mentor${users.filter((u) => u.role === "mentor").length + 1}`,
     name: "",
     email: "",
     phone: "",
@@ -127,7 +140,9 @@ const AdminCoordinators = () => {
   const [isViewingStudents, setIsViewingStudents] = useState(false);
   const [isAssigningStudents, setIsAssigningStudents] = useState(false);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<string[]>([]);
+  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<
+    string[]
+  >([]);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [students, setStudents] = useState(allStudents);
   const [newStudent, setNewStudent] = useState<Student>({
@@ -150,10 +165,15 @@ const AdminCoordinators = () => {
     teachersPayment: 0,
     hourlyPayment: 0,
     sessionAddedOn: new Date().toISOString(),
+    expenseRatio: 0,
+    classTakeAmount: 0,
+    teacherSalary: 0,
   });
 
   const filteredCoordinators = coordinators.filter((coordinator) => {
-    const matchesSearch = coordinator.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = coordinator.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
     if (!matchesSearch) return false;
     const c = coordinator as UserWithCreatedAt;
     if (!c.createdAt) return true;
@@ -186,10 +206,23 @@ const AdminCoordinators = () => {
       (user) => user.role === "mentor" && user.supervisorId === coordinatorId
     );
 
-    const mentorIds = mentors.map(mentor => mentor.id);
-    const coordinatorStudents = allStudents.filter(
-      student => mentorIds.includes(student.mentorId)
+    const mentorIds = mentors.map((mentor) => mentor.id);
+    const coordinatorStudents = allStudents.filter((student) =>
+      mentorIds.includes(student.mentorId)
     );
+
+    const classTakeAmount = coordinatorStudents.reduce(
+      (sum, student) => sum + (student.sessionsCompleted || 0),
+      0
+    );
+    const teacherSalary = coordinatorStudents.reduce(
+      (sum, student) => sum + (student.teachersPayment || 0),
+      0
+    );
+    const expenseRatio =
+      classTakeAmount > 0
+        ? Math.round((teacherSalary / classTakeAmount) * 100)
+        : 0;
 
     const totalSessions = coordinatorStudents.reduce(
       (sum, student) => sum + student.totalSessions,
@@ -204,40 +237,47 @@ const AdminCoordinators = () => {
       0
     );
     const completedHours = coordinatorStudents.reduce(
-      (sum, student) => sum + (student.totalHours * (student.sessionsCompleted / student.totalSessions)),
+      (sum, student) =>
+        sum +
+        student.totalHours *
+          (student.sessionsCompleted / student.totalSessions),
       0
     );
 
     const stats = generateDashboardStats(coordinatorStudents);
 
     // Calculate coordinator-level expense data
-    const totalSessionsForExpense = coordinatorStudents.reduce((sum, student) => sum + student.totalSessions, 0);
-    const totalPaymentsForExpense = coordinatorStudents.reduce((sum, student) => sum + student.totalPayment, 0);
-    const completedPaymentsForExpense = coordinatorStudents.reduce((sum, student) => sum + student.paidAmount, 0);
-    
-    const classTakeAmount = totalSessionsForExpense > 0 ? Math.round(totalPaymentsForExpense / totalSessionsForExpense) : 0;
-    const teacherSalary = Math.round(completedPaymentsForExpense * 0.7); // 70% of completed payments
-    const expenseRatio = totalPaymentsForExpense > 0 ? Math.round((teacherSalary / totalPaymentsForExpense) * 100) : 0;
-
-    return {
+    const coordinatorStats = {
       ...stats,
       mentorCount: mentors.length,
       studentCount: coordinatorStudents.length,
+      teacherCount: 1000,
       totalSessions,
       completedSessions,
       totalHours,
       completedHours: Math.round(completedHours),
-      sessionProgress: totalSessions > 0 ? Math.floor((completedSessions / totalSessions) * 100) : 0,
-      hoursProgress: totalHours > 0 ? Math.floor((completedHours / totalHours) * 100) : 0,
-      activeStudents: coordinatorStudents.filter(s => s.status === 'active').length,
+      sessionProgress:
+        totalSessions > 0
+          ? Math.floor((completedSessions / totalSessions) * 100)
+          : 0,
+      hoursProgress:
+        totalHours > 0 ? Math.floor((completedHours / totalHours) * 100) : 0,
+      activeStudents: coordinatorStudents.filter((s) => s.status === "active")
+        .length,
       completedPayments: stats.completedPayments,
       pendingPayments: stats.pendingPayments,
       totalPayments: stats.totalPayments,
-      paymentsProgress: stats.totalPayments > 0 ? Math.floor((stats.completedPayments / stats.totalPayments) * 100) : 0,
+      paymentsProgress:
+        stats.totalPayments > 0
+          ? Math.floor((stats.completedPayments / stats.totalPayments) * 100)
+          : 0,
       classTakeAmount,
       teacherSalary,
       expenseRatio,
+      refundSpot: 0,
+      refundPackage: 0,
     };
+    return coordinatorStats;
   };
 
   // Helper function to close all dialogs
@@ -268,7 +308,12 @@ const AdminCoordinators = () => {
   const handleAddCoordinator = () => {
     try {
       // Validate required fields
-      if (!newCoordinator.name || !newCoordinator.email || !newCoordinator.phone || !newCoordinator.password) {
+      if (
+        !newCoordinator.name ||
+        !newCoordinator.email ||
+        !newCoordinator.phone ||
+        !newCoordinator.password
+      ) {
         crudToasts.validation.error("Please fill in all required fields.");
         return;
       }
@@ -306,12 +351,12 @@ const AdminCoordinators = () => {
       const updatedCoordinators = coordinators.map((coord) =>
         coord.id === editingCoordinator.id
           ? {
-            ...coord,
-            name: editingCoordinator.name,
-            email: editingCoordinator.email,
-            phone: editingCoordinator.phone,
-            status: editingCoordinator.status,
-          }
+              ...coord,
+              name: editingCoordinator.name,
+              email: editingCoordinator.email,
+              phone: editingCoordinator.phone,
+              status: editingCoordinator.status,
+            }
           : coord
       );
 
@@ -333,7 +378,10 @@ const AdminCoordinators = () => {
     // Close all other dialogs first
     closeAllDialogs();
     // Set the selected coordinator and open students dialog
-    setSelectedCoordinator({ user: coordinator, stats: getCoordinatorStats(coordinator.id) });
+    setSelectedCoordinator({
+      user: coordinator,
+      stats: getCoordinatorStats(coordinator.id),
+    });
     setActiveDialog("students");
   };
 
@@ -348,13 +396,17 @@ const AdminCoordinators = () => {
 
     try {
       // Remove from users array first
-      const userIndex = users.findIndex((u) => u.id === selectedCoordinator.user.id);
+      const userIndex = users.findIndex(
+        (u) => u.id === selectedCoordinator.user.id
+      );
       if (userIndex !== -1) {
         users.splice(userIndex, 1);
       }
 
       // Update local coordinators state
-      setCoordinators(prev => prev.filter(c => c.id !== selectedCoordinator.user.id));
+      setCoordinators((prev) =>
+        prev.filter((c) => c.id !== selectedCoordinator.user.id)
+      );
 
       // Close dialog and reset selected coordinator
       setActiveDialog(null);
@@ -368,13 +420,12 @@ const AdminCoordinators = () => {
 
   const getAssignedMentors = (coordinatorId: string) => {
     // Filter users to get only mentors with matching supervisorId
-    const mentors = users.filter(user =>
-      user.role === "mentor" &&
-      user.supervisorId === coordinatorId
+    const mentors = users.filter(
+      (user) => user.role === "mentor" && user.supervisorId === coordinatorId
     );
 
-    console.log('Getting mentors for coordinator:', coordinatorId);
-    console.log('Found mentors:', mentors);
+    console.log("Getting mentors for coordinator:", coordinatorId);
+    console.log("Found mentors:", mentors);
 
     return mentors;
   };
@@ -395,7 +446,9 @@ const AdminCoordinators = () => {
         return;
       }
 
-      const mentorId = `mentor${users.filter(u => u.role === "mentor").length + 1}`;
+      const mentorId = `mentor${
+        users.filter((u) => u.role === "mentor").length + 1
+      }`;
       const newUser: User = {
         id: mentorId,
         name: newMentor.name,
@@ -415,7 +468,7 @@ const AdminCoordinators = () => {
       // Close the dialog and reset form
       setIsAddingMentor(false);
       setNewMentor({
-        id: `mentor${users.filter(u => u.role === "mentor").length + 1}`,
+        id: `mentor${users.filter((u) => u.role === "mentor").length + 1}`,
         name: "",
         email: "",
         phone: "",
@@ -424,7 +477,7 @@ const AdminCoordinators = () => {
       });
 
       // Force a re-render of the mentors list
-      setSelectedCoordinator(prev => prev ? { ...prev } : null);
+      setSelectedCoordinator((prev) => (prev ? { ...prev } : null));
 
       crudToasts.create.success("Mentor");
     } catch (error) {
@@ -442,9 +495,7 @@ const AdminCoordinators = () => {
     if (!selectedMentor) return;
 
     // Here you would typically make an API call to delete the mentor
-    const updatedUsers = users.filter(
-      (u) => u.id !== selectedMentor.id
-    );
+    const updatedUsers = users.filter((u) => u.id !== selectedMentor.id);
     users.length = 0;
     users.push(...updatedUsers);
     setIsDeletingMentor(false);
@@ -469,11 +520,11 @@ const AdminCoordinators = () => {
     const updatedUsers = users.map((user) =>
       user.id === editingMentor.id
         ? {
-          ...user,
-          name: editingMentor.name,
-          email: editingMentor.email,
-          phone: editingMentor.phone,
-        }
+            ...user,
+            name: editingMentor.name,
+            email: editingMentor.email,
+            phone: editingMentor.phone,
+          }
         : user
     );
     users.length = 0;
@@ -483,13 +534,15 @@ const AdminCoordinators = () => {
   };
 
   const getUnassignedMentors = () => {
-    return users.filter(user =>
-      user.role === "mentor"
-    ).map(mentor => ({
-      ...mentor,
-      isAssigned: !!mentor.supervisorId,
-      currentCoordinator: mentor.supervisorId ? users.find(u => u.id === mentor.supervisorId)?.name : null
-    }));
+    return users
+      .filter((user) => user.role === "mentor")
+      .map((mentor) => ({
+        ...mentor,
+        isAssigned: !!mentor.supervisorId,
+        currentCoordinator: mentor.supervisorId
+          ? users.find((u) => u.id === mentor.supervisorId)?.name
+          : null,
+      }));
   };
 
   const handleAssignMentor = () => {
@@ -497,14 +550,14 @@ const AdminCoordinators = () => {
 
     try {
       // Find the mentor to be assigned
-      const mentorToAssign = users.find(user => user.id === selectedMentorId);
+      const mentorToAssign = users.find((user) => user.id === selectedMentorId);
       if (!mentorToAssign) {
         crudToasts.assign.error("Mentor", "coordinator");
         return;
       }
 
       // Update the mentor's supervisorId
-      const updatedUsers = users.map(user => {
+      const updatedUsers = users.map((user) => {
         if (user.id === selectedMentorId) {
           return { ...user, supervisorId: selectedCoordinator.user.id };
         }
@@ -529,14 +582,16 @@ const AdminCoordinators = () => {
   const getCoordinatorStudents = (coordinatorId: string) => {
     // Get all mentors under this coordinator
     const mentors = users.filter(
-      user => user.role === "mentor" && user.supervisorId === coordinatorId
+      (user) => user.role === "mentor" && user.supervisorId === coordinatorId
     );
 
     // Get IDs of all mentors under this coordinator
-    const mentorIds = mentors.map(mentor => mentor.id);
+    const mentorIds = mentors.map((mentor) => mentor.id);
 
     // Get all students assigned to these mentors
-    return allStudents.filter(student => mentorIds.includes(student.mentorId));
+    return allStudents.filter((student) =>
+      mentorIds.includes(student.mentorId)
+    );
   };
 
   // Add type guard function
@@ -557,7 +612,7 @@ const AdminCoordinators = () => {
         email: "john@example.com",
         role: "coordinator",
         phone: "+91 98765 43211",
-        status: "active"
+        status: "active",
       },
       {
         id: "coord2",
@@ -565,8 +620,8 @@ const AdminCoordinators = () => {
         email: "jane@example.com",
         role: "coordinator",
         phone: "+91 98765 43212",
-        status: "active"
-      }
+        status: "active",
+      },
     ];
 
     // Initialize mentors with correct supervisor IDs
@@ -578,7 +633,7 @@ const AdminCoordinators = () => {
         role: "mentor",
         supervisorId: "coord1",
         phone: "+91 98765 43213",
-        status: "active"
+        status: "active",
       },
       {
         id: "mentor2",
@@ -587,7 +642,7 @@ const AdminCoordinators = () => {
         role: "mentor",
         supervisorId: "coord1",
         phone: "+91 98765 43214",
-        status: "active"
+        status: "active",
       },
       {
         id: "mentor3",
@@ -596,7 +651,7 @@ const AdminCoordinators = () => {
         role: "mentor",
         supervisorId: "coord2",
         phone: "+91 98765 43215",
-        status: "active"
+        status: "active",
       },
       {
         id: "mentor4",
@@ -605,35 +660,42 @@ const AdminCoordinators = () => {
         role: "mentor",
         supervisorId: "coord2",
         phone: "+91 98765 43216",
-        status: "active"
-      }
+        status: "active",
+      },
     ];
 
     // Add coordinators to users array if not present
-    initialCoordinators.forEach(coordinator => {
-      if (!users.some(user => user.id === coordinator.id)) {
+    initialCoordinators.forEach((coordinator) => {
+      if (!users.some((user) => user.id === coordinator.id)) {
         users.push(coordinator as User);
       }
     });
 
     // Add mentors to users array if not present
-    initialMentors.forEach(mentor => {
-      if (!users.some(user => user.id === mentor.id)) {
+    initialMentors.forEach((mentor) => {
+      if (!users.some((user) => user.id === mentor.id)) {
         users.push(mentor as User);
       }
     });
 
     // Add mock createdAt to coordinators
-    users.forEach(user => {
-      if (user.role === "coordinator" && !(user as UserWithCreatedAt).createdAt) {
+    users.forEach((user) => {
+      if (
+        user.role === "coordinator" &&
+        !(user as UserWithCreatedAt).createdAt
+      ) {
         // Random date in the last year
-        const randomDate = new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000));
+        const randomDate = new Date(
+          Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)
+        );
         (user as UserWithCreatedAt).createdAt = randomDate.toISOString();
       }
     });
 
     // Update coordinators state
-    setCoordinators(users.filter((user) => user.role === "coordinator") as UserWithCreatedAt[]);
+    setCoordinators(
+      users.filter((user) => user.role === "coordinator") as UserWithCreatedAt[]
+    );
   }, []);
 
   const handleEditStudent = (student: Student) => {
@@ -643,9 +705,12 @@ const AdminCoordinators = () => {
 
   const handleDeleteStudent = (student: Student) => {
     try {
-      const updatedStudents = students.filter(s => s.id !== student.id);
+      const updatedStudents = students.filter((s) => s.id !== student.id);
       setStudents(updatedStudents);
-      allStudents.splice(allStudents.findIndex(s => s.id === student.id), 1);
+      allStudents.splice(
+        allStudents.findIndex((s) => s.id === student.id),
+        1
+      );
       crudToasts.delete.success("Student");
     } catch (error) {
       crudToasts.delete.error("Student");
@@ -683,6 +748,9 @@ const AdminCoordinators = () => {
         teachersPayment: 0,
         hourlyPayment: 0,
         sessionAddedOn: new Date().toISOString(),
+        expenseRatio: 0,
+        classTakeAmount: 0,
+        teacherSalary: 0,
       });
       crudToasts.create.success("Student");
     } catch (error) {
@@ -693,11 +761,13 @@ const AdminCoordinators = () => {
   const handleAssignStudents = () => {
     try {
       if (selectedStudentsToAssign.length === 0) {
-        crudToasts.validation.error("Please select at least one student to assign.");
+        crudToasts.validation.error(
+          "Please select at least one student to assign."
+        );
         return;
       }
 
-      const updatedStudents = students.map(student => {
+      const updatedStudents = students.map((student) => {
         if (selectedStudentsToAssign.includes(student.id)) {
           return { ...student, mentorId: selectedMentor?.id };
         }
@@ -705,8 +775,8 @@ const AdminCoordinators = () => {
       });
 
       setStudents(updatedStudents);
-      selectedStudentsToAssign.forEach(studentId => {
-        const student = allStudents.find(s => s.id === studentId);
+      selectedStudentsToAssign.forEach((studentId) => {
+        const student = allStudents.find((s) => s.id === studentId);
         if (student) {
           student.mentorId = selectedMentor?.id;
         }
@@ -724,17 +794,20 @@ const AdminCoordinators = () => {
     <DashboardLayout>
       <div className="space-y-6 p-3 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Coordinators Management</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+            Coordinators Management
+          </h1>
         </div>
 
         <Card className="w-full">
           <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle>Search Coordinators</CardTitle>
+            <CardTitle>Filter Coordinators</CardTitle>
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* Search input - half width */}
-              <div className="w-full sm:w-1/2">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full items-end">
+              {/* Search by Name */}
+              <div className="w-full md:flex-1 min-w-[180px]">
+                <Label className="mb-1 block">Search by Name</Label>
                 <Input
                   placeholder="Search by name..."
                   value={search}
@@ -742,11 +815,12 @@ const AdminCoordinators = () => {
                   className="w-full text-sm"
                 />
               </div>
-              {/* Filter - half width, but shrinks when custom */}
-              <div className="w-full sm:w-1/2 flex flex-row gap-2 items-center">
-                <div className={timeFilter === "custom" ? "flex-1" : "w-full"}>
+              {/* Filter by Date */}
+              <div className="w-full md:w-auto">
+                <Label className="mb-1 block">Filter by Date</Label>
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
                   <Select value={timeFilter} onValueChange={setTimeFilter}>
-                    <SelectTrigger className="w-full text-sm">
+                    <SelectTrigger className="w-full sm:w-[140px] text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -758,24 +832,77 @@ const AdminCoordinators = () => {
                       <SelectItem value="custom">Custom</SelectItem>
                     </SelectContent>
                   </Select>
+                  {timeFilter === "custom" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                        >
+                          {customDateRange.from
+                            ? new Date(
+                                customDateRange.from
+                              ).toLocaleDateString()
+                            : "From"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="p-0 w-auto max-w-xs sm:max-w-sm"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={
+                            customDateRange.from
+                              ? new Date(customDateRange.from)
+                              : undefined
+                          }
+                          onSelect={(date) =>
+                            setCustomDateRange((r) => ({
+                              ...r,
+                              from: date
+                                ? date.toLocaleDateString("en-CA")
+                                : "",
+                            }))
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  {timeFilter === "custom" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                        >
+                          {customDateRange.to
+                            ? new Date(customDateRange.to).toLocaleDateString()
+                            : "To"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="p-0 w-auto max-w-xs sm:max-w-sm"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={
+                            customDateRange.to
+                              ? new Date(customDateRange.to)
+                              : undefined
+                          }
+                          onSelect={(date) => {
+                            setCustomDateRange((r) => ({
+                              ...r,
+                              to: date ? date.toLocaleDateString("en-CA") : "",
+                            }));
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
-                {timeFilter === "custom" && (
-                  <div className="flex flex-row items-center gap-2">
-                    <Input
-                      type="date"
-                      value={customDateRange.from}
-                      onChange={e => setCustomDateRange(r => ({ ...r, from: e.target.value }))}
-                      className="text-xs px-2 py-1 w-[135px]"
-                    />
-                    <span className="mx-1 text-xs">to</span>
-                    <Input
-                      type="date"
-                      value={customDateRange.to}
-                      onChange={e => setCustomDateRange(r => ({ ...r, to: e.target.value }))}
-                      className="text-xs px-2 py-1 w-[135px]"
-                    />
-                  </div>
-                )}
               </div>
             </div>
           </CardContent>
@@ -784,165 +911,312 @@ const AdminCoordinators = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {filteredCoordinators.map((coordinator) => {
             const stats = getCoordinatorStats(coordinator.id);
-            const coordinatorMentors = users.filter(user => user.role === "mentor" && user.supervisorId === coordinator.id);
+            const coordinatorMentors = users.filter(
+              (user) =>
+                user.role === "mentor" && user.supervisorId === coordinator.id
+            );
 
             return (
               <Card key={coordinator.id} className="flex flex-col">
                 <CardHeader className="p-3 sm:p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="space-y-1">
-                      <CardTitle className="text-base sm:text-lg">{coordinator.name}</CardTitle>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{coordinator.email}</p>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base sm:text-lg">
+                          {coordinator.name} ({coordinator.id})
+                        </CardTitle>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            coordinator.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-200 text-gray-800"
+                          }`}
+                        >
+                          {coordinator.status === "active"
+                            ? "Active"
+                            : "Inactive"}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-left sm:text-right space-y-1">
-                      <p className="text-xs sm:text-sm">ID: <span className="font-medium">{coordinator.id}</span></p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {coordinator.phone ? `Phone: ${coordinator.phone}` : 'No phone number'}
-                      </p>
+                      <div className="flex flex-wrap gap-2 mt-1 justify-start sm:justify-end">
+                        <a
+                          href={`mailto:${coordinator.email}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium transition"
+                          title="Send Email"
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span className="hidden xs:inline">Mail</span>
+                        </a>
+                        <a
+                          href={`tel:${coordinator.phone || ""}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition"
+                          title="Call"
+                        >
+                          <Phone className="w-4 h-4" />
+                          <span className="hidden xs:inline">Call</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/${(coordinator.phone || "").replace(/[^\d]/g, "")}?text=${encodeURIComponent(
+                            `Hello ${coordinator.name} (ID: ${coordinator.id}),\n\nThis is a message from Albedo Educator.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-green-100 text-green-900 hover:bg-green-200 text-xs font-medium transition"
+                          title="WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="hidden xs:inline">WhatsApp</span>
+                        </a>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium"
+                          onClick={() => window.print()}
+                          title="Print"
+                        >
+                          <Printer className="w-4 h-4" />
+                          <span className="hidden xs:inline">Print</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Team Size</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-xl sm:text-2xl font-bold">{stats.mentorCount}</p>
-                          <p className="text-sm text-muted-foreground">mentors</p>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full pt-2">
+                      <div className="flex-1 min-w-[100px] bg-card rounded-lg p-3 flex flex-col items-center justify-center border">
+                        <p className="text-sm text-muted-foreground">Mentors</p>
+                        <p className="text-2xl font-bold break-words text-center">
+                          {stats.mentorCount}
+                        </p>
+                      </div>
+                      <div className="flex-1 min-w-[100px] bg-card rounded-lg p-3 flex flex-col items-center justify-center border">
+                        <p className="text-sm text-muted-foreground">
+                          Students
+                        </p>
+                        <p className="text-2xl font-bold break-words text-center">
+                          {stats.studentCount}
+                        </p>
+                      </div>
+                      <div className="flex-1 min-w-[100px] bg-card rounded-lg p-3 flex flex-col items-center justify-center border">
+                        <p className="text-sm text-muted-foreground">
+                          Teachers
+                        </p>
+                        <p className="text-2xl font-bold break-words text-center">
+                          {stats.teacherCount}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Progress Bars - Each in its own row with motivational icon */}
+                    <div className="flex flex-col gap-4 w-full pt-4">
+                      {/* Sessions Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your sessions!"
+                        >
+                          <TrendingUp className="w-5 h-5 text-orange-400" />
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Sessions
+                        </p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.sessionProgress === 100
+                                ? "bg-palette-info"
+                                : stats.sessionProgress >= 75
+                                ? "bg-palette-accent"
+                                : stats.sessionProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{
+                              width: `${stats.sessionProgress}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              {stats.completedSessions}/{stats.totalSessions} (
+                              {stats.sessionProgress}%)
+                            </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              {stats.totalSessions - stats.completedSessions} (
+                              {100 - stats.sessionProgress}%)
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Students</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-xl sm:text-2xl font-bold">{stats.studentCount}</p>
-                          <p className="text-sm text-muted-foreground">total</p>
+                      {/* Hours Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your hours!"
+                        >
+                          <Lightbulb className="w-5 h-5 text-yellow-400" />
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Hours
+                        </p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.hoursProgress === 100
+                                ? "bg-palette-info"
+                                : stats.hoursProgress >= 75
+                                ? "bg-palette-accent"
+                                : stats.hoursProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${stats.hoursProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              {stats.completedHours}/{stats.totalHours} (
+                              {stats.hoursProgress}%)
+                            </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              {stats.totalHours - stats.completedHours} (
+                              {100 - stats.hoursProgress}%)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Payments Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your payments!"
+                        >
+                          <TrendingUp className="w-5 h-5 text-red-500" />
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Payments
+                        </p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              stats.paymentsProgress === 100
+                                ? "bg-palette-info"
+                                : stats.paymentsProgress >= 75
+                                ? "bg-palette-accent"
+                                : stats.paymentsProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${stats.paymentsProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              ₹{stats.completedPayments.toLocaleString()}/₹
+                              {stats.totalPayments.toLocaleString()} (
+                              {stats.paymentsProgress}%)
+                            </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              ₹
+                              {(
+                                stats.totalPayments - stats.completedPayments
+                              ).toLocaleString()}{" "}
+                              ({100 - stats.paymentsProgress}%)
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-
-
-                    {coordinatorMentors.length > 0 && (
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Sessions Progress</span>
-                            <span className="font-medium">{stats.sessionProgress}%</span>
-                          </div>
-                          <div className="w-full bg-muted h-2 rounded-full">
-                            <div
-                              className={`h-2 rounded-full transition-all duration-300 ${stats.sessionProgress === 100
-                                ? 'bg-palette-info'
-                                : stats.sessionProgress >= 75
-                                  ? 'bg-palette-accent'
-                                  : stats.sessionProgress >= 40
-                                    ? 'bg-palette-warning'
-                                    : 'bg-palette-danger'
-                                }`}
-                              style={{ width: `${stats.sessionProgress}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>{stats.completedSessions} completed</span>
-                            <span>{stats.totalSessions} total</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Hours Progress</span>
-                            <span className="font-medium">{stats.hoursProgress}%</span>
-                          </div>
-                          <div className="w-full bg-muted h-2 rounded-full">
-                            <div
-                              className={`h-2 rounded-full transition-all duration-300 ${stats.hoursProgress === 100
-                                ? 'bg-palette-info'
-                                : stats.hoursProgress >= 75
-                                  ? 'bg-palette-accent'
-                                  : stats.hoursProgress >= 40
-                                    ? 'bg-palette-warning'
-                                    : 'bg-palette-danger'
-                                }`}
-                              style={{ width: `${stats.hoursProgress}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>{stats.completedHours} completed</span>
-                            <span>{stats.totalHours} total</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Payments Progress</span>
-                            <span className="font-medium">{stats.paymentsProgress}%</span>
-                          </div>
-                          <div className="w-full bg-muted h-2 rounded-full">
-                            <div
-                              className={`h-2 rounded-full transition-all duration-300 ${stats.paymentsProgress === 100
-                                ? 'bg-palette-info'
-                                : stats.paymentsProgress >= 75
-                                  ? 'bg-palette-accent'
-                                  : stats.paymentsProgress >= 40
-                                    ? 'bg-palette-warning'
-                                    : 'bg-palette-danger'
-                                }`}
-                              style={{ width: `${stats.paymentsProgress}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>₹{stats.completedPayments.toLocaleString()} completed</span>
-                            <span>₹{stats.totalPayments.toLocaleString()} total</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    {/* Financial Stats - First Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                      {/* Refund Spot */}
                       <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-muted-foreground">Class Take Amount</p>
-                          <div className="w-2 h-2 rounded-full"></div>
+                          <p className="text-muted-foreground">Refund Spot</p>
                         </div>
                         <div className="space-y-1">
-                          <p className="">{formatCurrency(stats.classTakeAmount || 0)}</p>
+                          <p className="">{stats.refundSpot}</p>
                         </div>
                       </div>
+                      {/* Refund Package */}
                       <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-muted-foreground">Teacher Salary</p>
+                          <p className="text-muted-foreground">
+                            Refund Package
+                          </p>
                         </div>
                         <div className="space-y-1">
-                          <p className="">{formatCurrency(stats.teacherSalary || 0)}</p>
+                          <p className="">{stats.refundPackage}</p>
                         </div>
                       </div>
+                    </div>
+                    {/* Financial Stats - Second Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                      {/* Class Take Amount */}
                       <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Class Take Amount
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{stats.classTakeAmount}</p>
+                        </div>
+                      </div>
+                      {/* Teacher Salary */}
+                      <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">
+                            Teacher Salary
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="">{stats.teacherSalary}</p>
+                        </div>
+                      </div>
+                      {/* Expense Ratio */}
+                      <div
+                        className={`p-3 sm:p-4 rounded-lg border border-indigo-100/50 dark:bg-gray-900/100 bg-white shadow-sm ${
+                          stats.expenseRatio > 100
+                            ? "bg-red-100/60 text-red-700 border-red-200"
+                            : stats.expenseRatio > 75
+                            ? "bg-yellow-100/60 text-yellow-800 border-yellow-200"
+                            : stats.expenseRatio > 50
+                            ? "bg-blue-100/60 text-blue-800 border-blue-200"
+                            : "bg-green-100/60 text-green-800 border-green-200"
+                        }`}
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-muted-foreground">Expense Ratio</p>
                         </div>
                         <div className="space-y-1">
-                          <p className="">{stats.expenseRatio || 0}%</p>
+                          <p className="">{stats.expenseRatio}%</p>
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-3 xs:grid-cols-5 gap-2 pt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs sm:text-sm"
-                        onClick={() => handleViewDetails(coordinator)}
-                      >
-                        <Eye className="mr-1.5 h-3.5 w-3.5" />
-                        Details
-                      </Button>
+                    <div className="grid grid-cols-2 gap-2 pt-4">
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
                         onClick={() => handleViewMentors(coordinator)}
                       >
-                        <Users className="mr-1.5 h-3.5 w-3.5" />
                         Mentors
                       </Button>
                       <Button
@@ -957,7 +1231,6 @@ const AdminCoordinators = () => {
                           }
                         }}
                       >
-                        <Users className="mr-1.5 h-3.5 w-3.5" />
                         Students
                       </Button>
                     </div>
@@ -1007,7 +1280,9 @@ const AdminCoordinators = () => {
         >
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Assigned Mentors - {selectedCoordinator?.user.name}</DialogTitle>
+              <DialogTitle>
+                Assigned Mentors - {selectedCoordinator?.user.name}
+              </DialogTitle>
               <DialogDescription>
                 Manage mentors assigned to this coordinator.
               </DialogDescription>
@@ -1025,32 +1300,52 @@ const AdminCoordinators = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {selectedCoordinator?.user.id && getAssignedMentors(selectedCoordinator.user.id).map((mentor) => (
-                    <TableRow key={mentor.id}>
-                      <TableCell className="font-medium">{mentor.id}</TableCell>
-                      <TableCell>{mentor.name}</TableCell>
-                      <TableCell>{mentor.email}</TableCell>
-                      <TableCell>{mentor.phone || "No phone number"}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${mentor.status === 'active'
-                          ? 'bg-green-100 text-palette-accent'
-                          : 'bg-gray-100 text-gray-800'
-                          }`}>
-                          {mentor.status || 'active'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {allStudents.filter(student => student.mentorId === mentor.id).length}
-                      </TableCell>
-                      </TableRow>
-                  ))}
-                  {(!selectedCoordinator?.user.id || getAssignedMentors(selectedCoordinator.user.id).length === 0) && (
+                  {selectedCoordinator?.user.id &&
+                    getAssignedMentors(selectedCoordinator.user.id).map(
+                      (mentor) => (
+                        <TableRow key={mentor.id}>
+                          <TableCell className="font-medium">
+                            {mentor.id}
+                          </TableCell>
+                          <TableCell>{mentor.name}</TableCell>
+                          <TableCell>{mentor.email}</TableCell>
+                          <TableCell>
+                            {mentor.phone || "No phone number"}
+                          </TableCell>
+                          <TableCell>
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                mentor.status === "active"
+                                  ? "bg-green-100 text-palette-accent"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {mentor.status || "active"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {
+                              allStudents.filter(
+                                (student) => student.mentorId === mentor.id
+                              ).length
+                            }
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
+                  {(!selectedCoordinator?.user.id ||
+                    getAssignedMentors(selectedCoordinator.user.id).length ===
+                      0) && (
                     <TableRow>
                       <TableCell colSpan={7} className="h-24 text-center">
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Users className="h-8 w-8 text-muted-foreground/60" />
-                          <p className="text-sm text-muted-foreground">No mentors found</p>
-                          <p className="text-xs text-muted-foreground">Assign or add new mentors to get started</p>
+                          <p className="text-sm text-muted-foreground">
+                            No mentors found
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Assign or add new mentors to get started
+                          </p>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1072,11 +1367,11 @@ const AdminCoordinators = () => {
           newMentor={newMentor}
           editingMentor={editingMentor}
           students={students}
-          onViewDetailsClose={() => { }}
+          onViewDetailsClose={() => {}}
           onAddClose={() => setIsAddingMentor(false)}
           onEditClose={() => setIsEditingMentor(false)}
           onDeleteClose={() => setIsDeletingMentor(false)}
-          onViewStudentsClose={() => { }}
+          onViewStudentsClose={() => {}}
           onAddMentor={handleAddMentor}
           onUpdateMentor={handleUpdateMentor}
           onDeleteMentor={confirmDeleteMentor}
@@ -1122,7 +1417,7 @@ const AdminCoordinators = () => {
                           <span className="text-xs text-muted-foreground">
                             {mentor.isAssigned
                               ? `Currently assigned to: ${mentor.currentCoordinator}`
-                              : 'Not assigned to any coordinator'}
+                              : "Not assigned to any coordinator"}
                           </span>
                         </div>
                       </SelectItem>
@@ -1132,19 +1427,21 @@ const AdminCoordinators = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setIsAssigningMentor(false);
-                setSelectedMentorId("");
-              }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAssigningMentor(false);
+                  setSelectedMentorId("");
+                }}
+              >
                 Cancel
               </Button>
-              <Button
-                onClick={handleAssignMentor}
-                disabled={!selectedMentorId}
-              >
-                {selectedMentorId && getUnassignedMentors().find(m => m.id === selectedMentorId)?.isAssigned
-                  ? 'Reassign Mentor'
-                  : 'Assign Mentor'}
+              <Button onClick={handleAssignMentor} disabled={!selectedMentorId}>
+                {selectedMentorId &&
+                getUnassignedMentors().find((m) => m.id === selectedMentorId)
+                  ?.isAssigned
+                  ? "Reassign Mentor"
+                  : "Assign Mentor"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1160,7 +1457,9 @@ const AdminCoordinators = () => {
         >
           <DialogContent className="max-w-[95vw] w-full sm:max-w-4xl max-h-[90vh] overflow-y-auto p-2 sm:p-4 md:p-6">
             <DialogHeader className="mb-4">
-              <DialogTitle className="text-base sm:text-lg font-semibold">Students Under {selectedCoordinator?.user.name}</DialogTitle>
+              <DialogTitle className="text-base sm:text-lg font-semibold">
+                Students Under {selectedCoordinator?.user.name}
+              </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 View all students managed by this coordinator's mentors.
               </DialogDescription>
@@ -1170,107 +1469,162 @@ const AdminCoordinators = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[80px] font-medium hidden md:table-cell">ID</TableHead>
-                    <TableHead className="font-medium min-w-[120px]">Name</TableHead>
-                    <TableHead className="font-medium min-w-[120px] hidden sm:table-cell">Mentor</TableHead>
-                    <TableHead className="font-medium w-[100px]">Status</TableHead>
-                    <TableHead className="font-medium min-w-[100px]">Sessions</TableHead>
-                    <TableHead className="font-medium min-w-[100px] hidden sm:table-cell">Hours</TableHead>
-                    <TableHead className="font-medium min-w-[120px] hidden md:table-cell">Payments</TableHead>
-                    <TableHead className="font-medium w-[120px]">Progress</TableHead>
+                    <TableHead className="w-[80px] font-medium hidden md:table-cell">
+                      ID
+                    </TableHead>
+                    <TableHead className="font-medium min-w-[120px]">
+                      Name
+                    </TableHead>
+                    <TableHead className="font-medium min-w-[120px] hidden sm:table-cell">
+                      Mentor
+                    </TableHead>
+                    <TableHead className="font-medium w-[100px]">
+                      Status
+                    </TableHead>
+                    <TableHead className="font-medium min-w-[100px]">
+                      Sessions
+                    </TableHead>
+                    <TableHead className="font-medium min-w-[100px] hidden sm:table-cell">
+                      Hours
+                    </TableHead>
+                    <TableHead className="font-medium min-w-[120px] hidden md:table-cell">
+                      Payments
+                    </TableHead>
+                    <TableHead className="font-medium w-[120px]">
+                      Progress
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {selectedCoordinator &&
-                    getCoordinatorStudents(selectedCoordinator.user.id).map((student) => {
-                      const mentor = users.find(u => u.id === student.mentorId);
-                      const progress = Math.round((student.sessionsCompleted / student.totalSessions) * 100);
-                      const paymentProgress = Math.round((student.paidAmount / student.totalPayment) * 100);
+                    getCoordinatorStudents(selectedCoordinator.user.id).map(
+                      (student) => {
+                        const mentor = users.find(
+                          (u) => u.id === student.mentorId
+                        );
+                        const progress = Math.round(
+                          (student.sessionsCompleted / student.totalSessions) *
+                            100
+                        );
+                        const paymentProgress = Math.round(
+                          (student.paidAmount / student.totalPayment) * 100
+                        );
 
-                      return (
-                        <TableRow key={student.id} className="hover:bg-muted/50">
-                          <TableCell className="font-medium hidden md:table-cell">{student.id}</TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="font-medium">{student.name}</div>
-                              <div className="text-xs text-muted-foreground sm:hidden">
-                                Mentor: {mentor?.name || 'Not Assigned'}
+                        return (
+                          <TableRow
+                            key={student.id}
+                            className="hover:bg-muted/50"
+                          >
+                            <TableCell className="font-medium hidden md:table-cell">
+                              {student.id}
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium">
+                                  {student.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground sm:hidden">
+                                  Mentor: {mentor?.name || "Not Assigned"}
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">{mentor?.name || 'Not Assigned'}</TableCell>
-                          <TableCell>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${student.status === 'active'
-                              ? 'bg-green-100 text-palette-accent'
-                              : 'bg-gray-100 text-gray-800'
-                              }`}>
-                              {student.status}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm whitespace-nowrap">
-                                {student.sessionsCompleted}/{student.totalSessions}
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              {mentor?.name || "Not Assigned"}
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  student.status === "active"
+                                    ? "bg-green-100 text-palette-accent"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {student.status}
                               </span>
-                              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                {student.sessionsRemaining} left
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm whitespace-nowrap">
-                                {Math.round(student.sessionsCompleted * student.sessionDuration)}/{student.totalHours}
-                              </span>
-                              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                {Math.round(student.sessionsRemaining * student.sessionDuration)} left
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-sm whitespace-nowrap">
-                                ₹{student.paidAmount.toLocaleString()}/₹{student.totalPayment.toLocaleString()}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {paymentProgress}% paid
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-300 ${progress === 100
-                                    ? 'bg-progress-complete'
-                                    : progress >= 75
-                                      ? 'bg-progress-high'
-                                      : progress >= 40
-                                        ? 'bg-progress-medium'
-                                        : 'bg-progress-low'
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                <span className="text-sm whitespace-nowrap">
+                                  {student.sessionsCompleted}/
+                                  {student.totalSessions}
+                                </span>
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                  {student.sessionsRemaining} left
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-sm whitespace-nowrap">
+                                  {Math.round(
+                                    student.sessionsCompleted *
+                                      student.sessionDuration
+                                  )}
+                                  /{student.totalHours}
+                                </span>
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                  {Math.round(
+                                    student.sessionsRemaining *
+                                      student.sessionDuration
+                                  )}{" "}
+                                  left
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <div className="flex flex-col gap-1">
+                                <span className="text-sm whitespace-nowrap">
+                                  ₹{student.paidAmount.toLocaleString()}/₹
+                                  {student.totalPayment.toLocaleString()}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {paymentProgress}% paid
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-300 ${
+                                      progress === 100
+                                        ? "bg-progress-complete"
+                                        : progress >= 75
+                                        ? "bg-progress-high"
+                                        : progress >= 40
+                                        ? "bg-progress-medium"
+                                        : "bg-progress-low"
                                     }`}
-                                  style={{ width: `${progress}%` }}
-                                />
+                                    style={{ width: `${progress}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs font-medium tabular-nums w-[3ch]">
+                                  {progress}%
+                                </span>
                               </div>
-                              <span className="text-xs font-medium tabular-nums w-[3ch]">
-                                {progress}%
-                              </span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  {selectedCoordinator && getCoordinatorStudents(selectedCoordinator.user.id).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
-                        <div className="flex flex-col items-center justify-center gap-1">
-                          <Users className="h-8 w-8 text-muted-foreground/60" />
-                          <p className="text-sm text-muted-foreground">No students found</p>
-                          <p className="text-xs text-muted-foreground">This coordinator's mentors don't have any assigned students yet</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+                    )}
+                  {selectedCoordinator &&
+                    getCoordinatorStudents(selectedCoordinator.user.id)
+                      .length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={8} className="h-24 text-center">
+                          <div className="flex flex-col items-center justify-center gap-1">
+                            <Users className="h-8 w-8 text-muted-foreground/60" />
+                            <p className="text-sm text-muted-foreground">
+                              No students found
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              This coordinator's mentors don't have any assigned
+                              students yet
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
                 </TableBody>
               </Table>
             </div>
@@ -1283,8 +1637,9 @@ const AdminCoordinators = () => {
 
 export default AdminCoordinators;
 
-
-              {/* <Button variant="outline" className="w-full sm:w-auto text-sm">
+{
+  /* <Button variant="outline" className="w-full sm:w-auto text-sm">
                 <UserSearch className="mr-1.5 h-3.5 w-3.5" />
                 Search
-              </Button> */}
+              </Button> */
+}

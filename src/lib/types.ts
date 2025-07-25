@@ -29,6 +29,9 @@ export interface Student {
   totalPayment: number;
   paidAmount: number;
   teachersPayment: number;
+  expenseRatio: number;
+  classTakeAmount: number;
+  teacherSalary: number;
   hourlyPayment: number;
   sessionDuration: number;
   startDate: string;

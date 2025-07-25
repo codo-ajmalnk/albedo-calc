@@ -60,14 +60,4 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
 
-Simply open [Albedo Educator](https://albedoedu.com/projects/59b6a399-3fa3-4ac7-af76-32babb4dfa1d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Albedo Educator project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.albedoedu.com/tips-tricks/custom-domain#step-by-step-guide)
