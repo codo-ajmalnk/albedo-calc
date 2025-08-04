@@ -22,6 +22,8 @@ import CoordinatorMentors from "./pages/coordinator/Mentors";
 import CoordinatorStudents from "./pages/coordinator/Students";
 import MentorDashboard from "./pages/mentor/Dashboard";
 import MentorStudents from "./pages/mentor/Students";
+import CoordinatorTeachers from "./pages/coordinator/Teachers";
+import MentorTeachers from "./pages/mentor/Teacher";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -102,6 +104,14 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/coordinator/teachers"
+                element={
+                  <ProtectedRoute allowedRoles={["coordinator"]}>
+                    <CoordinatorTeachers />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Mentor Routes */}
               <Route
@@ -120,7 +130,14 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-
+              <Route
+                path="/mentor/teachers"
+                element={
+                  <ProtectedRoute allowedRoles={["mentor"]}>
+                    <MentorTeachers />
+                  </ProtectedRoute>
+                }
+              />
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -80,13 +80,144 @@ export const users: User[] = [
     phone: "+91 98765 43218",
     status: "active" as const
   },
+  {
+    id: "mentor7",
+    name: "Mentor Seven",
+    email: "mentor7@example.com",
+    role: "mentor" as const,
+    supervisorId: "coord2",
+    phone: "+91 98765 43217",
+    status: "active" as const
+  },
+  {
+    id: "mentor8",
+    name: "Mentor Eight",
+    email: "mentor8@example.com",
+    role: "mentor" as const,
+    supervisorId: "coord2",
+    phone: "+91 98765 43218",
+    status: "active" as const
+  },
+  {
+    id: "mentor9",
+    name: "Mentor Nine",
+    email: "mentor9@example.com",
+    role: "mentor" as const,
+    supervisorId: "coord2",
+    phone: "+91 98765 43217",
+    status: "active" as const
+  },
+  {
+    id: "mentor10",
+    name: "Mentor Ten",
+    email: "mentor10@example.com",
+    role: "mentor" as const,
+    supervisorId: "coord2",
+    phone: "+91 98765 43218",
+    status: "active" as const
+  },
+  {
+    id: "mentor11",
+    name: "Mentor Eleven",
+    email: "mentor11@example.com",
+    role: "mentor" as const,
+    supervisorId: "coord2",
+    phone: "+91 98765 43217",
+    status: "active" as const
+  },
+  {
+    id: "mentor12",
+    name: "Mentor Twelve",
+    email: "mentor12@example.com",
+    role: "mentor" as const,
+    supervisorId: "coord2",
+    phone: "+91 98765 43218",
+    status: "active" as const
+  },
+  {
+    id: "teacher1",
+    name: "Teacher Henry",
+    email: "teacher1@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43219",
+    status: "active" as const
+  },
+  {
+    id: "teacher2",
+    name: "Teacher John",
+    email: "teacher2@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43220",
+    status: "active" as const
+  },
+  {
+    id: "teacher3",
+    name: "Teacher Mark",
+    email: "teacher3@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43221",
+    status: "active" as const
+  },
+  {
+    id: "teacher4",
+    name: "Teacher Mary",
+    email: "teacher4@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43222",
+    status: "active" as const
+  },
+  {
+    id: "teacher5",
+    name: "Teacher John",
+    email: "teacher5@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43220",
+    status: "active" as const
+  },
+  {
+    id: "teacher6",
+    name: "Teacher Mark",
+    email: "teacher6@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43221",
+    status: "active" as const
+  },
+  {
+    id: "teacher7",
+    name: "Teacher Mary",
+    email: "teacher7@example.com",
+    role: "teacher" as const,
+    phone: "+91 98765 43222",
+    status: "active" as const
+  },
 ];
+
+export const packages = Array.from({ length: 6 }, (_, i) => {
+  const totalSessions = Math.floor(Math.random() * 100);
+  const completedSessions = Math.floor(Math.random() * (totalSessions + 1));
+  return {
+    id: `package${i + 1}`,
+    name: `Package ${i + 1}`,
+    teacherId: `teacher${Math.floor(Math.random() * 10) + 1}`,
+    price: Math.floor(Math.random() * 10000),
+    totalSessions,
+    completedSessions,
+    hours: Math.floor(Math.random() * 100),
+    durationDays: Math.floor(Math.random() * 100),
+    progress: Math.floor(Math.random() * 101), // 0 to 100 inclusive
+    completedHours: Math.floor(Math.random() * 100),
+    paidAmount: Math.floor(Math.random() * 10000),
+    sessionDuration: Math.floor(Math.random() * 100),
+  };
+});
 
 // Generate mock students with strict typing
 export const generateMockStudents = (): Student[] => {
   return Array.from({ length: 6 }, (_, i) => {
     const totalSessions = 12;
     const sessionsCompleted = Math.floor(Math.random() * 13);
+    const upcomingSessions = Math.floor(Math.random() * 13);
+    const meetingSessions = Math.floor(Math.random() * 13);
     const sessionsRemaining = totalSessions - sessionsCompleted;
     const progressPercentage = Math.round((sessionsCompleted / totalSessions) * 100);
     const totalHours = 24;
@@ -104,6 +235,11 @@ export const generateMockStudents = (): Student[] => {
     const totalPayments = totalPayment;
     const completedPayments = paidAmount;
     const pendingPayments = totalPayment - paidAmount;
+    const refundedPayments = Math.floor(Math.random() * 1001);
+    // Calculate expense-related properties
+    const expenseRatio = Math.random() * 0.3 + 0.1; // 10-40%
+    const classTakeAmount = Math.floor(totalPayment * expenseRatio);
+    const teacherSalary = Math.floor(teachersPayment * 0.8);
 
     return {
       id: `student${i + 1}`,
@@ -111,13 +247,20 @@ export const generateMockStudents = (): Student[] => {
       email: `student${i + 1}@example.com`,
       phone: `+91 98765${43210 + i}`,
       mentorId: `mentor${i % 3 + 1}`,
+      teacherId: `teacher${i % 4 + 1}`,
+      packageId: `package${i % 6 + 1}`,
       status: "active" as const,
       totalSessions,
       sessionsCompleted,
+      upcomingSessions,
+      meetingSessions,
       totalHours,
       totalPayment,
       paidAmount,
       teachersPayment,
+      expenseRatio,
+      classTakeAmount,
+      teacherSalary,
       hourlyPayment,
       sessionDuration,
       startDate: "January 1, 2024",
@@ -132,7 +275,8 @@ export const generateMockStudents = (): Student[] => {
       activeSessions,
       totalPayments,
       completedPayments,
-      pendingPayments
+      pendingPayments,
+      refundedPayments
     } satisfies Student;
   });
 };
@@ -148,6 +292,15 @@ export const generateDashboardStats = (
     (sum, student) => sum + student.sessionsCompleted,
     0
   );
+  const upcomingSessions = filteredStudents.reduce(
+    (sum, student) => sum + student.upcomingSessions,
+    0
+  );
+  const meetingSessions = filteredStudents.reduce(
+    (sum, student) => sum + student.meetingSessions,
+    0
+  );
+
   const totalSessions = filteredStudents.reduce(
     (sum, student) => sum + student.totalSessions,
     0
@@ -182,6 +335,10 @@ export const generateDashboardStats = (
     0
   );
   const pendingPayments = totalPayments - completedPayments;
+  const refundedPayments = filteredStudents.reduce(
+    (sum, student) => sum + student.refundedPayments,
+    0
+  );
   
   // Active sessions are sessions that are currently in progress (not completed)
   const activeSessions = filteredStudents.reduce(
@@ -201,6 +358,8 @@ export const generateDashboardStats = (
     activeSessions,
     completedSessions,
     totalSessions,
+    upcomingSessions,
+    meetingSessions,
     pendingSessions,
     overallProgress: totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0,
     totalHours,
@@ -210,5 +369,6 @@ export const generateDashboardStats = (
     totalPayments,
     completedPayments,
     pendingPayments,
+    refundedPayments
   } satisfies DashboardStats;
 };

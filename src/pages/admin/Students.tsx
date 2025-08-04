@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { StudentDialog } from "@/components/dialog/StudentDialog";
+import { StudentDialog } from "@/components/DialogOld/StudentDialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,12 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { students as allStudents, users } from "@/lib/mock-data";
+import { students as allStudents, users, packages as allPackages } from "@/lib/mock-data";
 import { crudToasts } from "@/lib/toast";
 import { Student, User } from "@/lib/types";
-import { Mail, MessageCircle, Phone, Printer } from "lucide-react";
+import { Download, Mail, MessageCircle, Phone, Printer } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TeacherAssignmentDialog from "@/components/dialog/TeacherAssignmentDialog";
+import PackageAssignmentDialog from "@/components/dialog/PackageAssignmentDialog";
 
 // Mock current user - in real app this would come from auth context
 const currentUser: User = {
@@ -89,32 +91,12 @@ export default function AdminStudents() {
   const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<
     string[]
   >([]);
-  const [newStudent, setNewStudent] = useState<Student>({
-    id: `student${students.length + 1}`,
-    name: "",
-    email: "",
-    phone: "",
-    mentorId: selectedMentor?.id || "",
-    status: "active",
-    totalSessions: 12,
-    sessionsCompleted: 0,
-    totalHours: 12,
-    completedHours: 0,
-    totalPayment: 12000,
-    paidAmount: 0,
-    teachersPayment: 0,
-    hourlyPayment: 0,
-    sessionDuration: 60,
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionAddedOn: new Date().toISOString(),
-    sessionsRemaining: 12,
-    progressPercentage: 0,
-    expenseRatio: 0,
-    classTakeAmount: 0,
-    teacherSalary: 0,
-  });
+
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [isTeacherDialogOpen, setIsTeacherDialogOpen] = useState(false);
+  const [teacherDialogTeachers, setTeacherDialogTeachers] = useState<any[]>([]);
+  const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
+  const [packageDialogStudent, setPackageDialogStudent] = useState<Student | null>(null);
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -142,27 +124,9 @@ export default function AdminStudents() {
     setIsViewDetailsOpen(true);
   };
 
-  const handleEdit = (student: Student) => {
-    if (!hasAccessToStudent(student)) {
-      crudToasts.validation.error(
-        "You don't have permission to edit this student's details."
-      );
-      return;
-    }
-    setEditingStudent(student);
-    setIsEditOpen(true);
-  };
 
-  const handleDelete = (student: Student) => {
-    if (!hasAccessToStudent(student)) {
-      crudToasts.validation.error(
-        "You don't have permission to delete this student."
-      );
-      return;
-    }
-    setSelectedStudent(student);
-    setIsDeleteOpen(true);
-  };
+
+
 
   const hasAccessToStudent = (student: Student) => {
     if (currentUser.role === "admin") return true;
@@ -209,97 +173,9 @@ export default function AdminStudents() {
     }
   };
 
-  const handleAddStudent = () => {
-    try {
-      if (
-        !newStudent.name ||
-        !newStudent.email ||
-        !newStudent.phone ||
-        !newStudent.mentorId
-      ) {
-        crudToasts.validation.error("Please fill in all required fields.");
-        return;
-      }
 
-      // Calculate derived values
-      const totalHours = Math.round(
-        (newStudent.totalSessions * newStudent.sessionDuration) / 60
-      );
-      const endDate = new Date(newStudent.startDate);
-      endDate.setDate(endDate.getDate() + (newStudent.totalSessions - 1) * 7); // Assuming one session per week
 
-      const studentToAdd = {
-        ...newStudent,
-        totalHours,
-        endDate: endDate.toISOString(),
-        sessionsRemaining: newStudent.totalSessions,
-        progressPercentage: 0,
-      };
 
-      setStudents([...students, studentToAdd]);
-      setIsAddingStudent(false);
-      setNewStudent({
-        id: `student${students.length + 2}`,
-        name: "",
-        email: "",
-        phone: "",
-        mentorId: selectedMentor?.id || "",
-        status: "active",
-        totalSessions: 12,
-        sessionsCompleted: 0,
-        totalHours: 12,
-        completedHours: 0,
-        totalPayment: 12000,
-        paidAmount: 0,
-        teachersPayment: 0,
-        hourlyPayment: 0,
-        sessionDuration: 60,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionAddedOn: new Date().toISOString(),
-        sessionsRemaining: 12,
-        progressPercentage: 0,
-        expenseRatio: 0,
-        classTakeAmount: 0,
-        teacherSalary: 0,
-      });
-      crudToasts.create.success("Student");
-    } catch (error) {
-      crudToasts.create.error("Student");
-    }
-  };
-
-  const handleUpdateStudent = () => {
-    if (!editingStudent) return;
-
-    try {
-      setStudents(
-        students.map((student) =>
-          student.id === editingStudent.id ? editingStudent : student
-        )
-      );
-      setIsEditOpen(false);
-      setEditingStudent(null);
-      crudToasts.update.success("Student");
-    } catch (error) {
-      crudToasts.update.error("Student");
-    }
-  };
-
-  const handleDeleteStudent = () => {
-    if (!selectedStudent) return;
-
-    try {
-      setStudents(
-        students.filter((student) => student.id !== selectedStudent.id)
-      );
-      setIsDeleteOpen(false);
-      setSelectedStudent(null);
-      crudToasts.delete.success("Student");
-    } catch (error) {
-      crudToasts.delete.error("Student");
-    }
-  };
 
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
 
@@ -307,13 +183,53 @@ export default function AdminStudents() {
     // Open mentor details dialog or navigate
   };
   const handleViewTeachers = (student: Student) => {
-    // Open teachers dialog or navigate
+    // Find the teacher(s) for this student
+    const teacher = users.find(u => u.role === "teacher" && u.id === student.teacherId);
+    if (teacher) {
+      setTeacherDialogTeachers([
+        {
+          id: teacher.id,
+          name: teacher.name,
+          status: teacher.status || "active",
+          totalSessions: student.totalSessions,
+          completedSessions: student.sessionsCompleted,
+          totalHours: student.totalHours,
+          completedHours: student.completedHours ?? 0,
+          salary: student.teacherSalary ?? 0,
+          paidAmount: student.teachersPayment ?? 0,
+          durationDays: 90,
+          progress: student.progressPercentage ?? 0,
+        },
+      ]);
+      setIsTeacherDialogOpen(true);
+    }
   };
   // Show student's packages (placeholder)
   const handleViewPackages = (student: Student) => {
     alert(
       `Packages for ${student.name} (ID: ${student.id}) will be shown here.`
     );
+  };
+
+  // Helper to map student package IDs to package objects for the dialog
+  const getStudentPackages = (student: Student) => {
+    const ids = Array.isArray(student.packageIds) ? student.packageIds : [student.packageId];
+    return allPackages
+      .filter(pkg => ids.includes(pkg.id))
+      .map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        sessions: pkg.totalSessions,
+        completedSessions: pkg.completedSessions,
+        hours: pkg.hours,
+        completedHours: pkg.completedHours,
+        payment: pkg.price,
+        paidAmount: pkg.paidAmount,
+        progress: pkg.progress,
+        durationDays: pkg.durationDays,
+        teacherName: users.find(u => u.role === "teacher" && u.id === pkg.teacherId)?.name || "Unknown",
+        teacherPhone: users.find(u => u.role === "teacher" && u.id === pkg.teacherId)?.phone || "",
+      }));
   };
 
   return (
@@ -545,6 +461,16 @@ export default function AdminStudents() {
                           <Printer className="w-4 h-4" />
                           <span className="hidden xs:inline">Print</span>
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium"
+                          onClick={() => alert('Download triggered!')}
+                          title="Download"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span className="hidden xs:inline">Download</span>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -764,7 +690,10 @@ export default function AdminStudents() {
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
-                        onClick={() => handleViewPackages(student)}
+                        onClick={() => {
+                          setPackageDialogStudent(student);
+                          setIsPackageDialogOpen(true);
+                        }}
                       >
                         Packages
                       </Button>
@@ -791,7 +720,7 @@ export default function AdminStudents() {
           )}
         </div>
 
-        <StudentDialog
+        {/* <StudentDialog
           isViewDetailsOpen={isViewDetailsOpen}
           isAddOpen={isAddingStudent}
           isEditOpen={isEditOpen}
@@ -825,7 +754,21 @@ export default function AdminStudents() {
           getMentorName={getMentorName}
           onEditStudent={handleEdit}
           currentUser={currentUser}
+        /> */}
+        <TeacherAssignmentDialog
+          open={isTeacherDialogOpen}
+          onOpenChange={setIsTeacherDialogOpen}
+          teachers={teacherDialogTeachers}
+          userRole={currentUser.role}
         />
+        {packageDialogStudent && (
+          <PackageAssignmentDialog
+            open={isPackageDialogOpen}
+            onOpenChange={setIsPackageDialogOpen}
+            packages={getStudentPackages(packageDialogStudent)}
+            userRole={currentUser.role}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

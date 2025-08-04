@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Eye, UserSearch, Edit, Trash2, Plus } from "lucide-react";
+import { Eye, UserSearch, Edit, Trash2, Plus, Mail, Phone, MessageCircle, Printer, Download } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { crudToasts } from "@/lib/toast";
 import {
   Dialog,
@@ -34,6 +35,13 @@ import {
   SelectValue,
   SelectContent,
 } from "@/components/ui";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import TeacherAssignmentDialog from "@/components/dialog/TeacherAssignmentDialog";
+import PackageAssignmentDialog from "@/components/dialog/PackageAssignmentDialog";
 
 const MentorStudents = () => {
   const { user } = useAuth();
@@ -47,28 +55,9 @@ const MentorStudents = () => {
   const [isDeletingStudent, setIsDeletingStudent] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [isAddingStudent, setIsAddingStudent] = useState(false);
-  const [newStudent, setNewStudent] = useState<Student>({
-    id: `student${students.length + 1}`,
-    name: "",
-    email: "",
-    phone: "",
-    mentorId: user?.id || "",
-    status: "active",
-    totalSessions: 12,
-    sessionsCompleted: 0,
-    totalHours: 24,
-    completedHours: 0,
-    totalPayment: 12000,
-    paidAmount: 0,
-    teachersPayment: 0,
-    hourlyPayment: 0,
-    sessionDuration: 60,
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionAddedOn: new Date().toISOString(),
-    sessionsRemaining: 12,
-    progressPercentage: 0,
-  });
+  const [isTeacherDialogOpen, setIsTeacherDialogOpen] = useState(false);
+  const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
+  const [dialogStudent, setDialogStudent] = useState<Student | null>(null);
 
   if (!user) return null;
 
@@ -105,81 +94,6 @@ const MentorStudents = () => {
     };
   };
 
-  const handleEditStudent = (student: Student) => {
-    setEditingStudent(student);
-    setIsEditingStudent(true);
-  };
-
-  const handleUpdateStudent = () => {
-    if (!editingStudent) return;
-
-    try {
-      setStudents(
-        students.map((student) =>
-          student.id === editingStudent.id ? editingStudent : student
-        )
-      );
-      setIsEditingStudent(false);
-      setEditingStudent(null);
-      crudToasts.update.success("Student");
-    } catch (error) {
-      crudToasts.update.error("Student");
-    }
-  };
-
-  const handleDeleteStudent = (student: Student) => {
-    setSelectedStudent(student);
-    setIsDeletingStudent(true);
-  };
-
-  const confirmDeleteStudent = () => {
-    if (!selectedStudent) return;
-
-    try {
-      setStudents(
-        students.filter((student) => student.id !== selectedStudent.id)
-      );
-      setIsDeletingStudent(false);
-      setSelectedStudent(null);
-      crudToasts.delete.success("Student");
-    } catch (error) {
-      crudToasts.delete.error("Student");
-    }
-  };
-
-  const handleAddStudent = () => {
-    try {
-      // Validate required fields
-      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
-        crudToasts.validation.error("Please fill in all required fields.");
-        return;
-      }
-
-      setStudents([...students, newStudent]);
-      setIsAddingStudent(false);
-      setNewStudent({
-        ...newStudent,
-        id: `student${students.length + 2}`,
-        name: "",
-        email: "",
-        phone: "",
-        totalSessions: 12,
-        sessionsCompleted: 0,
-        totalHours: 24,
-        totalPayment: 12000,
-        paidAmount: 0,
-        sessionsRemaining: 12,
-        progressPercentage: 0,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60,
-      });
-      crudToasts.create.success("Student");
-    } catch (error) {
-      crudToasts.create.error("Student");
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-6">
@@ -201,22 +115,22 @@ const MentorStudents = () => {
               Search Students
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Search by Name</Label>
-              <div className="flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full items-end">
+              {/* Search by Name */}
+              <div className="w-full md:flex-1 min-w-[180px]">
+                <Label className="mb-1 block">Search by Name</Label>
                 <Input
-                  placeholder="Search students..."
+                  placeholder="Search by name..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full text-sm"
                 />
               </div>
-            </div>
-              <div className="space-y-3">
-                <Label>Filter by Date</Label>
-                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+              {/* Filter by Date */}
+              <div className="w-full md:w-auto">
+                <Label className="mb-1 block">Filter by Date</Label>
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
                   <Select value={timeFilter} onValueChange={setTimeFilter}>
                     <SelectTrigger className="w-full sm:w-[140px] text-sm">
                       <SelectValue />
@@ -231,31 +145,74 @@ const MentorStudents = () => {
                     </SelectContent>
                   </Select>
                   {timeFilter === "custom" && (
-                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                      <Input
-                        type="date"
-                        value={customDateRange.from}
-                        onChange={(e) =>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                        >
+                          {customDateRange.from
+                            ? new Date(
+                                customDateRange.from
+                              ).toLocaleDateString()
+                            : "From"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="p-0 w-auto max-w-xs sm:max-w-sm"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={
+                            customDateRange.from
+                              ? new Date(customDateRange.from)
+                              : undefined
+                          }
+                          onSelect={(date) =>
                           setCustomDateRange((r) => ({
                             ...r,
-                            from: e.target.value,
-                          }))
-                        }
-                        className="text-xs px-2 py-1 w-full sm:w-[120px]"
-                      />
-                      <span className="mx-1 text-xs">to</span>
-                      <Input
-                        type="date"
-                        value={customDateRange.to}
-                        onChange={(e) =>
+                              from: date
+                                ? date.toLocaleDateString("en-CA")
+                                : "",
+                            }))
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  {timeFilter === "custom" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-xs px-2 py-1 w-full sm:w-[120px]"
+                        >
+                          {customDateRange.to
+                            ? new Date(customDateRange.to).toLocaleDateString()
+                            : "To"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="p-0 w-auto max-w-xs sm:max-w-sm"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={
+                            customDateRange.to
+                              ? new Date(customDateRange.to)
+                              : undefined
+                          }
+                          onSelect={(date) => {
                           setCustomDateRange((r) => ({
                             ...r,
-                            to: e.target.value,
-                          }))
-                        }
-                        className="text-xs px-2 py-1 w-full sm:w-[120px]"
-                      />
-                    </div>
+                              to: date ? date.toLocaleDateString("en-CA") : "",
+                            }));
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   )}
                 </div>
               </div>
@@ -265,186 +222,277 @@ const MentorStudents = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {filteredStudents.map((student) => {
-            const stats = getStudentStats(student);
+            // Progress/stat calculations (copied and adapted from admin/Students.tsx)
+            const sessionsProgress = Math.round(
+              (student.sessionsCompleted / student.totalSessions) * 100
+            );
+            const completedHours = Math.round(
+              (student.sessionsCompleted * student.sessionDuration) / 60
+            );
+            const hoursProgress = Math.round(
+              (completedHours / student.totalHours) * 100
+            );
+            const paymentProgress = Math.round(
+              (student.paidAmount / student.totalPayment) * 100
+            );
+            const classTakeAmount =
+              student.totalSessions > 0
+                ? Math.round(student.totalPayment / student.totalSessions)
+                : 0;
+            const teacherSalary = Math.round(student.paidAmount * 0.7);
+            const expenseRatio =
+              student.totalPayment > 0
+                ? Math.round((teacherSalary / student.totalPayment) * 100)
+                : 0;
+
             return (
-              <Card
-                key={student.id}
-                className="flex flex-col border-2 hover:border-primary/50 transition-colors"
-              >
-                <CardHeader className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                    <div className="space-y-1.5">
-                      <CardTitle className="text-lg sm:text-xl font-bold">
-                        {student.name}
+              <Card key={student.id} className="flex flex-col">
+                <CardHeader className="p-3 sm:p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                    <div className="space-y-1">
+                      <CardTitle className="text-base sm:text-lg">
+                        {student.name} ({student.id})
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {student.email}
                       </p>
                     </div>
-                    <div className="text-left sm:text-right space-y-1.5">
-                      <p className="text-sm">
-                        ID: <span className="font-medium">{student.id}</span>
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {student.phone
-                          ? `Phone: ${student.phone}`
-                          : "No phone number"}
-                      </p>
+                    <div className="text-left sm:text-right space-y-1">
+                      <div className="flex flex-wrap gap-2 mt-1 justify-start sm:justify-end">
+                        <a
+                          href={`mailto:${student.email}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium transition"
+                          title="Send Email"
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span className="hidden xs:inline">Mail</span>
+                        </a>
+                        <a
+                          href={`tel:${student.phone || ""}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-green-50 text-green-700 hover:bg-green-100 text-xs font-medium transition"
+                          title="Call"
+                        >
+                          <Phone className="w-4 h-4" />
+                          <span className="hidden xs:inline">Call</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/${(student.phone || "").replace(/[^\d]/g, "")}?text=${encodeURIComponent(
+                            `Hello ${student.name} (ID: ${student.id}),\n\nThis is a message from Albedo Educator.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-green-100 text-green-900 hover:bg-green-200 text-xs font-medium transition"
+                          title="WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="hidden xs:inline">WhatsApp</span>
+                        </a>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium"
+                          onClick={() => window.print()}
+                          title="Print"
+                        >
+                          <Printer className="w-4 h-4" />
+                          <span className="hidden xs:inline">Print</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium"
+                          onClick={() => alert('Download triggered!')}
+                          title="Download"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span className="hidden xs:inline">Download</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="flex-1 p-4 sm:p-6 pt-0">
+                <CardContent className="flex-1 p-3 sm:p-4 md:p-6 pt-0">
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 rounded-lg bg-muted/10">
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Status
-                        </p>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            student.status === "active"
-                              ? "bg-palette-info text-palette-info-foreground"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
+                    {/* Progress Bars */}
+                    <div className="flex flex-col gap-4 w-full pt-4">
+                      {/* Sessions Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your sessions!"
                         >
-                          {student.status}
-                        </span>
+                          <span role="img" aria-label="Trending Up">📈</span>
                       </div>
-                      <div className="p-3 rounded-lg bg-muted/10">
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Overall Progress
-                        </p>
-                        <p className="text-base font-medium">
-                          {stats.overallProgress}%
-                        </p>
+                        <p className="text-sm text-muted-foreground mb-1">Sessions</p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              sessionsProgress === 100
+                                ? "bg-palette-info"
+                                : sessionsProgress >= 75
+                                ? "bg-palette-accent"
+                                : sessionsProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${sessionsProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              {student.sessionsCompleted}/{student.totalSessions} ({sessionsProgress}%)
+                            </span>
+                        </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              {student.totalSessions - student.sessionsCompleted} ({100 - sessionsProgress}%)
+                          </span>
+                        </div>
+                        </div>
+                      </div>
+                      {/* Hours Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your hours!"
+                        >
+                          <span role="img" aria-label="Lightbulb">💡</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">Hours</p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              hoursProgress === 100
+                                ? "bg-palette-info"
+                                : hoursProgress >= 75
+                                ? "bg-palette-accent"
+                                : hoursProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${hoursProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                            <span>
+                              {completedHours}/{student.totalHours} ({hoursProgress}%)
+                            </span>
+                        </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                            <span>
+                              {student.totalHours - completedHours} ({100 - hoursProgress}%)
+                          </span>
+                        </div>
+                        </div>
+                      </div>
+                      {/* Payments Progress */}
+                      <div className="bg-card rounded-xl p-4 border shadow-sm flex flex-col min-w-0 w-full relative">
+                        <div
+                          className="absolute top-3 right-4"
+                          title="Keep going! Complete your payments!"
+                        >
+                          <span role="img" aria-label="Trending Up">📈</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">Payments</p>
+                        <div className="w-full bg-muted h-2 rounded-full mb-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              paymentProgress === 100
+                                ? "bg-palette-info"
+                                : paymentProgress >= 75
+                                ? "bg-palette-accent"
+                                : paymentProgress >= 40
+                                ? "bg-palette-warning"
+                                : "bg-palette-danger"
+                            }`}
+                            style={{ width: `${paymentProgress}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground flex-wrap">
+                          <div className="flex flex-col break-words text-center">
+                            <span>Completed:</span>
+                          <span>
+                              ₹{student.paidAmount.toLocaleString()}/₹{student.totalPayment.toLocaleString()} ({paymentProgress}%)
+                          </span>
+                          </div>
+                          <div className="flex flex-col break-words text-center">
+                            <span>Pending:</span>
+                          <span>
+                              ₹{(student.totalPayment - student.paidAmount).toLocaleString()} ({100 - paymentProgress}%)
+                          </span>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="space-y-5">
-                      <div className="space-y-2.5">
-                        <div className="flex justify-between text-sm mb-1.5">
-                          <span className="font-medium">Sessions Progress</span>
-                          <span className="font-bold">
-                            {stats.sessionProgress}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              stats.sessionProgress === 100
-                                ? "bg-palette-info"
-                                : stats.sessionProgress >= 75
-                                ? "bg-palette-accent"
-                                : stats.sessionProgress >= 40
-                                ? "bg-palette-warning"
-                                : "bg-palette-danger"
-                            }`}
-                            style={{ width: `${stats.sessionProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{student.sessionsCompleted} completed</span>
-                          <span>{student.totalSessions} total</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2.5">
-                        <div className="flex justify-between text-sm mb-1.5">
-                          <span className="font-medium">Hours Progress</span>
-                          <span className="font-bold">
-                            {stats.hoursProgress}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              stats.hoursProgress === 100
-                                ? "bg-palette-info"
-                                : stats.hoursProgress >= 75
-                                ? "bg-palette-accent"
-                                : stats.hoursProgress >= 40
-                                ? "bg-palette-warning"
-                                : "bg-palette-danger"
-                            }`}
-                            style={{ width: `${stats.hoursProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{stats.completedHours} completed</span>
-                          <span>{student.totalHours} total</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2.5">
-                        <div className="flex justify-between text-sm mb-1.5">
-                          <span className="font-medium">Payment Progress</span>
-                          <span className="font-bold">
-                            {stats.paymentProgress}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted h-2.5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              stats.paymentProgress === 100
-                                ? "bg-palette-info"
-                                : stats.paymentProgress >= 75
-                                ? "bg-palette-accent"
-                                : stats.paymentProgress >= 40
-                                ? "bg-palette-warning"
-                                : "bg-palette-danger"
-                            }`}
-                            style={{ width: `${stats.paymentProgress}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>
-                            ₹{(student.paidAmount || 0).toLocaleString()} paid
-                          </span>
-                          <span>
-                            ₹{(student.totalPayment || 0).toLocaleString()}{" "}
-                            total
-                          </span>
-                        </div>
-                      </div>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {/* Financial Stats */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+                      {/* Class Take Amount */}
                       <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-muted-foreground">
-                            Remaining Sessions
-                          </p>
-                          <div className="w-2 h-2 rounded-full"></div>
+                          <p className="text-muted-foreground">Class Take Amount</p>
                         </div>
                         <div className="space-y-1">
-                          <p className="">
-                            {student.totalSessions - student.sessionsCompleted}
-                          </p>
+                          <p>₹{classTakeAmount.toLocaleString()}</p>
                         </div>
                       </div>
+                      {/* Teacher Salary */}
                       <div className="p-3 sm:p-4 rounded-lg border border-purple-100/50 dark:bg-gray-900/100 bg-white shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-muted-foreground">
-                            Pending Payment
-                          </p>
+                          <p className="text-muted-foreground">Teacher Salary</p>
                         </div>
                         <div className="space-y-1">
-                          <p className="">
-                            ₹{(stats.pendingPayment || 0).toLocaleString()}
-                          </p>
+                          <p>₹{teacherSalary.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      {/* Expense Ratio */}
+                      <div
+                        className={`p-3 sm:p-4 rounded-lg border border-indigo-100/50 dark:bg-gray-900/100 bg-white shadow-sm ${
+                          expenseRatio > 100
+                            ? "bg-red-100/60 text-red-700 border-red-200"
+                            : expenseRatio > 75
+                            ? "bg-yellow-100/60 text-yellow-800 border-yellow-200"
+                            : expenseRatio > 50
+                            ? "bg-blue-100/60 text-blue-800 border-blue-200"
+                            : "bg-green-100/60 text-green-800 border-green-200"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-muted-foreground">Expense Ratio</p>
+                    </div>
+                        <div className="space-y-1">
+                          <p>{expenseRatio}%</p>
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-2 pt-2">
+                    {/* Buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-4">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full text-xs sm:text-sm hover:bg-muted/80"
-                        onClick={() => setSelectedStudent(student)}
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => {
+                          setDialogStudent(student);
+                          setIsPackageDialogOpen(true);
+                        }}
                       >
-                        <Eye className="mr-1.5 h-3.5 w-3.5" />
-                        Details
+                        Packages
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs sm:text-sm"
+                        onClick={() => {
+                          setDialogStudent(student);
+                          setIsTeacherDialogOpen(true);
+                        }}
+                      >
+                        Teachers
                       </Button>
                     </div>
                   </div>
@@ -472,7 +520,7 @@ const MentorStudents = () => {
       </div>
 
       {/* View Details Dialog */}
-      <Dialog
+      {/* <Dialog
         open={!!selectedStudent && !isDeletingStudent}
         onOpenChange={(open) => {
           if (!open) setSelectedStudent(null);
@@ -770,345 +818,55 @@ const MentorStudents = () => {
             </div>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
-      {/* Edit Student Dialog */}
-      <Dialog open={isEditingStudent} onOpenChange={setIsEditingStudent}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-          <DialogHeader className="space-y-3">
-            <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight">
-              Edit Student
-            </DialogTitle>
-            <DialogDescription className="text-sm sm:text-base">
-              Update the student's progress information. All fields marked with
-              * are required.
-            </DialogDescription>
-          </DialogHeader>
-          {editingStudent && (
-            <div className="grid gap-6 py-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-student-id"
-                    className="text-sm font-medium"
-                  >
-                    Student ID
-                  </Label>
-                  <Input
-                    id="edit-student-id"
-                    value={editingStudent.id}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-name" className="text-sm font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    id="edit-name"
-                    value={editingStudent.name}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-sessions-completed"
-                    className="text-sm font-medium"
-                  >
-                    Completed Sessions *
-                  </Label>
-                  <Input
-                    id="edit-sessions-completed"
-                    type="number"
-                    min="0"
-                    max={editingStudent.totalSessions}
-                    value={editingStudent.sessionsCompleted}
-                    onChange={(e) =>
-                      setEditingStudent({
-                        ...editingStudent,
-                        sessionsCompleted: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-total-sessions"
-                    className="text-sm font-medium"
-                  >
-                    Total Sessions
-                  </Label>
-                  <Input
-                    id="edit-total-sessions"
-                    type="number"
-                    value={editingStudent.totalSessions}
-                    disabled
-                    className="w-full bg-muted"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-total-hours"
-                    className="text-sm font-medium"
-                  >
-                    Total Hours
-                  </Label>
-                  <Input
-                    id="edit-total-hours"
-                    type="number"
-                    value={editingStudent.totalHours}
-                    disabled
-                    className="w-full bg-muted"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-paid-amount"
-                    className="text-sm font-medium"
-                  >
-                    Paid Amount (₹) *
-                  </Label>
-                  <Input
-                    id="edit-paid-amount"
-                    type="number"
-                    min="0"
-                    max={editingStudent.totalPayment}
-                    value={editingStudent.paidAmount}
-                    onChange={(e) =>
-                      setEditingStudent({
-                        ...editingStudent,
-                        paidAmount: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="edit-total-payment"
-                    className="text-sm font-medium"
-                  >
-                    Total Payment (₹)
-                  </Label>
-                  <Input
-                    id="edit-total-payment"
-                    type="number"
-                    value={editingStudent.totalPayment}
-                    disabled
-                    className="w-full bg-muted"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsEditingStudent(false);
-                setEditingStudent(null);
-              }}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateStudent} className="w-full sm:w-auto">
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeletingStudent} onOpenChange={setIsDeletingStudent}>
-        <AlertDialogContent className="max-w-[95vw] sm:max-w-[400px]">
-          <AlertDialogHeader className="space-y-3">
-            <AlertDialogTitle className="text-xl font-bold tracking-tight">
-              Are you sure?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm sm:text-base">
-              This will permanently delete {selectedStudent?.name}'s profile and
-              remove all associated data. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 mt-6">
-            <AlertDialogCancel
-              onClick={() => {
-                setIsDeletingStudent(false);
-                setSelectedStudent(null);
-              }}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteStudent}
-              className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete Student
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Add Student Dialog */}
-      <Dialog open={isAddingStudent} onOpenChange={setIsAddingStudent}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[600px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-          <DialogHeader className="space-y-3">
-            <DialogTitle className="text-xl font-bold">
-              Add New Student
-            </DialogTitle>
-            <DialogDescription>
-              Fill in the student details below. All fields marked with * are
-              required.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="student-id">Student ID</Label>
-                <Input
-                  id="student-id"
-                  value={newStudent.id}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name *</Label>
-                <Input
-                  id="name"
-                  value={newStudent.name}
-                  onChange={(e) =>
-                    setNewStudent({ ...newStudent, name: e.target.value })
-                  }
-                  placeholder="Enter student's full name"
-                  className="w-full"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newStudent.email}
-                  onChange={(e) =>
-                    setNewStudent({ ...newStudent, email: e.target.value })
-                  }
-                  placeholder="student@example.com"
-                  className="w-full"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={newStudent.phone}
-                  onChange={(e) =>
-                    setNewStudent({ ...newStudent, phone: e.target.value })
-                  }
-                  placeholder="+91 98765 43210"
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="total-sessions">Total Sessions *</Label>
-                <Input
-                  id="total-sessions"
-                  type="number"
-                  min="0"
-                  value={newStudent.totalSessions}
-                  onChange={(e) =>
-                    setNewStudent({
-                      ...newStudent,
-                      totalSessions: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="total-hours">Total Hours *</Label>
-                <Input
-                  id="total-hours"
-                  type="number"
-                  min="0"
-                  value={newStudent.totalHours}
-                  onChange={(e) =>
-                    setNewStudent({
-                      ...newStudent,
-                      totalHours: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="total-payment">Total Payment (₹) *</Label>
-                <Input
-                  id="total-payment"
-                  type="number"
-                  min="0"
-                  value={newStudent.totalPayment}
-                  onChange={(e) =>
-                    setNewStudent({
-                      ...newStudent,
-                      totalPayment: parseInt(e.target.value),
-                    })
-                  }
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddingStudent(false);
-                setNewStudent({
-                  ...newStudent,
-                  id: `student${students.length + 2}`,
-                  name: "",
-                  email: "",
-                  phone: "",
-                  totalSessions: 12,
-                  sessionsCompleted: 0,
-                  totalHours: 24,
-                  totalPayment: 12000,
-                  paidAmount: 0,
-                  sessionsRemaining: 12,
-                  progressPercentage: 0,
-                  startDate: new Date().toISOString(),
-                  endDate: new Date(
-                    Date.now() + 90 * 24 * 60 * 60 * 1000
-                  ).toISOString(),
-                  sessionDuration: 60,
-                });
-              }}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleAddStudent} className="w-full sm:w-auto">
-              Create Student
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TeacherAssignmentDialog
+        open={isTeacherDialogOpen}
+        onOpenChange={setIsTeacherDialogOpen}
+        teachers={
+          dialogStudent
+            ? [
+                {
+                  id: dialogStudent.teacherId,
+                  name: "Teacher Name", // Replace with actual lookup if available
+                  status: "active",
+                  totalSessions: dialogStudent.totalSessions,
+                  completedSessions: dialogStudent.sessionsCompleted,
+                  totalHours: dialogStudent.totalHours,
+                  completedHours: dialogStudent.completedHours ?? 0,
+                  salary: dialogStudent.teacherSalary ?? 0,
+                  paidAmount: dialogStudent.teachersPayment ?? 0,
+                  durationDays: 90,
+                  progress: dialogStudent.progressPercentage ?? 0,
+                },
+              ]
+            : []
+        }
+        userRole={user?.role || "mentor"}
+      />
+      {dialogStudent && (
+        <PackageAssignmentDialog
+          open={isPackageDialogOpen}
+          onOpenChange={setIsPackageDialogOpen}
+          packages={[
+            {
+              id: dialogStudent.packageId,
+              name: "Package Name", // Replace with actual lookup if available
+              sessions: dialogStudent.totalSessions,
+              completedSessions: dialogStudent.sessionsCompleted,
+              hours: dialogStudent.totalHours,
+              completedHours: dialogStudent.completedHours ?? 0,
+              payment: dialogStudent.totalPayment,
+              paidAmount: dialogStudent.paidAmount,
+              progress: dialogStudent.progressPercentage ?? 0,
+              durationDays: 90,
+              teacherName: "Teacher Name", // Replace with actual lookup if available
+              teacherPhone: dialogStudent.phone,
+            },
+          ]}
+          userRole={user?.role || "mentor"}
+        />
+      )}
     </DashboardLayout>
   );
 };
