@@ -49,7 +49,7 @@ const PackageAssignmentDialog: React.FC<PackageAssignmentDialogProps> = ({
       <DialogHeader>
         <DialogTitle>Assigned Packages</DialogTitle>
         <DialogDescription>
-          Manage packages and view their progress.
+          View packages and their progress.
         </DialogDescription>
       </DialogHeader>
       <div className="relative overflow-x-auto">

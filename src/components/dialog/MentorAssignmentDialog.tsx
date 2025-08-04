@@ -31,7 +31,7 @@ const MentorAssignmentDialog: React.FC<MentorAssignmentDialogProps> = ({
           Assigned Mentors - {coordinator?.user.name}
         </DialogTitle>
         <DialogDescription>
-          Manage mentors assigned to this coordinator.
+          View mentors assigned to this coordinator.
         </DialogDescription>
       </DialogHeader>
       <div className="relative overflow-x-auto">

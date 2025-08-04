@@ -35,7 +35,7 @@ const TeacherAssignmentDialog: React.FC<TeacherAssignmentDialogProps> = ({
     <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>Assigned Teachers</DialogTitle>
-        <DialogDescription>Manage teachers and view their progress.</DialogDescription>
+        <DialogDescription>View teachers and their progress.</DialogDescription>
       </DialogHeader>
       <div className="relative overflow-x-auto">
         <Table>

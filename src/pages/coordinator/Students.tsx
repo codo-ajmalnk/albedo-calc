@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { students as allStudents, users } from "@/lib/mock-data";
+import { packages } from "@/lib/mock-data";
 import { useAuth } from "@/context/AuthContext";
 import { Student } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -923,7 +924,24 @@ const CoordinatorStudents = () => {
         <PackageAssignmentDialog
           open={isPackageDialogOpen}
           onOpenChange={setIsPackageDialogOpen}
-          packages={[]}
+          packages={[
+            ...packages
+              .filter(pkg => pkg.id === packageDialogStudent.packageId)
+              .map(pkg => ({
+                id: pkg.id,
+                name: pkg.name,
+                sessions: pkg.totalSessions,
+                completedSessions: pkg.completedSessions,
+                hours: pkg.hours,
+                completedHours: pkg.completedHours,
+                payment: pkg.price,
+                paidAmount: pkg.paidAmount,
+                progress: pkg.progress,
+                durationDays: pkg.durationDays,
+                teacherName: users.find(u => u.id === pkg.teacherId)?.name || "Unknown",
+                teacherPhone: users.find(u => u.id === pkg.teacherId)?.phone || "Unknown",
+              }))
+          ]}
           userRole={user.role}
         />
       )}

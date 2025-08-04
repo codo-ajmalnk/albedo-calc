@@ -100,6 +100,11 @@ export default function AdminTeachers() {
     return allStudents.filter((s) => mentorIds.includes(s.mentorId));
   };
 
+  // Helper: get students for a teacher
+  const getStudentsForTeacher = (teacherId: string) => {
+    return allStudents.filter((s) => s.teacherId === teacherId);
+  };
+
   const filteredTeachers = mockTeachers.filter((teacher) => {
     const matchesSearch = teacher.name
       .toLowerCase()
@@ -528,8 +533,8 @@ export default function AdminTeachers() {
                       </div>
                     </div>
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2 pt-4">
-                      <Button
+                    <div className="grid grid-cols-1 gap-2 pt-4">
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -539,7 +544,7 @@ export default function AdminTeachers() {
                         }}
                       >
                         Mentors
-                      </Button>
+                      </Button> */}
                       <Button
                         variant="outline"
                         size="sm"
@@ -566,7 +571,7 @@ export default function AdminTeachers() {
           )}
         </div>
       </div>
-      {dialogTeacher && (
+      {/* {dialogTeacher && (
         <MentorAssignmentDialog
           open={isMentorDialogOpen}
           onOpenChange={setIsMentorDialogOpen}
@@ -576,13 +581,13 @@ export default function AdminTeachers() {
           formatCurrency={formatCurrency}
           userRole={"admin"}
         />
-      )}
+      )} */}
       {dialogTeacher && (
         <StudentAssignmentDialog
           open={isStudentDialogOpen}
           onOpenChange={setIsStudentDialogOpen}
           coordinator={{ user: dialogTeacher }}
-          getStudents={getStudents}
+          getStudents={getStudentsForTeacher}
           users={allUsers}
           userRole={"admin"}
         />

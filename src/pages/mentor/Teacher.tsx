@@ -97,6 +97,11 @@ export default function MentorTeachers() {
     return allStudents.filter((s) => mentorIds.includes(s.mentorId));
   };
 
+  // Helper: get students for a teacher
+  const getStudentsForTeacher = (teacherId: string) => {
+    return allStudents.filter((s) => s.teacherId === teacherId);
+  };
+
   const myMentors = allUsers.filter((u) => u.role === "mentor");
 
   const filteredTeachers = mockTeachers.filter((teacher) => {
@@ -556,7 +561,7 @@ export default function MentorTeachers() {
           open={isStudentDialogOpen}
           onOpenChange={setIsStudentDialogOpen}
           coordinator={{ user: dialogTeacher }}
-          getStudents={getStudents}
+          getStudents={getStudentsForTeacher}
           users={allUsers}
           userRole={"admin"}
         />

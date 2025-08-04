@@ -97,6 +97,12 @@ export default function CoordinatorTeachers() {
     return allStudents.filter((s) => mentorIds.includes(s.mentorId));
   };
 
+    // Helper: get students for a teacher
+    const getStudentsForTeacher = (teacherId: string) => {
+      return allStudents.filter((s) => s.teacherId === teacherId);
+    };
+  
+
   const myMentors = allUsers.filter((u) => u.role === "mentor");
 
   const filteredTeachers = mockTeachers.filter((teacher) => {
@@ -133,8 +139,8 @@ export default function CoordinatorTeachers() {
                   className="w-full text-sm"
                 />
               </div>
-              {/* Filter by Coordinator */}
-              <div className="w-full md:flex-1 min-w-[180px]">
+              {/* Filter by Mentors */}
+              {/* <div className="w-full md:flex-1 min-w-[180px]">
                 <Label className="mb-1 block">Filter by Mentors</Label>
                 <Select
                   value={mentorFilter}
@@ -152,7 +158,7 @@ export default function CoordinatorTeachers() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
               {/* Filter by Date */}
               <div className="w-full md:w-auto">
                 <Label className="mb-1 block">Filter by Date</Label>
@@ -522,8 +528,8 @@ export default function CoordinatorTeachers() {
                       </div>
                     </div>
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2 pt-4">
-                      <Button
+                    <div className="grid grid-cols-1 gap-2 pt-4">
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         className="w-full text-xs sm:text-sm"
@@ -533,7 +539,7 @@ export default function CoordinatorTeachers() {
                         }}
                       >
                         Mentors
-                      </Button>
+                      </Button> */}
                       <Button
                         variant="outline"
                         size="sm"
@@ -560,7 +566,7 @@ export default function CoordinatorTeachers() {
           )}
         </div>
       </div>
-      {dialogTeacher && (
+      {/* {dialogTeacher && (
         <MentorAssignmentDialog
           open={isMentorDialogOpen}
           onOpenChange={setIsMentorDialogOpen}
@@ -570,13 +576,13 @@ export default function CoordinatorTeachers() {
           formatCurrency={formatCurrency}
           userRole={"admin"}
         />
-      )}
+      )} */}
       {dialogTeacher && (
         <StudentAssignmentDialog
           open={isStudentDialogOpen}
           onOpenChange={setIsStudentDialogOpen}
           coordinator={{ user: dialogTeacher }}
-          getStudents={getStudents}
+          getStudents={getStudentsForTeacher}
           users={allUsers}
           userRole={"admin"}
         />
