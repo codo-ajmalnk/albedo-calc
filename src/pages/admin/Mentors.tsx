@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { MentorDialog } from "@/components/dialog/MentorDialog";
+import { MentorDialog } from "@/components/DialogOld/MentorDialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import {
 import { crudToasts } from "@/lib/toast";
 import { Student, User } from "@/lib/types";
 import {
+  Download,
   Lightbulb,
   Mail,
   MessageCircle,
@@ -34,6 +35,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import StudentAssignmentDialog from "@/components/dialog/StudentAssignmentDialog";
+import TeacherAssignmentDialog from "@/components/dialog/TeacherAssignmentDialog";
 
 const AdminMentors = () => {
   const navigate = useNavigate();
@@ -52,7 +55,7 @@ const AdminMentors = () => {
 
   // Single dialog state to manage all dialogs
   const [activeDialog, setActiveDialog] = useState<
-    "details" | "students" | "edit" | "delete" | "add" | null
+    "details" | "students" | "teachers" | null
   >(null);
 
   const [selectedMentor, setSelectedMentor] = useState<{
@@ -64,6 +67,7 @@ const AdminMentors = () => {
     users.filter((user) => user.role === "mentor")
   );
   const [students, setStudents] = useState<Student[]>(allStudents);
+  
   const [newMentor, setNewMentor] = useState({
     id: `mentor${users.filter((u) => u.role === "mentor").length + 1}`,
     name: "",
@@ -202,262 +206,10 @@ const AdminMentors = () => {
     setActiveDialog("students");
   };
 
-  const handleEditProfile = (mentor: User) => {
-    setEditingMentor({
-      id: mentor.id,
-      name: mentor.name,
-      email: mentor.email,
-      phone: mentor.phone || "",
-      password: "",
-      supervisorId: mentor.supervisorId || "",
-      role: "mentor",
-    });
-    setActiveDialog("edit");
-  };
-
-  const handleDeleteMentor = (mentor: User) => {
-    setSelectedMentor({ user: mentor, stats: getMentorStats(mentor.id) });
-    setActiveDialog("delete");
-  };
-
-  const confirmDeleteMentor = () => {
-    if (!selectedMentor) return;
-
-    const mentorStudents = students.filter(
-      (student) => student.mentorId === selectedMentor.user.id
-    );
-
-    if (mentorStudents.length > 0) {
-      crudToasts.validation.error(
-        "Cannot delete mentor with assigned students. Please reassign or remove all students first."
-      );
-      return;
-    }
-
-    try {
-      setMentors(
-        mentors.filter((mentor) => mentor.id !== selectedMentor.user.id)
-      );
-      setActiveDialog(null);
-      setSelectedMentor(null);
-      crudToasts.delete.success("Mentor");
-    } catch (error) {
-      crudToasts.delete.error("Mentor");
-    }
-  };
-
-  const handleAddMentor = () => {
-    try {
-      if (!newMentor.name || !newMentor.email || !newMentor.phone) {
-        crudToasts.validation.error("Please fill in all required fields.");
-        return;
-      }
-
-      setMentors([...mentors, { ...newMentor, role: "mentor" }]);
-      setActiveDialog(null);
-      setNewMentor({
-        id: `mentor${mentors.length + 2}`,
-        name: "",
-        email: "",
-        phone: "",
-        password: "",
-        supervisorId: "",
-        role: "mentor" as const,
-      });
-      crudToasts.create.success("Mentor");
-    } catch (error) {
-      crudToasts.create.error("Mentor");
-    }
-  };
-
-  const handleUpdateMentor = () => {
-    if (!editingMentor) return;
-
-    try {
-      setMentors(
-        mentors.map((mentor) =>
-          mentor.id === editingMentor.id
-            ? { ...editingMentor, role: "mentor" }
-            : mentor
-        )
-      );
-      setActiveDialog(null);
-      setEditingMentor(null);
-      crudToasts.update.success("Mentor");
-    } catch (error) {
-      crudToasts.update.error("Mentor");
-    }
-  };
-
-  // Add student-related state variables
-  const [isAssigningStudents, setIsAssigningStudents] = useState(false);
-  const [isAddingStudent, setIsAddingStudent] = useState(false);
-  const [isEditingStudent, setIsEditingStudent] = useState(false);
-  const [isDeletingStudent, setIsDeletingStudent] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [selectedStudentsToAssign, setSelectedStudentsToAssign] = useState<
-    string[]
-  >([]);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [newStudent, setNewStudent] = useState<Student>({
-    id: `student${students.length + 1}`,
-    name: "",
-    email: "",
-    phone: "",
-    mentorId: "",
-    status: "active",
-    totalSessions: 12,
-    sessionsCompleted: 0,
-    totalHours: 24,
-    totalPayment: 12000,
-    paidAmount: 0,
-    sessionsRemaining: 12,
-    progressPercentage: 0,
-    startDate: new Date().toISOString(),
-    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    sessionDuration: 60,
-    teachersPayment: 0,
-    hourlyPayment: 0,
-    sessionAddedOn: new Date().toISOString(),
-    expenseRatio: 0,
-    classTakeAmount: 0,
-    teacherSalary: 0,
-  });
-
-  // Add student management functions
-  const handleEditStudent = (student: Student) => {
-    setEditingStudent(student);
-    setIsEditingStudent(true);
-  };
-
-  const handleDeleteStudent = (student: Student) => {
-    setSelectedStudent(student);
-    setIsDeletingStudent(true);
-  };
-
-  const handleUpdateStudent = () => {
-    if (!editingStudent) return;
-
-    try {
-      setStudents(
-        students.map((student) =>
-          student.id === editingStudent.id ? editingStudent : student
-        )
-      );
-      setIsEditingStudent(false);
-      setEditingStudent(null);
-      crudToasts.update.success("Student");
-    } catch (error) {
-      crudToasts.update.error("Student");
-    }
-  };
-
-  const handleAddStudent = () => {
-    try {
-      if (!newStudent.name || !newStudent.email || !newStudent.phone) {
-        crudToasts.validation.error("Please fill in all required fields.");
-        return;
-      }
-
-      if (!selectedMentor?.user.id) {
-        crudToasts.validation.error("No mentor selected.");
-        return;
-      }
-
-      const studentToAdd: Student = {
-        ...newStudent,
-        mentorId: selectedMentor.user.id,
-      };
-
-      setStudents([...students, studentToAdd]);
-      allStudents.push(studentToAdd);
-      setIsAddingStudent(false);
-      setNewStudent({
-        id: `student${students.length + 2}`,
-        name: "",
-        email: "",
-        phone: "",
-        mentorId: "",
-        status: "active",
-        totalSessions: 12,
-        sessionsCompleted: 0,
-        totalHours: 24,
-        totalPayment: 12000,
-        paidAmount: 0,
-        sessionsRemaining: 12,
-        progressPercentage: 0,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        sessionDuration: 60,
-        teachersPayment: 0,
-        hourlyPayment: 0,
-        sessionAddedOn: new Date().toISOString(),
-        expenseRatio: 0,
-        classTakeAmount: 0,
-        teacherSalary: 0,
-      });
-      crudToasts.create.success("Student");
-    } catch (error) {
-      crudToasts.create.error("Student");
-    }
-  };
-
-  const confirmDeleteStudent = () => {
-    if (!selectedStudent) return;
-
-    try {
-      setStudents(
-        students.filter((student) => student.id !== selectedStudent.id)
-      );
-      setIsDeletingStudent(false);
-      setSelectedStudent(null);
-      crudToasts.delete.success("Student");
-    } catch (error) {
-      crudToasts.delete.error("Student");
-    }
-  };
-
-  const handleAssignStudents = () => {
-    try {
-      if (!selectedMentor?.user.id) {
-        crudToasts.validation.error("No mentor selected.");
-        return;
-      }
-
-      if (selectedStudentsToAssign.length === 0) {
-        crudToasts.validation.error(
-          "Please select at least one student to assign."
-        );
-        return;
-      }
-
-      const updatedStudents = students.map((student) => {
-        if (selectedStudentsToAssign.includes(student.id)) {
-          return { ...student, mentorId: selectedMentor.user.id };
-        }
-        return student;
-      });
-
-      setStudents(updatedStudents);
-      selectedStudentsToAssign.forEach((studentId) => {
-        const student = allStudents.find((s) => s.id === studentId);
-        if (student) {
-          student.mentorId = selectedMentor.user.id;
-        }
-      });
-
-      setIsAssigningStudents(false);
-      setSelectedStudentsToAssign([]);
-      crudToasts.assign.success("Students", "mentor");
-    } catch (error) {
-      crudToasts.assign.error("Students", "mentor");
-    }
-  };
 
   const handleViewTeachers = (mentor: User) => {
-    // Implement your logic here (open dialog, navigate, etc.)
-    // For now, you can use an alert or a placeholder
-    alert(`Show teachers for mentor: ${mentor.name}`);
+    setSelectedMentor({ user: mentor, stats: getMentorStats(mentor.id) });
+    setActiveDialog("teachers");
   };
 
   return (
@@ -666,6 +418,16 @@ const AdminMentors = () => {
                           <Printer className="w-4 h-4" />
                           <span className="hidden xs:inline">Print</span>
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium"
+                          onClick={() => alert('Download triggered!')}
+                          title="Download"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span className="hidden xs:inline">Download</span>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -693,7 +455,7 @@ const AdminMentors = () => {
                         <p className="text-sm text-muted-foreground">
                           Coordinator
                         </p>
-                        <p className="text-2xl font-bold break-words text-center">
+                        <p className="text-1xl font-bold break-words text-center">
                           {getCoordinatorName(mentor.supervisorId)}
                         </p>
                       </div>
@@ -935,39 +697,54 @@ const AdminMentors = () => {
           )}
         </div>
 
-        <MentorDialog
-          isViewDetailsOpen={activeDialog === "details"}
-          isAddOpen={activeDialog === "add"}
-          isEditOpen={activeDialog === "edit"}
-          isDeleteOpen={activeDialog === "delete"}
-          isViewStudentsOpen={activeDialog === "students"}
-          selectedMentor={selectedMentor?.user}
-          selectedCoordinator={null}
-          newMentor={newMentor}
-          editingMentor={editingMentor}
-          students={students}
-          onViewDetailsClose={closeAllDialogs}
-          onAddClose={closeAllDialogs}
-          onEditClose={closeAllDialogs}
-          onDeleteClose={closeAllDialogs}
-          onViewStudentsClose={closeAllDialogs}
-          onAddMentor={handleAddMentor}
-          onUpdateMentor={handleUpdateMentor}
-          onDeleteMentor={confirmDeleteMentor}
-          setNewMentor={setNewMentor}
-          setEditingMentor={setEditingMentor}
-          isAssigningStudents={isAssigningStudents}
-          isAddingStudent={isAddingStudent}
-          setIsAssigningStudents={setIsAssigningStudents}
-          setIsAddingStudent={setIsAddingStudent}
-          handleEditStudent={handleEditStudent}
-          handleDeleteStudent={handleDeleteStudent}
-          handleAddStudent={handleAddStudent}
-          handleAssignStudents={handleAssignStudents}
-          selectedStudentsToAssign={selectedStudentsToAssign}
-          setSelectedStudentsToAssign={setSelectedStudentsToAssign}
-          newStudent={newStudent}
-          setNewStudent={setNewStudent}
+
+        <StudentAssignmentDialog
+          open={activeDialog === "students"}
+          onOpenChange={(open) => {
+            if (!open) closeAllDialogs();
+          }}
+          coordinator={selectedMentor}
+          getStudents={(mentorId) => students.filter(s => s.mentorId === mentorId)}
+          users={users}
+          userRole={"mentor"}
+        />
+
+        <TeacherAssignmentDialog
+          open={activeDialog === "teachers"}
+          onOpenChange={(open) => {
+            if (!open) closeAllDialogs();
+          }}
+          teachers={(() => {
+            if (!selectedMentor) return [];
+            // Get all students for this mentor
+            const mentorStudents = students.filter(s => s.mentorId === selectedMentor.user.id);
+            // Get unique teacherIds from those students
+            const teacherIds = Array.from(new Set(mentorStudents.map(s => s.teacherId)));
+            // Get teacher users from users
+            return users.filter(u => u.role === "teacher" && teacherIds.includes(u.id)).map((t) => {
+              const totalSessions = Math.floor(Math.random() * 100);
+              const completedSessions = Math.min(Math.floor(Math.random() * 100), totalSessions);
+              const totalHours = Math.floor(Math.random() * 100);
+              const completedHours = Math.min(Math.floor(Math.random() * 100), totalHours);
+              const salary = Math.floor(Math.random() * 10000);
+              const paidAmount = Math.min(Math.floor(Math.random() * 10000), salary);
+              const progress = totalSessions > 0 ? Math.min(100, Math.round((completedSessions / totalSessions) * 100)) : 0;
+              return {
+                id: t.id,
+                name: t.name,
+                status: t.status || "active",
+                totalSessions,
+                totalHours,
+                salary,
+                completedSessions,
+                completedHours,
+                paidAmount,
+                durationDays: Math.floor(Math.random() * 100), // mock value
+                progress,
+              };
+            });
+          })()}
+          userRole={"mentor"}
         />
       </div>
     </DashboardLayout>

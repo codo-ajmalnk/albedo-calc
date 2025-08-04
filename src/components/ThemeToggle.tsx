@@ -17,10 +17,10 @@ export function ThemeToggle() {
       whileTap={{ scale: 0.95 }}
     >
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
         onClick={toggleTheme}
-        className="rounded-full bg-background/10 backdrop-blur-sm hover:bg-background/20 border border-white/10"
+        className="relative"
       >
         <Sun
           className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:rotate-90 dark:scale-0"

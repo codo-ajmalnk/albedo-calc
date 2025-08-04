@@ -7,6 +7,7 @@ import { NotificationPanel } from "./NotificationPanel";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "./ui/button";
 import { ConfirmationModal } from "./ui/confirmation-modal";
+import { Printer, Download } from "lucide-react";
 
 type Role = "admin" | "coordinator" | "mentor" | "student";
 
@@ -42,6 +43,21 @@ export default function DashboardLayout({
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    // Placeholder: download a dummy text file
+    const element = document.createElement("a");
+    const file = new Blob(["Downloaded content"], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "download.txt";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const NavLink = ({
@@ -93,6 +109,7 @@ export default function DashboardLayout({
             <NavLink to="/coordinator">Dashboard</NavLink>
             <NavLink to="/coordinator/mentors">My Mentors</NavLink>
             <NavLink to="/coordinator/students">All Students</NavLink>
+            <NavLink to="/coordinator/teachers">Teachers</NavLink>
           </>
         );
       case "mentor":
@@ -100,6 +117,7 @@ export default function DashboardLayout({
           <>
             <NavLink to="/mentor">Dashboard</NavLink>
             <NavLink to="/mentor/students">My Students</NavLink>
+            <NavLink to="/mentor/teachers">Teachers</NavLink>
           </>
         );
       default:
@@ -158,20 +176,42 @@ export default function DashboardLayout({
             {/* Right: Controls (xl+ only) */}
             <div className="hidden xl:flex items-center gap-2 flex-shrink-0">
               <NotificationPanel />
+              {/* Print Button */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handlePrint}
+                  title="Print"
+                  className="relative"
+                >
+                  <Printer className="h-[1.2rem] w-[1.2rem]" aria-hidden="true" />
+                  <span className="sr-only">Print</span>
+                </Button>
+              </motion.div>
+              {/* Download Button */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownload}
+                  title="Download"
+                  className="relative"
+                >
+                  <Download className="h-[1.2rem] w-[1.2rem]" aria-hidden="true" />
+                  <span className="sr-only">Download</span>
+                </Button>
+              </motion.div>
               <ThemeToggle />
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Button
-                  variant="secondary"
+                  variant="destructive"
                   size="sm"
                   onClick={handleLogoutClick}
-                  className={cn(
-                    "hover:bg-white/90 hover:text-black transition-all duration-200",
-                    "shadow-sm hover:shadow-md active:shadow-sm",
-                    "border border-white/10"
-                  )}
+                
                 >
                   Logout
                 </Button>

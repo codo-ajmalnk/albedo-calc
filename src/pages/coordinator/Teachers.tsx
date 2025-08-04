@@ -40,6 +40,7 @@ const mockTeachers = [
     phone: "+91 98765 43221",
     status: "active",
     coordinatorId: "coord1",
+    mentorId: `mentor${Math.floor(Math.random() * 10) + 1}`,
     students: 12,
     packages: 12,
     sessions: 24,
@@ -56,6 +57,7 @@ const mockTeachers = [
     phone: "+91 98765 43222",
     status: "inactive",
     coordinatorId: "coord2",
+    mentorId: `mentor${Math.floor(Math.random() * 10) + 1}`,
     students: 8,
     sessions: 16,
     completedSessions: 10,
@@ -66,16 +68,11 @@ const mockTeachers = [
   },
 ];
 
-const mockCoordinators = [
-  { id: "coord1", name: "John Coordinator" },
-  { id: "coord2", name: "Jane Coordinator" },
-];
-
 const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
 
-export default function AdminTeachers() {
+export default function CoordinatorTeachers() {
   const [search, setSearch] = useState("");
-  const [coordinatorFilter, setCoordinatorFilter] = useState("all");
+  const [mentorFilter, setMentorFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState<string>("all");
   const [customDateRange, setCustomDateRange] = useState<{
     from: string;
@@ -100,20 +97,17 @@ export default function AdminTeachers() {
     return allStudents.filter((s) => mentorIds.includes(s.mentorId));
   };
 
+  const myMentors = allUsers.filter((u) => u.role === "mentor");
+
   const filteredTeachers = mockTeachers.filter((teacher) => {
     const matchesSearch = teacher.name
       .toLowerCase()
       .includes(search.toLowerCase());
-    const matchesCoordinator =
-      coordinatorFilter === "all" ||
-      teacher.coordinatorId === coordinatorFilter;
-    return matchesSearch && matchesCoordinator;
+    const matchesMentor =
+      mentorFilter === "all" ||
+      teacher.mentorId === mentorFilter;
+    return matchesSearch && matchesMentor;
   });
-
-  const getCoordinatorName = (coordinatorId: string) => {
-    const coord = mockCoordinators.find((c) => c.id === coordinatorId);
-    return coord ? coord.name : "Unassigned";
-  };
 
   return (
     <DashboardLayout>
@@ -141,19 +135,19 @@ export default function AdminTeachers() {
               </div>
               {/* Filter by Coordinator */}
               <div className="w-full md:flex-1 min-w-[180px]">
-                <Label className="mb-1 block">Filter by Coordinator</Label>
+                <Label className="mb-1 block">Filter by Mentors</Label>
                 <Select
-                  value={coordinatorFilter}
-                  onValueChange={setCoordinatorFilter}
+                  value={mentorFilter}
+                  onValueChange={setMentorFilter}
                 >
                   <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="Select Coordinator" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Coordinators</SelectItem>
-                    {mockCoordinators.map((coordinator) => (
-                      <SelectItem key={coordinator.id} value={coordinator.id}>
-                        {coordinator.name} ({coordinator.id})
+                    <SelectItem value="all">All Mentors</SelectItem>
+                    {myMentors.map((mentor) => (
+                      <SelectItem key={mentor.id} value={mentor.id}>
+                        {mentor.name} ({mentor.id})
                       </SelectItem>
                     ))}
                   </SelectContent>

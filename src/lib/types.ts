@@ -1,4 +1,4 @@
-export type Role = "admin" | "coordinator" | "mentor";
+export type Role = "admin" | "coordinator" | "mentor" | "teacher";
 
 export interface User {
   id: string;
@@ -22,10 +22,14 @@ export interface Student {
   email: string;
   phone: string;
   mentorId: string;
+  teacherId: string;
+  packageId: string;
   status: "active" | "inactive";
   totalHours: number;
   totalSessions: number;
   sessionsCompleted: number;
+  upcomingSessions: number;
+  meetingSessions: number;
   totalPayment: number;
   paidAmount: number;
   teachersPayment: number;
@@ -46,6 +50,7 @@ export interface Student {
   totalPayments?: number;
   completedPayments?: number;
   pendingPayments?: number;
+  refundedPayments?: number;
 }
 
 export interface DashboardStats {
@@ -58,6 +63,8 @@ export interface DashboardStats {
   pendingHours: number;
   pendingSessions: number;
   totalSessions: number;
+  upcomingSessions: number;
+  meetingSessions: number;
   totalPayments: number;
   pendingPayments: number;
   completedPayments: number;
@@ -65,6 +72,7 @@ export interface DashboardStats {
   totalExpenses?: number;
   completedExpenses?: number;
   pendingExpenses?: number;
+  refundedPayments?: number;
   classTakeAmount?: number;
   expenseRatio?: number;
   teacherSalary?: number;
